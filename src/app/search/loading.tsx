@@ -1,6 +1,6 @@
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import SearchSkeleton from "../components/search/SearchSkeleton";
 
 export default function SearchLoading() {
-  return <UnifiedLoader variant="grid" showFilters={true} />;
+  return <SearchSkeleton />;
 }
 

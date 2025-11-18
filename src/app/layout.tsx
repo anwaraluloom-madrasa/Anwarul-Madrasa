@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 import "../globals.css";
 import Navbar from "../component/navbar";
 import Footer from "@/component/footer";
@@ -45,7 +46,9 @@ export default function RootLayout({
         <div className="gtranslate_wrapper"></div>
         <ToastProvider>
           <DocumentAttributes />
-          <RouteProgressBar />
+          <Suspense fallback={null}>
+            <RouteProgressBar />
+          </Suspense>
           <Navbar />
           <main>
             <Breadcrumb />

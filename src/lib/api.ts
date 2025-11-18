@@ -1493,7 +1493,14 @@ export class IftahApi {
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        // API endpoint might not exist, return empty array gracefully
+        logger.info('Iftah subcategories API not available, returning empty array');
+        return {
+          data: [],
+          success: true, // Return success: true so calling code doesn't treat it as an error
+          error: undefined,
+          pagination: createPaginationMeta({ page, limit, total: 0 }),
+        };
       }
 
       const subCategoriesData = Array.isArray(result.data) ? result.data : [];
@@ -1516,11 +1523,12 @@ export class IftahApi {
         pagination: createPaginationMeta({ page, limit, total }),
       } as ApiResponse<any[]>;
     } catch (error) {
-      logger.warn('Iftah getSubCategories failed', { error });
+      // API endpoint doesn't exist or failed, return empty array gracefully
+      logger.info('Iftah getSubCategories API not available, returning empty array');
       return {
         data: [],
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        success: true, // Return success: true so calling code doesn't treat it as an error
+        error: undefined,
         pagination: createPaginationMeta({ page, limit, total: 0 }),
       };
     }

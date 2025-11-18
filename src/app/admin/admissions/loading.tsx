@@ -1,6 +1,6 @@
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import AdminSkeleton from "../../components/admin/AdminSkeleton";
 
-export default function Loading() {
-  return <UnifiedLoader variant="list" />;
+export default function LoadingAdminAdmissions() {
+  return <AdminSkeleton />;
 }
 
