@@ -20,7 +20,7 @@ const NAV_LABELS: Record<string, string> = {
   iftah: "افتاء",
   article: "مقالې",
   awlayaa: "اولیا",
-  awlyaacharts: "اولیا چارټونه", // اولیا چارټونه - Awlyaa Charts navigation
+  // awlyaacharts: "اولیا چارټونه", // Temporarily hidden
   admission: "نوم لیکنه",
   books: "کتابتون",
   onlineCourses: "انلاین کورسونه",
