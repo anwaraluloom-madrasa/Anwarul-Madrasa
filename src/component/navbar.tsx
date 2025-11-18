@@ -13,14 +13,14 @@ import { FaSearch } from "react-icons/fa";
 import { Gift } from "lucide-react";
 
 
-const PRIMARY_LINK_LIMIT = 7;
+const PRIMARY_LINK_LIMIT = 9; // Increased to show books and tasawwuf in main navigation
 const NAV_LABELS: Record<string, string> = {
   home: "کور",
   courses: " کورسونه",
   iftah: "افتاء",
   article: "مقالې",
   awlayaa: "اولیا",
-  awlyaacharts: "اولیا چارټونه",
+  // awlyaacharts: "اولیا چارټونه", // Temporarily hidden
   admission: "نوم لیکنه",
   books: "کتابتون",
   onlineCourses: "انلاین کورسونه",
