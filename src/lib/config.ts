@@ -106,7 +106,7 @@ export const navigation = {
     { name: 'iftah', href: '/iftah', icon: 'fatwa' },
     { name: 'article', href: '/articles', icon: 'article' },
     { name: 'awlayaa', href: '/awlayaa', icon: 'awlayaa' },
-    { name: 'awlyaacharts', href: '/awlyaa-charts', icon: 'chart' },
+    // { name: 'awlyaacharts', href: '/awlyaa-charts', icon: 'chart' }, // Temporarily hidden
     { name: 'admission', href: '/admission', icon: 'admission' },
     { name: 'books', href: '/book', icon: 'book' },
     { name: 'donation', href: '/donation', icon: 'donation' },
