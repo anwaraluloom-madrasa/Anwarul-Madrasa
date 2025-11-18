@@ -41,54 +41,63 @@ export default async function IftahPage() {
   let displayCategories: IftahCategory[] = [];
 
   try {
-    // Get all iftahs to extract unique tags
+    // Fetch all tags (categories) from API - this gets ALL categories even if they have no questions
+    const tagsResult = await IftahApi.getTags({ limit: 100 });
+    const apiTags = Array.isArray(tagsResult.data) ? tagsResult.data : [];
+    
+    console.log('📊 Fetched tags from API:', apiTags.length);
+    
+    // Get all iftahs to extract tags and count questions per category
     const res = await IftahApi.getAll({ limit: 100 });
     allIftahs = Array.isArray(res.data) ? res.data : [];
     
-    console.log('📊 Fetched iftahs:', allIftahs.length, 'Sample:', allIftahs[0]);
+    console.log('📊 Fetched iftahs:', allIftahs.length);
     
-    // Extract unique tags from iftahs - check both iftah_sub_category.tag and direct tag
-    const tagMap = new Map<number, { id: number; name: string; count: number }>();
+    // Extract unique tags from iftahs - this gets categories that have questions
+    const tagsFromIftahs = new Map<number, { id: number; name: string }>();
+    const tagCountMap = new Map<number, number>();
+    
     allIftahs.forEach((iftah: Iftah) => {
       // Check iftah_sub_category.tag first (this is the nested structure from API)
       if (iftah.iftah_sub_category?.tag) {
         const tagId = iftah.iftah_sub_category.tag.id;
-        if (tagMap.has(tagId)) {
-          const existing = tagMap.get(tagId)!;
-          existing.count += 1;
-        } else {
-          tagMap.set(tagId, {
-            id: tagId,
-            name: iftah.iftah_sub_category.tag.name,
-            count: 1
-          });
-        }
+        const tagName = iftah.iftah_sub_category.tag.name;
+        tagsFromIftahs.set(tagId, { id: tagId, name: tagName });
+        tagCountMap.set(tagId, (tagCountMap.get(tagId) || 0) + 1);
       } 
       // Fallback to direct tag if available
       else if (iftah.tag) {
         const tagId = iftah.tag.id;
-        if (tagMap.has(tagId)) {
-          const existing = tagMap.get(tagId)!;
-          existing.count += 1;
-        } else {
-          tagMap.set(tagId, {
-            id: tagId,
-            name: iftah.tag.name,
-            count: 1
-          });
-        }
+        const tagName = iftah.tag.name;
+        tagsFromIftahs.set(tagId, { id: tagId, name: tagName });
+        tagCountMap.set(tagId, (tagCountMap.get(tagId) || 0) + 1);
       }
     });
 
-    // Convert map to array
-    displayCategories = Array.from(tagMap.values()).map(tag => ({
+    // Merge API tags with tags from iftahs - combine both sources
+    const allTagsMap = new Map<number, { id: number; name: string }>();
+    
+    // Add all API tags
+    apiTags.forEach((tag: any) => {
+      allTagsMap.set(tag.id, { id: tag.id, name: tag.name });
+    });
+    
+    // Add tags from iftahs (this will add any tags that exist in iftahs but not in API)
+    tagsFromIftahs.forEach((tag, tagId) => {
+      allTagsMap.set(tagId, tag);
+    });
+
+    // Convert merged tags to display categories, including those with 0 questions
+    displayCategories = Array.from(allTagsMap.values()).map(tag => ({
       id: tag.id,
       name: tag.name,
       name_en: tag.name,
       icon: '📚',
       description: '',
-      count: tag.count
+      count: tagCountMap.get(tag.id) || 0
     }));
+    
+    console.log('📊 Display categories:', displayCategories.length, 'categories (', displayCategories.filter(c => (c.count || 0) > 0).length, 'with questions,', displayCategories.filter(c => (c.count || 0) === 0).length, 'with 0 questions)');
   } catch (error) {
     console.error('Error fetching iftah data:', error);
     // Use default categories when API fails

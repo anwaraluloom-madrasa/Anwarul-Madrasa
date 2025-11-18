@@ -9,8 +9,13 @@ const RouteProgressBar = () => {
   const [progress, setProgress] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const isAnimatingRef = useRef(false);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const hideProgress = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
     setIsVisible(false);
     setProgress(0);
     isAnimatingRef.current = false;
@@ -20,15 +25,36 @@ const RouteProgressBar = () => {
     if (!isAnimatingRef.current) return;
 
     setProgress(100);
-    // Hide immediately, no delay
-    hideProgress();
+    // Hide quickly for fast transitions
+    setTimeout(() => {
+      hideProgress();
+    }, 100);
   }, [hideProgress]);
 
   const startProgress = useCallback(() => {
+    // Clear any existing interval
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+    }
+    
     isAnimatingRef.current = true;
     setIsVisible(true);
-    // Start at 50% for instant feedback, no artificial delays
-    setProgress(50);
+    // Start at 20% for instant feedback
+    setProgress(20);
+    
+    // Fast progress increase
+    progressIntervalRef.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 85) {
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+            progressIntervalRef.current = null;
+          }
+          return prev;
+        }
+        return prev + Math.random() * 15;
+      });
+    }, 100);
   }, []);
 
   useEffect(() => {
@@ -74,10 +100,10 @@ const RouteProgressBar = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-[3px] bg-transparent">
-      <div className="h-full overflow-hidden rounded-full bg-primary-100/50">
+    <div className="pointer-events-none fixed top-0 left-0 right-0 z-[10000] h-[3px] bg-transparent">
+      <div className="h-full overflow-hidden bg-gray-100/50">
         <div
-          className="h-full bg-gradient-to-r from-secondary-400 via-secondary-500 to-secondary-600 transition-all duration-100 ease-out"
+          className="h-full bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-150 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>

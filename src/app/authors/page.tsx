@@ -7,6 +7,7 @@ import IslamicHeader from "../components/IslamicHeader";
 import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
+import AuthorCardSkeleton from "../components/authors/AuthorCardSkeleton";
 
 import { AuthorsApi } from "../../lib/api";
 import { Author } from "../../lib/types";
@@ -28,7 +29,18 @@ export default function AuthorsPage() {
   });
 
   if (isLoadingInitial) {
-    return <UnifiedLoader variant="grid" count={6} showFilters={false} />;
+    return (
+      <main className="min-h-screen bg-background-primary">
+        <IslamicHeader pageType="authors" />
+        <div className="max-w-7xl mx-auto px-6 space-y-12 pb-16">
+          <div className="grid gap-20 mt-10 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <AuthorCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </main>
+    );
   }
 
   if (error) {

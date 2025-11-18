@@ -6,6 +6,7 @@ import Footer from "@/component/footer";
 import { ToastProvider } from "@/components/Toast";
 import DocumentAttributes from "@/components/DocumentAttributes";
 import Breadcrumb from "@/components/Breadcrumb";
+import RouteProgressBar from "@/components/RouteProgressBar";
 
 export const metadata: Metadata = {
   title: "Anwar ul-Uloom al-Islamiyyah - Islamic Learning Platform",
@@ -44,6 +45,7 @@ export default function RootLayout({
         <div className="gtranslate_wrapper"></div>
         <ToastProvider>
           <DocumentAttributes />
+          <RouteProgressBar />
           <Navbar />
           <main>
             <Breadcrumb />

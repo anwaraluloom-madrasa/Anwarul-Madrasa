@@ -12,6 +12,7 @@ import ErrorDisplay from "@/components/ErrorDisplay";
 import { NoDataEmptyState } from "@/components/EmptyState";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Search } from "lucide-react";
+import AwlayaaCardSkeleton from "../components/awlayaa/AwlayaaCardSkeleton";
 
 export default function AwlyaaListPage() {
   const { t: tRaw, i18n } = useTranslation('common', { useSuspense: false });
@@ -73,7 +74,26 @@ export default function AwlyaaListPage() {
   };
 
   if (loading) {
-    return <UnifiedLoader variant="grid" count={6} showFilters={false} />;
+    return (
+      <div className="min-h-screen bg-gray-50" dir="rtl">
+        <IslamicHeader pageType="awlayaa" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 relative z-20" dir="rtl">
+          {/* Search bar skeleton */}
+          <div className="mb-8">
+            <div className="max-w-2xl mx-auto">
+              <div className="h-12 bg-gray-200 rounded-xl animate-pulse"></div>
+            </div>
+          </div>
+          
+          {/* Awlyaa grid skeleton */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <AwlayaaCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
