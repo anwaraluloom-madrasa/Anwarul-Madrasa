@@ -17,6 +17,8 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      // Use Next.js fetch caching
+      next: { revalidate: 60 }, // Revalidate every 60 seconds
     });
 
     console.log('API Response Status:', response.status);
@@ -36,6 +38,8 @@ export async function GET(request: NextRequest) {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        // Add caching headers for better performance
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
   } catch (error) {

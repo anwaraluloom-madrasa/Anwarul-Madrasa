@@ -67,17 +67,48 @@ export function createPaginationMeta({
   };
 }
 
+// Request cache for deduplication and short-term caching
+interface CacheEntry<T> {
+  data: ApiResponse<T>;
+  timestamp: number;
+  promise?: Promise<ApiResponse<T>>;
+}
+
 // Base API Client
 class ApiClient {
   private baseUrl: string;
   private defaultHeaders: HeadersInit;
-  private defaultTimeout = 45000; // Increased to 45 seconds for slow networks and large data requests
+  private defaultTimeout = 10000; // Reduced to 10 seconds for faster failure detection
+  private cache = new Map<string, CacheEntry<any>>();
+  private readonly CACHE_DURATION = 5000; // 5 seconds cache for GET requests
+  private inFlightRequests = new Map<string, Promise<ApiResponse<any>>>();
 
   constructor() {
     this.baseUrl = apiConfig.baseUrl;
     this.defaultHeaders = {
       "Content-Type": "application/json",
     };
+    
+    // Clean up old cache entries periodically
+    if (typeof window !== 'undefined') {
+      setInterval(() => this.cleanCache(), 30000); // Every 30 seconds
+    }
+  }
+
+  private cleanCache(): void {
+    const now = Date.now();
+    for (const [key, entry] of this.cache.entries()) {
+      if (now - entry.timestamp > this.CACHE_DURATION * 2) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  private getCacheKey(endpoint: string, params?: Record<string, QueryValue>): string {
+    const sortedParams = params 
+      ? Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&')
+      : '';
+    return `${endpoint}?${sortedParams}`;
   }
 
   private buildUrl(
@@ -231,23 +262,69 @@ class ApiClient {
     options: RequestOptions = {}
   ): Promise<ApiResponse<T>> {
     const { params, ...rest } = options;
+    const method = (rest.method ?? "GET").toString().toUpperCase();
+    const isGetRequest = method === "GET";
+    
+    // Check cache for GET requests
+    if (isGetRequest) {
+      const cacheKey = this.getCacheKey(endpoint, params);
+      const cached = this.cache.get(cacheKey);
+      const now = Date.now();
+      
+      if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+        logger.debug(`Cache hit for ${endpoint}`);
+        return cached.data;
+      }
+      
+      // Check if same request is already in-flight (deduplication)
+      const inFlight = this.inFlightRequests.get(cacheKey);
+      if (inFlight) {
+        logger.debug(`Deduplicating request for ${endpoint}`);
+        return inFlight;
+      }
+    }
+    
     const url = this.buildUrl(endpoint, params);
     const headers: HeadersInit = {
       ...this.defaultHeaders,
       ...rest.headers,
     };
-    const method = (rest.method ?? "GET").toString().toUpperCase();
     const config: RequestInit = {
       ...rest,
       headers,
       signal: rest.signal ?? this.createTimeoutSignal(method),
+      // Add cache control for better performance
+      cache: isGetRequest ? 'default' : 'no-store',
     };
 
     const startTime = performance.now();
     logger.apiRequest(endpoint, params);
+    
+    // Create request promise for deduplication
+    const cacheKey = isGetRequest ? this.getCacheKey(endpoint, params) : '';
+    const requestPromise = this.executeRequest<T>(url, config, endpoint, cacheKey, isGetRequest);
+    
+    if (isGetRequest && cacheKey) {
+      this.inFlightRequests.set(cacheKey, requestPromise);
+      requestPromise.finally(() => {
+        this.inFlightRequests.delete(cacheKey);
+      });
+    }
+    
+    return requestPromise;
+  }
 
-    // Retry logic for failed requests
-    const maxRetries = apiConfig.errorHandling.maxRetries;
+  private async executeRequest<T>(
+    url: string,
+    config: RequestInit,
+    endpoint: string,
+    cacheKey: string,
+    isGetRequest: boolean
+  ): Promise<ApiResponse<T>> {
+    const startTime = performance.now();
+    
+    // Retry logic for failed requests - reduced retries for faster failure
+    const maxRetries = Math.min(apiConfig.errorHandling.maxRetries, 2); // Max 2 retries instead of 3
     let lastError: Error | null = null;
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -280,8 +357,8 @@ class ApiClient {
             throw new Error(`HTTP error! status: ${statusCode}`);
           }
           
-          // Wait before retry (exponential backoff)
-          const delay = apiConfig.errorHandling.retryDelay * attempt;
+          // Wait before retry (faster exponential backoff)
+          const delay = Math.min(apiConfig.errorHandling.retryDelay * attempt, 2000); // Cap at 2 seconds
           logger.debug(`Retrying ${endpoint} in ${delay}ms (attempt ${attempt}/${maxRetries})`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
@@ -298,11 +375,21 @@ class ApiClient {
           pagination = rawPayload.pagination ?? null;
         }
 
-        return {
+        const result: ApiResponse<T> = {
           data,
           success: true,
           pagination,
         };
+
+        // Cache successful GET requests
+        if (isGetRequest && cacheKey) {
+          this.cache.set(cacheKey, {
+            data: result,
+            timestamp: Date.now(),
+          });
+        }
+
+        return result;
       } catch (error) {
         const normalized =
           error instanceof Error ? error : new Error(this.parseError(error));
@@ -330,11 +417,11 @@ class ApiClient {
           break;
         }
 
-        // For timeout errors, wait a bit longer before retry
+        // For timeout errors, wait a bit longer before retry (but still capped)
         if (attempt < maxRetries) {
           const delay = isTimeoutError 
-            ? apiConfig.errorHandling.retryDelay * attempt * 2 // Longer delay for timeout
-            : apiConfig.errorHandling.retryDelay * attempt;
+            ? Math.min(apiConfig.errorHandling.retryDelay * attempt * 1.5, 2000) // Faster retry, cap at 2s
+            : Math.min(apiConfig.errorHandling.retryDelay * attempt, 2000);
           
           if (isTimeoutError) {
             logger.debug(`Timeout error on ${endpoint}, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`);
@@ -777,10 +864,7 @@ export class AdmissionsApi {
               );
 
               if (response.ok) {
-                  // Wait a moment for cookie to be set (browser needs time)
-                  await new Promise((resolve) => setTimeout(resolve, 100));
-
-                  // Check cookies again
+                  // Check cookies immediately (browser sets cookies synchronously)
                   token = this.extractCsrfTokenFromCookies();
 
                   if (token) {
@@ -2467,10 +2551,7 @@ export class ContactApi {
         console.log("📥 [CONTACT] CSRF endpoint response status:", response.status);
 
         if (response.ok) {
-          // Wait a moment for cookie to be set (browser needs time)
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          // Check cookies again
+          // Check cookies immediately (browser sets cookies synchronously)
           token = this.extractCsrfTokenFromCookies();
 
           if (token) {
