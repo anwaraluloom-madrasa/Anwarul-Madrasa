@@ -109,11 +109,11 @@ export const navigation = {
     // { name: 'awlyaacharts', href: '/awlyaa-charts', icon: 'chart' }, // Temporarily hidden
     { name: 'admission', href: '/admission', icon: 'admission' },
     { name: 'books', href: '/book', icon: 'book' },
+    { name: 'tasawwuf', href: '/tasawwuf', icon: 'tasawwuf' },
     { name: 'donation', href: '/donation', icon: 'donation' },
     { name: 'blogs', href: '/blogs', icon: 'blog' },
     { name: 'author', href: '/authors', icon: 'author' },
     { name: 'event', href: '/event', icon: 'event' },
-    { name: 'tasawwuf', href: '/tasawwuf', icon: 'tasawwuf' },
     { name: 'graduation', href: '/graduated-students', icon: 'graduation' },
     { name: 'sanad', href: '/sanad', icon: 'sanad' },
     { name: 'contact', href: '/contact', icon: 'contact' },  

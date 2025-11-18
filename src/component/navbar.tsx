@@ -13,7 +13,7 @@ import { FaSearch } from "react-icons/fa";
 import { Gift } from "lucide-react";
 
 
-const PRIMARY_LINK_LIMIT = 7;
+const PRIMARY_LINK_LIMIT = 9; // Increased to show books and tasawwuf in main navigation
 const NAV_LABELS: Record<string, string> = {
   home: "کور",
   courses: " کورسونه",
