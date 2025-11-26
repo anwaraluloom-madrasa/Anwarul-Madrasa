@@ -161,7 +161,7 @@ export default function HomePage() {
           {/* Hero Text */}
           <div className="mb-14">
             <div className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-primary-400/20 to-primary-500/20 text-primary-700 text-sm font-semibold rounded-full mb-6 animate-fade-in backdrop-blur-sm">
-              <span className="icon-scroll">📜</span> زموږ د سند ځانګړنه
+              <span className="icon-scroll">📜</span> زموږ د سند
             </div>
             <h2 className="text-4xl md:text-5xl font-extrabold text-primary-700 mb-5 ">
             شجره

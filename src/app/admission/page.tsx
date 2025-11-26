@@ -174,10 +174,10 @@ export default function AdmissionPage() {
         newErrors.degree_id = 'مهرباني وکړئ دا ساحه ډکه کړئ - خپله درجه وټاکئ';
       }
       if (!formData.previous_degree.trim()) {
-        newErrors.previous_degree = 'مهرباني وکړئ دا ساحه ډکه کړئ - خپل تیر سند داخل کړئ';
+        newErrors.previous_degree = 'مهرباني وکړئ دا ساحه ډکه کړئ - خپل مخکینی سند داخل کړئ';
       }
       if (!formData.previous_madrasa.trim()) {
-        newErrors.previous_madrasa = 'مهرباني وکړئ دا ساحه ډکه کړئ - خپل تیر مدرسه نوم داخل کړئ';
+        newErrors.previous_madrasa = 'مهرباني وکړئ دا ساحه ډکه کړئ - خپل مخکیني مدرسه نوم داخل کړئ';
       }
       if (!formData.location_madrasa.trim()) {
         newErrors.location_madrasa = 'مهرباني وکړئ دا ساحه ډکه کړئ - د مدرسې موقعیت داخل کړئ';
@@ -761,7 +761,7 @@ export default function AdmissionPage() {
               </div>
 
               <div className="w-full">
-                <label className="block text-sm font-semibold text-gray-700 mb-2 w-full" style={{ fontFamily: 'Amiri, serif' }}>تیر سند *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 w-full" style={{ fontFamily: 'Amiri, serif' }}>مخکینی سند *</label>
                 <input
                   ref={(el) => { fieldRefs.current.previous_degree = el; }}
                   type="text"
@@ -772,7 +772,7 @@ export default function AdmissionPage() {
                     errors.previous_degree ? "border-red-400 bg-red-50" : "border-gray-300 bg-white hover:border-[#4a8a8a]"
                   }`}
                   style={{ fontFamily: 'Amiri, serif' }}
-                  placeholder="تیر سند * (مثال: فارغ‌التحصیلی)"
+                  placeholder="مخکینی سند * (مثال: فارغ‌التحصیلی)"
                 />
                 {errors.previous_degree && (
                   <p className="bg-red-50 text-red-700 text-sm mt-2 p-2.5 rounded-lg flex items-center gap-2 border border-red-200" style={{ fontFamily: 'Amiri, serif' }}>
@@ -783,7 +783,7 @@ export default function AdmissionPage() {
               </div>
 
               <div className="w-full">
-                <label className="block text-sm font-semibold text-gray-700 mb-2 w-full" style={{ fontFamily: 'Amiri, serif' }}>تیر مدرسه نوم *</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2 w-full" style={{ fontFamily: 'Amiri, serif' }}>مخکیني مدرسه نوم *</label>
                 <input
                   ref={(el) => { fieldRefs.current.previous_madrasa = el; }}
                   type="text"
@@ -794,7 +794,7 @@ export default function AdmissionPage() {
                     errors.previous_madrasa ? "border-red-400 bg-red-50" : "border-gray-300 bg-white hover:border-[#4a8a8a]"
                   }`}
                   style={{ fontFamily: 'Amiri, serif' }}
-                  placeholder="تیر مدرسه نوم *"
+                  placeholder="مخکیني مدرسه نوم *"
                 />
                 {errors.previous_madrasa && (
                   <p className="bg-red-50 text-red-700 text-sm mt-2 p-2.5 rounded-lg flex items-center gap-2 border border-red-200" style={{ fontFamily: 'Amiri, serif' }}>

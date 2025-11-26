@@ -227,7 +227,9 @@ export default function DonationPage() {
 
                     <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <motion.a
-                        href={`https://wa.me/${donation.whatsapp?.replace(/[^\d]/g, '')}`}
+                        href={`https://wa.me/+93772046406?text=${encodeURIComponent(
+                          `Hi!اسلام علیکم ورحمته الله وبرکاته `
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         whileHover={{ scale: 1.03, y: -2 }}
