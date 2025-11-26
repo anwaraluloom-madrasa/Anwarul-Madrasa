@@ -2,10 +2,82 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useInView, useAnimation } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { getImageUrl } from "@/lib/utils";
 import { cleanText } from "@/lib/textUtils";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
+
+// Image component with error handling for ContentSection
+function ContentImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    if (!src) {
+      setImgSrc("/placeholder-article.jpg");
+      setIsLoading(false);
+      return;
+    }
+    
+    const newUrl = getImageUrl(src, "/placeholder-article.jpg");
+    setImgSrc(newUrl);
+    setHasError(false);
+    setIsLoading(true);
+    
+    // Log image URL for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖼️ Content image:', {
+        original: src,
+        processed: newUrl,
+        alt
+      });
+    }
+  }, [src, alt]);
+  
+  const handleError = () => {
+    console.warn('⚠️ Content image failed to load:', imgSrc);
+    setHasError(true);
+    setImgSrc("/placeholder-article.jpg");
+    setIsLoading(false);
+  };
+  
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+  
+  if (hasError || !imgSrc) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+    );
+  }
+  
+  return (
+    <>
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center z-10">
+          <svg className="w-8 h-8 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      )}
+      <Image
+        src={imgSrc}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+        className={className}
+        onError={handleError}
+        onLoad={handleLoad}
+      />
+    </>
+  );
+}
 
 interface Author {
   name: string;
@@ -244,15 +316,10 @@ export default function ContentSection({
               {/* Image Section */}
               {item.image && (
                 <div className="lg:w-80 flex-shrink-0">
-                  <div className="relative h-48 lg:h-full rounded-xl overflow-hidden">
-                  <Image
-                    src={
-                      getImageUrl(item.image, "/placeholder-article.jpg") ||
-                      "/placeholder-article.jpg"
-                    }
+                  <div className="relative h-48 lg:h-full rounded-xl overflow-hidden bg-gray-100">
+                    <ContentImage
+                      src={item.image}
                       alt={item.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

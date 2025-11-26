@@ -1,6 +1,5 @@
 // app/articles/[slug]/page.tsx
 import { ArticlesApi, extractArray } from "../../../lib/api";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
@@ -9,6 +8,7 @@ import { cleanText } from "@/lib/textUtils";
 import VideoPlayer from "@/app/components/VideoPlayer";
 import Breadcrumb from "@/components/Breadcrumb";
 import { Calendar, FileText } from "lucide-react";
+import ArticleDetailImage from "./ArticleDetailImage";
 
 interface Article {
   title: string;
@@ -154,12 +154,9 @@ export default async function ArticleDetailsPage({ params }: PageProps) {
 
                 {(article.featuredImage || article.image) && !article.video_url && (
                   <div className="relative w-full aspect-[16/9] rounded-xl overflow-hidden bg-gray-100">
-                    <Image
-                      src={getImageUrl(article.featuredImage || article.image, "/placeholder-blog.jpg") || "/placeholder-blog.jpg"}
+                    <ArticleDetailImage
+                      src={article.featuredImage || article.image}
                       alt={article.title}
-                      fill
-                      sizes="100vw"
-                      className="object-cover"
                       priority
                     />
                   </div>

@@ -173,12 +173,17 @@ export default function VideoPlayer({ videoUrl, posterUrl, title }: VideoPlayerP
     setIsLoading(false);
   };
 
+  // Process poster URL through getImageUrl
+  const processedPosterUrl = posterUrl 
+    ? getImageUrl(posterUrl, "/placeholder-course.jpg") 
+    : "/placeholder-course.jpg";
+
   return (
     <div ref={containerRef} className="relative w-full aspect-[16/9] bg-gray-900 rounded-md sm:rounded-lg md:rounded-xl overflow-hidden group">
       <video
         ref={videoRef}
         className="w-full h-full object-contain"
-        poster={posterUrl || "/placeholder-course.jpg"}
+        poster={processedPosterUrl}
         onPlay={handlePlay}
         onPause={handlePause}
         onError={handleError}

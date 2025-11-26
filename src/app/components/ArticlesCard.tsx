@@ -18,6 +18,78 @@ import { getImageUrl } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import ErrorDisplay from "@/components/ErrorDisplay";
 
+// Image component with error handling
+function ArticleImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
+  const [imgSrc, setImgSrc] = React.useState<string | null>(null);
+  const [hasError, setHasError] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+  
+  React.useEffect(() => {
+    if (!src) {
+      setImgSrc("/placeholder-blog.jpg");
+      setIsLoading(false);
+      return;
+    }
+    
+    const newUrl = getImageUrl(src, "/placeholder-blog.jpg");
+    setImgSrc(newUrl);
+    setHasError(false);
+    setIsLoading(true);
+    
+    // Log image URL for debugging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🖼️ Article image:', {
+        original: src,
+        processed: newUrl,
+        alt
+      });
+    }
+  }, [src, alt]);
+  
+  const handleError = () => {
+    console.warn('⚠️ Image failed to load:', imgSrc);
+    setHasError(true);
+    setImgSrc("/placeholder-blog.jpg");
+    setIsLoading(false);
+  };
+  
+  const handleLoad = () => {
+    setIsLoading(false);
+  };
+  
+  if (hasError || !imgSrc) {
+    return (
+      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+    );
+  }
+  
+  return (
+    <>
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
+          <svg className="w-8 h-8 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </div>
+      )}
+      <Image
+        src={imgSrc}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        className={className}
+        onError={handleError}
+        onLoad={handleLoad}
+      />
+    </>
+  );
+}
+
 type RawArticle = {
   id: number;
   title: string;
@@ -347,28 +419,12 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
                 <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 
                 {/* Image Section */}
-                <div className="relative w-full h-48 overflow-hidden">
-                  {(() => {
-                    const imageUrl = getImageUrl(article.image);
-                    return imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={article.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(event) => {
-                          event.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                    );
-                  })()}
+                <div className="relative w-full h-48 overflow-hidden bg-gray-100">
+                  <ArticleImage 
+                    src={article.image} 
+                    alt={article.title}
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
                   
                   {/* Category Badge */}
                   <div className="absolute top-4 right-4">

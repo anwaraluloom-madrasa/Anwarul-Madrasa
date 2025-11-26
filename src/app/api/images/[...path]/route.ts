@@ -46,8 +46,10 @@ export async function GET(
     const { path } = await context.params;
     const imagePath = path.join('/');
 
-    // Construct the full image URL
-    const imageUrl = `${API_BASE_URL}/madrasa/public/storage/${imagePath}`;
+    // Construct the full image URL - using /storage/ path directly
+    const imageUrl = `${API_BASE_URL}/storage/${imagePath}`;
+
+    console.log(`🖼️ [Image API] Fetching image from: ${imageUrl}`);
 
     // Fetch the image from the server
     const response = await fetch(imageUrl, {
@@ -57,15 +59,24 @@ export async function GET(
       },
     });
 
+    console.log(`🖼️ [Image API] Response status: ${response.status} for ${imagePath}`);
+
     if (!response.ok) {
+      console.warn(`⚠️ [Image API] Failed to fetch image (${response.status}): ${imageUrl}`);
       return await loadPlaceholderImage();
     }
 
     const imageBuffer = await response.arrayBuffer();
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    
+    console.log(`✅ [Image API] Successfully fetched image: ${imagePath} (${imageBuffer.byteLength} bytes, ${contentType})`);
 
-    return createImageResponse(imageBuffer, response.headers.get('content-type'));
+    return createImageResponse(imageBuffer, contentType);
   } catch (error) {
-    console.error('Image Proxy Error:', error);
+    console.error('❌ [Image API] Image Proxy Error:', error);
+    const { path } = await context.params;
+    const imagePath = path.join('/');
+    console.error(`❌ [Image API] Failed path: ${imagePath}`);
     return await loadPlaceholderImage();
   }
 }
