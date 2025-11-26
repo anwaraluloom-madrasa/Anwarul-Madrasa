@@ -844,4 +844,29 @@
       transform: translateY(0);
     }
   }
+
+  /* Loading wave animation for Islamic sound wave loader */
+  @keyframes loading-wave {
+    0%, 100% {
+      transform: scaleY(0.5);
+      opacity: 0.5;
+    }
+    25% {
+      transform: scaleY(1.1);
+      opacity: 0.9;
+    }
+    50% {
+      transform: scaleY(1.3);
+      opacity: 1;
+    }
+    75% {
+      transform: scaleY(1.1);
+      opacity: 0.9;
+    }
+  }
+
+  .animate-loading-wave {
+    animation: loading-wave 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transform-origin: bottom center;
+  }
 }

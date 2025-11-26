@@ -1,5 +1,11 @@
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import IslamicHeader from "../components/IslamicHeader";
+import DonationSkeleton from "../components/donation/DonationSkeleton";
 
 export default function LoadingDonationPage() {
-  return <UnifiedLoader variant="detail" />;
+  return (
+    <main className="w-full min-h-screen bg-gray-50" dir="rtl">
+      <IslamicHeader pageType="donation" />
+      <DonationSkeleton />
+    </main>
+  );
 }

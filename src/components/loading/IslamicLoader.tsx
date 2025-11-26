@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 
 /**
- * IslamicLoader - A beautiful, simple Islamic-themed loader
- * Used for all detail pages across the website
+ * IslamicLoader - Beautiful Islamic sound wave pattern
+ * Elegant wave design inspired by Islamic geometric patterns
  */
 
 export default function IslamicLoader() {
@@ -14,52 +14,56 @@ export default function IslamicLoader() {
   }, []);
 
   return (
-    <div className="fixed inset-0 top-0 left-0 right-0 flex items-center justify-center bg-gradient-to-br from-[#e0f2f2] via-white to-[#f0f9f9] p-4" style={{ zIndex: 9999 }}>
-      <div className="bg-white rounded-xl p-6 sm:p-8 max-w-[280px] w-full border border-[#d0e8e8]">
-        <div className="flex flex-col items-center justify-center space-y-5">
-          {/* Islamic Crescent Moon Loader */}
-          <div className="relative">
-            {/* Outer rotating ring */}
-            <div className="w-14 h-14 sm:w-16 sm:h-16 border-2 border-[#e0f2f2] border-t-[#4a8a8a] rounded-full animate-spin"></div>
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 9999 }}>
+      <div className="flex items-center justify-center space-x-2.5">
+        {/* Beautiful white sound wave pattern - Elegant and clean */}
+        {[
+          { id: 'wave-1', height: 20, delay: 0 },
+          { id: 'wave-2', height: 36, delay: 100 },
+          { id: 'wave-3', height: 52, delay: 200 },
+          { id: 'wave-4', height: 64, delay: 300 },
+          { id: 'wave-5', height: 72, delay: 400 },
+          { id: 'wave-6', height: 64, delay: 500 },
+          { id: 'wave-7', height: 52, delay: 600 },
+          { id: 'wave-8', height: 36, delay: 700 },
+          { id: 'wave-9', height: 20, delay: 800 },
+        ].map((wave) => (
+          <div
+            key={wave.id}
+            className="relative rounded-full animate-loading-wave"
+            style={{
+              width: '4px',
+              height: `${wave.height}px`,
+              animationDelay: `${wave.delay}ms`,
+              background: 'linear-gradient(to top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9))',
+              boxShadow: `
+                0 0 20px rgba(255, 255, 255, 0.6),
+                0 0 10px rgba(255, 255, 255, 0.4),
+                inset 0 0 15px rgba(255, 255, 255, 0.3),
+                inset 0 -3px 10px rgba(255, 255, 255, 0.2)
+              `,
+              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.8))'
+            }}
+          >
+            {/* Inner glow effect */}
+            <div 
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: 'linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.4))',
+                filter: 'blur(1px)'
+              }}
+            ></div>
             
-            {/* Inner crescent moon - elegant design */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                {/* Crescent shape - simplified */}
-                <div className="w-10 h-10 sm:w-12 sm:h-12 relative">
-                  <div className="absolute inset-0 bg-[#4a8a8a] rounded-full opacity-15 animate-pulse"></div>
-                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 bg-white rounded-full"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Loading Text - compact */}
-          <div className="text-center space-y-1.5">
-            <h3 className="text-base sm:text-lg font-semibold text-[#4a8a8a]" style={{ fontFamily: 'Amiri, serif' }}>
-              جاري التحميل...
-            </h3>
-            <p className="text-xs text-gray-500" style={{ fontFamily: 'Amiri, serif' }}>
-              مهرباني وکړئ انتظار وکړئ
-            </p>
-          </div>
-          
-          {/* Animated Progress Dots - minimal */}
-          <div className="flex items-center justify-center gap-1.5 pt-1">
+            {/* Top highlight */}
             <div 
-              className="w-1.5 h-1.5 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '0ms', animationDuration: '0.8s' }}
-            ></div>
-            <div 
-              className="w-1.5 h-1.5 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '150ms', animationDuration: '0.8s' }}
-            ></div>
-            <div 
-              className="w-1.5 h-1.5 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '300ms', animationDuration: '0.8s' }}
+              className="absolute top-0 left-0 right-0 h-3 rounded-full"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1), transparent)',
+                filter: 'blur(2px)'
+              }}
             ></div>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   );

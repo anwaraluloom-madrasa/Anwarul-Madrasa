@@ -6,7 +6,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 type Alignment = "center" | "left";
 type Theme = "amber" | "emerald" | "indigo" | "slate";
-type PageType = "courses" | "articles" | "blogs" | "events" | "books" | "authors" | "awlayaa" | "tasawwuf" | "gallery" | "about" | "contact" | "donation" | "registration" | "graduated-students" | "iftah" | "sanad" | "default";
+type PageType = "courses" | "articles" | "blogs" | "events" | "books" | "authors" | "awlayaa" | "tasawwuf" | "gallery" | "about" | "contact" | "donation" | "registration" | "graduated-students" | "iftah" | "sanad" | "admission" | "default";
 
 export interface IslamicHeaderProps {
   title?: string;
@@ -137,6 +137,11 @@ export default function IslamicHeader({
       registration: {
         title: t('header.registration.title'),
         subtitle: t('header.registration.subtitle'),
+        theme: "emerald" as Theme,
+      },
+      admission: {
+        title: t('header.admission.title') || 'Admission',
+        subtitle: t('header.admission.subtitle') || 'Join our community',
         theme: "emerald" as Theme,
       },
       "graduated-students": {

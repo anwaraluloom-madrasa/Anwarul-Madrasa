@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 import "../globals.css";
 import Navbar from "../component/navbar";
 import Footer from "@/component/footer";
 import { ToastProvider } from "@/components/Toast";
 import DocumentAttributes from "@/components/DocumentAttributes";
 import Breadcrumb from "@/components/Breadcrumb";
+import RouteProgressBar from "@/components/RouteProgressBar";
 
 export const metadata: Metadata = {
   title: "Anwar ul-Uloom al-Islamiyyah - Islamic Learning Platform",
@@ -44,6 +46,9 @@ export default function RootLayout({
         <div className="gtranslate_wrapper"></div>
         <ToastProvider>
           <DocumentAttributes />
+          <Suspense fallback={null}>
+            <RouteProgressBar />
+          </Suspense>
           <Navbar />
           <main>
             <Breadcrumb />

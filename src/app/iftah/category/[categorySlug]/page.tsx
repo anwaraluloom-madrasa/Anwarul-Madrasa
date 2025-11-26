@@ -110,6 +110,12 @@ export default async function IftahCategoryPage({ params }: PageProps) {
   let tagInfo: any = null;
   let tagId: number | string | null = foundTagId;
   
+  // Fetch ALL subcategories from API - this gets ALL subcategories even if they have no questions
+  const subCategoriesResult = await IftahApi.getSubCategories({ limit: 100 });
+  const apiSubCategories = Array.isArray(subCategoriesResult.data) ? subCategoriesResult.data : [];
+  
+  console.log('📊 Fetched subcategories from API:', apiSubCategories.length);
+  
   // If tag ID found, fetch tag data using the tag API endpoint
   if (foundTagId) {
     const tagResult = await IftahApi.getTagById(foundTagId);
@@ -120,23 +126,6 @@ export default async function IftahCategoryPage({ params }: PageProps) {
       // Extract data array - this is the main iftah items array
       if (Array.isArray(responseData.data)) {
         categoryIftahs = responseData.data as Iftah[];
-        
-        // Extract unique subcategories from iftah items
-        const uniqueSubCategories = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
-        responseData.data.forEach((item: any) => {
-          if (item.iftah_sub_category && item.iftah_sub_category.id) {
-            const subCat = item.iftah_sub_category;
-            if (!uniqueSubCategories.has(subCat.id)) {
-              uniqueSubCategories.set(subCat.id, {
-                id: subCat.id,
-                name: subCat.name,
-                tag_id: subCat.tag_id,
-                tag: subCat.tag
-              });
-            }
-          }
-        });
-        subCategories = Array.from(uniqueSubCategories.values());
       }
       
       tagInfo = responseData.tag_id ? { tag_id: responseData.tag_id } : null;
@@ -153,24 +142,47 @@ export default async function IftahCategoryPage({ params }: PageProps) {
         (item as any).iftah_sub_category?.tag?.name === categoryName
       );
       categoryIftahs = filtered;
-      
-      // Extract unique subcategories from filtered items
-      const uniqueSubCategories = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
-      filtered.forEach((item: any) => {
-        if (item.iftah_sub_category && item.iftah_sub_category.id) {
-          const subCat = item.iftah_sub_category;
-          if (!uniqueSubCategories.has(subCat.id)) {
-            uniqueSubCategories.set(subCat.id, {
-              id: subCat.id,
-              name: subCat.name,
-              tag_id: subCat.tag_id,
-              tag: subCat.tag
-            });
-          }
-        }
-      });
-      subCategories = Array.from(uniqueSubCategories.values());
     }
+    
+    // Extract subcategories from iftahs that belong to this category
+    const subCategoriesFromIftahs = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
+    categoryIftahs.forEach((item: any) => {
+      if (item.iftah_sub_category && item.iftah_sub_category.id) {
+        const subCat = item.iftah_sub_category;
+        if (!subCategoriesFromIftahs.has(subCat.id)) {
+          subCategoriesFromIftahs.set(subCat.id, {
+            id: subCat.id,
+            name: subCat.name,
+            tag_id: subCat.tag_id,
+            tag: subCat.tag
+          });
+        }
+      }
+    });
+    
+    // Merge API subcategories with subcategories from iftahs
+    const allSubCategoriesMap = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
+    
+    // Add all API subcategories that match this tag_id
+    apiSubCategories.forEach((subCat: any) => {
+      if (subCat.tag_id === foundTagId || subCat.tag?.id === foundTagId) {
+        allSubCategoriesMap.set(subCat.id, {
+          id: subCat.id,
+          name: subCat.name,
+          tag_id: subCat.tag_id,
+          tag: subCat.tag
+        });
+      }
+    });
+    
+    // Add subcategories from iftahs (this will add any that exist in iftahs but not in API)
+    subCategoriesFromIftahs.forEach((subCat, subCatId) => {
+      allSubCategoriesMap.set(subCatId, subCat);
+    });
+    
+    subCategories = Array.from(allSubCategoriesMap.values());
+    
+    console.log('📊 Merged subcategories for tag', foundTagId, ':', subCategories.length, 'subcategories (', subCategoriesFromIftahs.size, 'from iftahs,', apiSubCategories.filter((sc: any) => sc.tag_id === foundTagId || sc.tag?.id === foundTagId).length, 'from API)');
   } else {
     // Fallback: Try to fetch all iftahs and filter by tag name
     console.log('🔄 Fallback: Fetching all iftahs and filtering by tag name');
@@ -184,26 +196,64 @@ export default async function IftahCategoryPage({ params }: PageProps) {
     );
     categoryIftahs = filtered;
     
-    // Extract unique subcategories from filtered items
-    const uniqueSubCategories = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
-    filtered.forEach((item: any) => {
-      if (item.iftah_sub_category && item.iftah_sub_category.id) {
-        const subCat = item.iftah_sub_category;
-        if (!uniqueSubCategories.has(subCat.id)) {
-          uniqueSubCategories.set(subCat.id, {
-            id: subCat.id,
-            name: subCat.name,
-            tag_id: subCat.tag_id,
-            tag: subCat.tag
-          });
-        }
+    // If we couldn't find the tag ID, try to find it from the filtered items
+    const foundTagFromItems = filtered.find((item: Iftah) => 
+      item.tag?.name === categoryName || (item as any).iftah_sub_category?.tag?.name === categoryName
+    );
+    
+    if (foundTagFromItems) {
+      const categoryTagId = (foundTagFromItems as any).iftah_sub_category?.tag?.id || foundTagFromItems.tag?.id;
+      if (categoryTagId) {
+        // Extract subcategories from filtered iftahs
+        const subCategoriesFromIftahs = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
+        filtered.forEach((item: any) => {
+          if (item.iftah_sub_category && item.iftah_sub_category.id) {
+            const subCat = item.iftah_sub_category;
+            if (!subCategoriesFromIftahs.has(subCat.id)) {
+              subCategoriesFromIftahs.set(subCat.id, {
+                id: subCat.id,
+                name: subCat.name,
+                tag_id: subCat.tag_id,
+                tag: subCat.tag
+              });
+            }
+          }
+        });
+        
+        // Merge API subcategories with subcategories from iftahs
+        const allSubCategoriesMap = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
+        
+        // Add all API subcategories that match this tag_id
+        apiSubCategories.forEach((subCat: any) => {
+          if (subCat.tag_id === categoryTagId || subCat.tag?.id === categoryTagId) {
+            allSubCategoriesMap.set(subCat.id, {
+              id: subCat.id,
+              name: subCat.name,
+              tag_id: subCat.tag_id,
+              tag: subCat.tag
+            });
+          }
+        });
+        
+        // Add subcategories from iftahs
+        subCategoriesFromIftahs.forEach((subCat, subCatId) => {
+          allSubCategoriesMap.set(subCatId, subCat);
+        });
+        
+        subCategories = Array.from(allSubCategoriesMap.values());
+        console.log('📊 Merged subcategories for tag', categoryTagId, ':', subCategories.length, 'subcategories');
       }
-    });
-    subCategories = Array.from(uniqueSubCategories.values());
+    }
+    
+    // If still no subcategories found, show all API subcategories (fallback)
+    if (subCategories.length === 0) {
+      subCategories = apiSubCategories;
+      console.log('📊 No matching subcategories found, showing all API subcategories:', subCategories.length, 'subcategories');
+    }
   }
   
-  // Only show 404 if we have no data at all
-  if (categoryIftahs.length === 0 && !foundTagId) {
+  // Only show 404 if we have no data at all (no category found, no subcategories, and no questions)
+  if (categoryIftahs.length === 0 && subCategories.length === 0 && !foundTagId) {
     notFound();
   }
   
