@@ -143,7 +143,7 @@ const Hero = () => {
         <div className="overflow-hidden">
           <ScrollingRow direction="right" delay={3} />
         </div>
-        <div className="overflow-hidden md:hidden">
+        <div className="overflow-hidden lg:hidden">
           <ScrollingRow direction="left" delay={3} />
         </div>
     
@@ -161,22 +161,22 @@ const Hero = () => {
     </p>
 
     {/* Title & Subtitle */}
-    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-5xl font-bold leading-tight drop-shadow-[0_8px_20px_rgba(0,0,0,1)]">
+    <h1 className="text-3xl pt-2 sm:text-5xl md:text-6xl lg:text-5xl font-bold leading-tight drop-shadow-[0_8px_20px_rgba(0,0,0,1)]">
       <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
         {t("hero.title")}
       </span>
-      <span className="block text-xl sm:text-2xl md:text-3xl lg:text-4xl text-white mt-2 drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
+      <span className="block text-xl pt-2 sm:text-2xl md:text-3xl lg:text-4xl text-white mt-2 drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
         {t("hero.subtitle")}
       </span>
     </h1>
 
     {/* Description */}
-    <p className="text-base sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-3xl mx-auto drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
+    <p className="text-base pt-2 sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-3xl mx-auto drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
       {t("hero.description")}
     </p>
 
     {/* Buttons */}
-    <div className="flex flex-wrap gap-4 justify-center mt-8">
+    <div className="flex flex-wrap gap-4  justify-center mt-8 pt-2">
       <Link href="/about">
         <Button
           variant="primary"

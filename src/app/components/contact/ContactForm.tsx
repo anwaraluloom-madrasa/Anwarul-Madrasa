@@ -201,7 +201,7 @@ function Contact() {
                 <div className="space-y-1">
                   <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 bg-amber-500 rounded-full"></span>
-                   93772046406
+                     796148087 93+
                   </p>
                   <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 bg-amber-500 rounded-full"></span>

@@ -388,7 +388,7 @@ export default function IftahQuestionForm({ isOpen, onClose }: IftahQuestionForm
                   }}
                 >
                   <span className="font-black" style={{ fontWeight: 900 }}>
-                 أَنْوَارُ العُلُومِ دَارُ الإِفْتَاء
+                  دَارُ الإِفْتَاء اَنْوَارُ العُلُومِ
                   </span>
                 </p>
               </div>
