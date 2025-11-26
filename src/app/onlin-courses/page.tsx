@@ -486,7 +486,8 @@ export default function OnlineCoursesPage() {
                     href="tel:+93796148087" 
                     className="text-white/80 text-sm hover:text-white transition-colors block"
                   >
-                     796 148 087 93+
+                      796148087 93+
+                  
                   </a>
                 </div>
               </motion.div>

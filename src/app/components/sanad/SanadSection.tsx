@@ -96,7 +96,7 @@ export default function SanadSection({ showAll = false, showHero = false }: Sana
                     شجرهٔ حضرات کابل
                   </h2>
                   <p className="font-bold md:text-lg text-black  leading-relaxed rtl" style={{ fontFamily: 'Amiri, serif' }}>
-                    شجره عالیه حضرتات عالي درجات نقشبندیه مجددیه عمریه (قدسنا الله باسرارهم العاليه) خانقاه عالیه مجددیه عمریه ارغندی، پغمان، کابل
+                    شجره عالیه حضرات عالي درجات نقشبندیه مجددیه عمریه (قدسنا الله باسرارهم العاليه) خانقاه عالیه مجددیه عمریه ارغندی، پغمان، کابل
                   </p>
                 </div>
               </div>
