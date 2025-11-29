@@ -3,8 +3,8 @@
 import { useEffect } from 'react';
 
 /**
- * IslamicLoader - Beautiful Islamic sound wave pattern
- * Elegant wave design inspired by Islamic geometric patterns
+ * IslamicLoader - Simple spinning loader
+ * Clean circular spinner with brand colors
  */
 
 export default function IslamicLoader() {
@@ -13,57 +13,49 @@ export default function IslamicLoader() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
 
+  // Brand colors - emerald/green gradient
+  const brandColors = [
+    '#041613', '#092f2d', '#0a3f3d', '#0a5350', '#0f766e', 
+    '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5', 
+    '#ecfdf5', '#ecfdf5'
+  ];
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" style={{ zIndex: 9999 }}>
-      <div className="flex items-center justify-center space-x-2.5">
-        {/* Beautiful white sound wave pattern - Elegant and clean */}
-        {[
-          { id: 'wave-1', height: 20, delay: 0 },
-          { id: 'wave-2', height: 36, delay: 100 },
-          { id: 'wave-3', height: 52, delay: 200 },
-          { id: 'wave-4', height: 64, delay: 300 },
-          { id: 'wave-5', height: 72, delay: 400 },
-          { id: 'wave-6', height: 64, delay: 500 },
-          { id: 'wave-7', height: 52, delay: 600 },
-          { id: 'wave-8', height: 36, delay: 700 },
-          { id: 'wave-9', height: 20, delay: 800 },
-        ].map((wave) => (
-          <div
-            key={wave.id}
-            className="relative rounded-full animate-loading-wave"
-            style={{
-              width: '4px',
-              height: `${wave.height}px`,
-              animationDelay: `${wave.delay}ms`,
-              background: 'linear-gradient(to top, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.9))',
-              boxShadow: `
-                0 0 20px rgba(255, 255, 255, 0.6),
-                0 0 10px rgba(255, 255, 255, 0.4),
-                inset 0 0 15px rgba(255, 255, 255, 0.3),
-                inset 0 -3px 10px rgba(255, 255, 255, 0.2)
-              `,
-              filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.8))'
-            }}
-          >
-            {/* Inner glow effect */}
-            <div 
-              className="absolute inset-0 rounded-full"
-              style={{
-                background: 'linear-gradient(to top, rgba(255, 255, 255, 0.2), transparent, rgba(255, 255, 255, 0.4))',
-                filter: 'blur(1px)'
-              }}
-            ></div>
+    <div 
+      className="fixed inset-0 flex items-center justify-center bg-white/95 backdrop-blur-sm" 
+      style={{ zIndex: 9999 }}
+    >
+      <div className="relative w-16 h-16">
+        <div className="absolute inset-0 animate-spin-slow" style={{ transformOrigin: 'center' }}>
+          {Array.from({ length: 12 }, (_, i) => {
+            const angle = (i * 360) / 12;
+            const radian = (angle * Math.PI) / 180;
+            const radius = 28;
+            const x = Math.cos(radian) * radius;
+            const y = Math.sin(radian) * radius;
+            const color = brandColors[Math.floor((i / 12) * (brandColors.length - 1))];
             
-            {/* Top highlight */}
-            <div 
-              className="absolute top-0 left-0 right-0 h-3 rounded-full"
-              style={{
-                background: 'linear-gradient(to bottom, rgba(255, 255, 255, 1), transparent)',
-                filter: 'blur(2px)'
-              }}
-            ></div>
-          </div>
-        ))}
+            return (
+              <div
+                key={i}
+                className="absolute"
+                style={{
+                  left: '50%',
+                  top: '50%',
+                  transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
+                }}
+              >
+                <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
+                  <path
+                    d="M5 0C5 0 10 5 10 9C10 13 5 18 5 18C5 18 0 13 0 9C0 5 5 0 5 0Z"
+                    fill={color}
+                    opacity="0.85"
+                  />
+                </svg>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

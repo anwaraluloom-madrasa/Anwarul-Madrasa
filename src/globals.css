@@ -869,4 +869,18 @@
     animation: loading-wave 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     transform-origin: bottom center;
   }
+
+  /* Slow spin animation for teardrop loader */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 2s linear infinite;
+  }
 }
