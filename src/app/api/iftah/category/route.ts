@@ -4,8 +4,7 @@ const API_BASE_URL = 'https://website.anwarululoom.com/api';
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('🔍 Iftah categories endpoint called - fetching from external API');
-    
+
     // Fetch from external API
     const response = await fetch(`${API_BASE_URL}/iftah-categories`, {
       method: 'GET',
@@ -18,8 +17,7 @@ export async function GET(request: NextRequest) {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('✅ Iftah categories received from API:', data);
-      
+
       // Handle different response formats
       if (Array.isArray(data)) {
         return NextResponse.json(data, {
@@ -41,10 +39,7 @@ export async function GET(request: NextRequest) {
         });
       }
     }
-    
-    // If API fails, return empty array instead of static categories
-    console.log('⚠️ External API not available, returning empty categories');
-    
+ 
     return NextResponse.json([], {
       status: 200,
       headers: {

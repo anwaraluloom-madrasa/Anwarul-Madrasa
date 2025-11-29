@@ -8,8 +8,6 @@ export async function GET(request: NextRequest) {
     const queryString = searchParams.toString();
     const apiUrl = `${API_BASE_URL}/courses${queryString ? `?${queryString}` : ''}`;
 
-    console.log('API URL:', apiUrl);
-    console.log('Request URL:', request.url);
 
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -20,9 +18,6 @@ export async function GET(request: NextRequest) {
       // Use Next.js fetch caching
       next: { revalidate: 60 }, // Revalidate every 60 seconds
     });
-
-    console.log('API Response Status:', response.status);
-    console.log('API Response Headers:', Object.fromEntries(response.headers.entries()));
 
     if (!response.ok) {
       const errorText = await response.text();

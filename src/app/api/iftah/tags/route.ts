@@ -8,7 +8,6 @@ export async function GET(request: NextRequest) {
     const queryString = searchParams.toString();
     const apiUrl = `${API_BASE_URL}/darul-ifta/tags${queryString ? `?${queryString}` : ''}`;
 
-    console.log('🔍 Iftah Tags API endpoint called - fetching from external API:', apiUrl);
 
     const response = await fetch(apiUrl, {
       method: 'GET',

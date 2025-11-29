@@ -12,8 +12,6 @@ export async function GET(
     const queryString = searchParams.toString();
     const apiUrl = `${API_BASE_URL}/darul-ifta/sub-category/${subCategoryId}${queryString ? `?${queryString}` : ''}`;
 
-    console.log('🔍 Iftah Subcategory API endpoint called - fetching from external API:', apiUrl);
-
     let response: Response;
     try {
       response = await fetch(apiUrl, {

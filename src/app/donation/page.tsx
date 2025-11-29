@@ -25,7 +25,7 @@ import {
 } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import {DonationApi} from "../../lib/api";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import DonationSkeleton from "../components/donation/DonationSkeleton";
 
 interface DonationInfo {
   id: number;
@@ -90,7 +90,12 @@ export default function DonationPage() {
   };
 
   if (loading) {
-    return <UnifiedLoader variant="detail" />;
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-[#e0f2f2] via-white to-[#f0f9f9]">
+        <IslamicHeader pageType="donation" />
+        <DonationSkeleton />
+      </main>
+    );
   }
 
   if (error) {
@@ -110,11 +115,11 @@ export default function DonationPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-[#e0f2f2] via-white to-[#f0f9f9]">
+    <main className="min-h-screen bg-gradient-to-b from-[#e0f2f2] via-white to-[#f0f9f9]" dir="rtl">
       <IslamicHeader pageType="donation" />
       
       {/* Donation Methods Grid */}
-      <section className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 lg:py-20">
+      <section className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12 md:py-16 lg:py-20" dir="rtl">
         <div className="text-center mb-12 sm:mb-16 md:mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,11 +166,11 @@ export default function DonationPage() {
               <motion.div
                 key={donation.id}
                 variants={fadeIn}
-                className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border border-[#d0e8e8] hover:border-[#4a8a8a] hover:shadow-lg transition-all duration-300 group shadow-sm"
+                className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden border-2 border-[#d0e8e8] hover:border-emerald-400 hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 group shadow-md hover:-translate-y-1"
               >
                 <div className="flex flex-col lg:flex-row">
                   {/* Header Section - Enhanced */}
-                  <div className="bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] text-white p-6 sm:p-8 md:p-10 lg:w-2/5 flex-shrink-0 relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 text-white p-6 sm:p-8 md:p-10 lg:w-2/5 flex-shrink-0 relative overflow-hidden">
                     {/* Decorative Pattern */}
                     <div className="absolute inset-0 opacity-5">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -mr-16 -mt-16"></div>
@@ -191,35 +196,35 @@ export default function DonationPage() {
                   <div className="p-6 sm:p-8 md:p-10 lg:w-3/5 bg-white">
                     <div className="space-y-4 mb-6 sm:mb-8">
                       {donation.whatsapp && (
-                        <div className="flex items-center gap-4 p-4 sm:p-5 bg-[#e0f2f2] rounded-xl border border-[#d0e8e8] hover:border-[#4a8a8a] hover:bg-[#d5f5f5] transition-all duration-200 group/item">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#4a8a8a] rounded-full flex items-center justify-center flex-shrink-0 shadow-md group-hover/item:scale-110 transition-transform duration-200">
+                        <div className="flex items-center gap-4 p-4 sm:p-5 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-md transition-all duration-200 group/item">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg group-hover/item:scale-110 transition-transform duration-200">
                             <FaWhatsapp className="text-white text-lg sm:text-xl" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-[#4a8a8a] text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.whatsapp')}</p>
+                            <p className="font-bold text-emerald-700 text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.whatsapp')}</p>
                             <p className="text-sm sm:text-base text-gray-800 font-medium truncate">{donation.whatsapp}</p>
                           </div>
                         </div>
                       )}
 
                       {donation.email && (
-                        <div className="flex items-center gap-4 p-4 sm:p-5 bg-[#e0f2f2] rounded-xl border border-[#d0e8e8] hover:border-[#4a8a8a] hover:bg-[#d5f5f5] transition-all duration-200 group/item">
-                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#4a8a8a] rounded-full flex items-center justify-center flex-shrink-0 shadow-md group-hover/item:scale-110 transition-transform duration-200">
+                        <div className="flex items-center gap-4 p-4 sm:p-5 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-md transition-all duration-200 group/item">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg group-hover/item:scale-110 transition-transform duration-200">
                             <FaEnvelope className="text-white text-lg sm:text-xl" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-[#4a8a8a] text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.email')}</p>
+                            <p className="font-bold text-emerald-700 text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.email')}</p>
                             <p className="text-sm sm:text-base text-gray-800 font-medium truncate">{donation.email}</p>
                           </div>
                         </div>
                       )}
 
-                      <div className="flex items-start gap-4 p-4 sm:p-5 bg-[#e0f2f2] rounded-xl border border-[#d0e8e8] hover:border-[#4a8a8a] hover:bg-[#d5f5f5] transition-all duration-200 group/item">
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#4a8a8a] rounded-full flex items-center justify-center flex-shrink-0 shadow-md group-hover/item:scale-110 transition-transform duration-200 mt-0.5">
+                      <div className="flex items-start gap-4 p-4 sm:p-5 bg-gradient-to-r from-emerald-50 to-emerald-100 rounded-xl border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-md transition-all duration-200 group/item">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg group-hover/item:scale-110 transition-transform duration-200 mt-0.5">
                           <FaMapMarkerAlt className="text-white text-lg sm:text-xl" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-[#4a8a8a] text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.location')}</p>
+                          <p className="font-bold text-emerald-700 text-sm sm:text-base mb-1.5" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.location')}</p>
                           <p className="text-sm sm:text-base text-gray-800 font-medium leading-relaxed">{donation.address.replace(/<[^>]*>/g, '')}</p>
                         </div>
                       </div>
@@ -234,7 +239,7 @@ export default function DonationPage() {
                         rel="noopener noreferrer"
                         whileHover={{ scale: 1.03, y: -2 }}
                         whileTap={{ scale: 0.97 }}
-                        className="flex-1 bg-[#4a8a8a] hover:bg-[#3a7a7a] text-white py-4 sm:py-5 px-6 sm:px-8 rounded-xl font-bold text-center transition-all duration-200 flex items-center justify-center gap-3 shadow-md hover:shadow-lg text-base sm:text-lg"
+                        className="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-4 sm:py-5 px-6 sm:px-8 rounded-xl font-bold text-center transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-base sm:text-lg"
                         style={{ fontFamily: 'Amiri, serif' }}
                       >
                         <FaWhatsapp className="text-xl sm:text-2xl" />
@@ -246,7 +251,7 @@ export default function DonationPage() {
                           href={`mailto:${donation.email}`}
                           whileHover={{ scale: 1.03, y: -2 }}
                           whileTap={{ scale: 0.97 }}
-                          className="flex-1 bg-gray-700 hover:bg-gray-800 text-white py-4 sm:py-5 px-6 sm:px-8 rounded-xl font-bold text-center transition-all duration-200 flex items-center justify-center gap-3 shadow-md hover:shadow-lg text-base sm:text-lg"
+                          className="flex-1 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white py-4 sm:py-5 px-6 sm:px-8 rounded-xl font-bold text-center transition-all duration-200 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl text-base sm:text-lg"
                           style={{ fontFamily: 'Amiri, serif' }}
                         >
                           <FaEnvelope className="text-xl sm:text-2xl" />
@@ -263,10 +268,10 @@ export default function DonationPage() {
       </section>
 
       {/* Donation Instructions */}
-      <section className="py-12 sm:py-16 md:py-20 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 bg-white" dir="rtl">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
           <div className="text-center mb-12 sm:mb-16 md:mb-20">
-            <div className="inline-flex items-center gap-2 bg-[#e0f2f2] text-[#4a8a8a] px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border border-[#d0e8e8]">
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 px-4 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-semibold mb-4 sm:mb-6 border-2 border-emerald-200">
               <span>📋</span>
               <span>{t('donation.instructionTitle')}</span>
             </div>
@@ -284,17 +289,17 @@ export default function DonationPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               viewport={{ once: true }}
-              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border border-[#d0e8e8] hover:border-[#4a8a8a] hover:shadow-lg transition-all duration-300"
+              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border-2 border-gray-200 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="relative mb-8">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
                   <span className="text-3xl sm:text-4xl font-bold">1</span>
                 </div>
                 <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-8 sm:h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-xs sm:text-sm font-bold text-yellow-900">✓</span>
                 </div>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-[#4a8a8a] transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.contactStep')}</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-emerald-700 transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.contactStep')}</h3>
               <p className="text-base sm:text-lg text-gray-600 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.contactStepDesc')}</p>
             </motion.div>
 
@@ -303,17 +308,17 @@ export default function DonationPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
               viewport={{ once: true }}
-              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border border-[#d0e8e8] hover:border-[#4a8a8a] hover:shadow-lg transition-all duration-300"
+              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border-2 border-gray-200 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="relative mb-8">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
                   <span className="text-3xl sm:text-4xl font-bold">2</span>
                 </div>
                 <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-8 sm:h-8 bg-blue-400 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-xs sm:text-sm font-bold text-blue-900">✓</span>
                 </div>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-[#4a8a8a] transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.donateStep')}</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-emerald-700 transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.donateStep')}</h3>
               <p className="text-base sm:text-lg text-gray-600 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>{t('donation.donateStepDesc')}</p>
             </motion.div>
 
@@ -322,17 +327,17 @@ export default function DonationPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
               viewport={{ once: true }}
-              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border border-[#d0e8e8] hover:border-[#4a8a8a] hover:shadow-lg transition-all duration-300"
+              className="group text-center bg-white rounded-2xl sm:rounded-3xl p-8 sm:p-10 border-2 border-gray-200 hover:border-emerald-400 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
             >
               <div className="relative mb-8">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white rounded-2xl flex items-center justify-center mx-auto transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl shadow-lg">
                   <span className="text-3xl sm:text-4xl font-bold">3</span>
                 </div>
                 <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 w-7 h-7 sm:w-8 sm:h-8 bg-green-400 rounded-full flex items-center justify-center shadow-md">
                   <span className="text-xs sm:text-sm font-bold text-green-900">✓</span>
                 </div>
               </div>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-[#4a8a8a] transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>د مرستې تصدیق</h3>
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-5 group-hover:text-emerald-700 transition-colors duration-300" style={{ fontFamily: 'Amiri, serif' }}>د مرستې تصدیق</h3>
               <p className="text-base sm:text-lg text-gray-600 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>د خپلو مرستو د رسیدلو تصدیق تر لاسه کړئ</p>
             </motion.div>
           </div>

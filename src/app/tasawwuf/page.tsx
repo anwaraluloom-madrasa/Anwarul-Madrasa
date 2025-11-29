@@ -5,12 +5,10 @@ import IslamicHeader from "../components/IslamicHeader";
 
 export default function TasawwufPage() {
   return (
-    <main>
+    <main className="w-full min-h-screen bg-gray-50" dir="rtl">
       <IslamicHeader pageType="tasawwuf" />
-      <div className="pb-16">
-        <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full mx-auto py-8 px-4 sm:px-6 lg:px-8">
           <TasawwufList homePage={false} />
-        </div>
       </div>
     </main>
   );

@@ -2,7 +2,7 @@
 
 import { memo, useMemo } from "react";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface PaginationControlsProps {
@@ -72,77 +72,122 @@ const PaginationControls = memo(function PaginationControls({
 
   return (
     <nav
-      className={`flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-center ${className}`.trim()}
+      className={`flex flex-col items-center justify-center gap-6 ${className}`.trim()}
       aria-label="Pagination"
+      dir={isRTL ? "rtl" : "ltr"}
     >
-      <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
-        <button
-          type="button"
-          onClick={() => handlePageChange(page - 1)}
-          disabled={!hasPrevPage || isBusy}
-          className="inline-flex items-center gap-2 rounded-full border border-primary-200/60 bg-white/80 px-4 py-2 text-sm font-medium text-primary-700 transition-all hover:shadow-sm hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={t('pagination.previous')}
-        >
-          {isRTL ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          {t('pagination.previous')}
-        </button>
-        <button
-          type="button"
-          onClick={() => handlePageChange(page + 1)}
-          disabled={!hasNextPage || isBusy}
-          className="inline-flex items-center gap-2 rounded-full border border-primary-200/60 bg-white/80 px-4 py-2 text-sm font-medium text-primary-700 transition-all hover:shadow-sm hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label={t('pagination.next')}
-        >
-          {t('pagination.next')}
-          {isRTL ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-        </button>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {pages[0] > 1 && (
+      {/* Main Pagination Controls */}
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        {/* First Page Button */}
+        {page > 2 && (
           <button
             type="button"
             onClick={() => handlePageChange(1)}
             disabled={isBusy}
-            className="rounded-full border border-transparent px-3 py-1 text-sm font-semibold text-primary-600 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-emerald-200 bg-white text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            aria-label="First page"
+          >
+            {isRTL ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
+          </button>
+        )}
+
+        {/* Previous Button */}
+        <button
+          type="button"
+          onClick={() => handlePageChange(page - 1)}
+          disabled={!hasPrevPage || isBusy}
+          className="inline-flex items-center gap-2 rounded-xl border-2 border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+          aria-label={t('pagination.previous')}
+        >
+          {isRTL ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          <span className="hidden sm:inline">{t('pagination.previous')}</span>
+        </button>
+
+        {/* Page Numbers */}
+        <div className="flex items-center gap-1.5">
+        {pages[0] > 1 && (
+            <>
+          <button
+            type="button"
+            onClick={() => handlePageChange(1)}
+            disabled={isBusy}
+                className="w-10 h-10 rounded-xl border-2 border-emerald-200 bg-white text-sm font-bold text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm hover:shadow-md"
           >
             1
           </button>
+              {pages[0] > 2 && (
+                <span className="px-2 text-emerald-400 font-bold">…</span>
+              )}
+            </>
         )}
-        {pages[0] > 2 && <span className="px-1 text-primary-400">…</span>}
+          
         {pages.map((item) => (
           <button
             key={item}
             type="button"
             onClick={() => handlePageChange(item)}
             disabled={isBusy}
-            className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
+              className={`w-10 h-10 rounded-xl text-sm font-bold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${
               item === page
-                ? "bg-primary-600 text-white shadow-sm"
-                : "text-primary-700 hover:bg-primary-50"
-            } disabled:cursor-not-allowed disabled:opacity-60`}
+                  ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg scale-105 border-2 border-emerald-500"
+                  : "border-2 border-emerald-200 bg-white text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 shadow-sm hover:shadow-md"
+              }`}
           >
             {item}
           </button>
         ))}
+          
+          {pages[pages.length - 1] < safeTotal && (
+            <>
         {pages[pages.length - 1] < safeTotal - 1 && (
-          <span className="px-1 text-primary-400">…</span>
+                <span className="px-2 text-emerald-400 font-bold">…</span>
         )}
-        {pages[pages.length - 1] < safeTotal && (
+              <button
+                type="button"
+                onClick={() => handlePageChange(safeTotal)}
+                disabled={isBusy}
+                className="w-10 h-10 rounded-xl border-2 border-emerald-200 bg-white text-sm font-bold text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 shadow-sm hover:shadow-md"
+              >
+                {safeTotal}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Next Button */}
+        <button
+          type="button"
+          onClick={() => handlePageChange(page + 1)}
+          disabled={!hasNextPage || isBusy}
+          className="inline-flex items-center gap-2 rounded-xl border-2 border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+          aria-label={t('pagination.next')}
+        >
+          <span className="hidden sm:inline">{t('pagination.next')}</span>
+          {isRTL ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </button>
+
+        {/* Last Page Button */}
+        {page < safeTotal - 1 && (
           <button
             type="button"
             onClick={() => handlePageChange(safeTotal)}
             disabled={isBusy}
-            className="rounded-full border border-transparent px-3 py-1 text-sm font-semibold text-primary-600 transition hover:bg-primary-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center w-10 h-10 rounded-xl border-2 border-emerald-200 bg-white text-emerald-700 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            aria-label="Last page"
           >
-            {safeTotal}
+            {isRTL ? <ChevronsLeft className="h-4 w-4" /> : <ChevronsRight className="h-4 w-4" />}
           </button>
         )}
       </div>
 
-      <div className="text-sm text-primary-600">
-        {t('pagination.page')} {Math.min(page, safeTotal)}
-        {typeof totalPages === "number" && totalPages > 0 ? ` ${t('pagination.of')} ${safeTotal}` : ""}
+      {/* Page Info */}
+      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-200/50">
+        <span className="text-sm font-semibold text-emerald-700">
+          {t('pagination.page')} <span className="font-bold">{Math.min(page, safeTotal)}</span>
+          {typeof totalPages === "number" && totalPages > 0 && (
+            <> {t('pagination.of')} <span className="font-bold">{safeTotal}</span></>
+          )}
+        </span>
       </div>
     </nav>
   );

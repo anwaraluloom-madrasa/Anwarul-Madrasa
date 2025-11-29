@@ -1,7 +1,7 @@
-import { getImageUrl } from "./utils";
+import { getImageUrl, getSimpleImageUrl } from "./utils";
 
 // Re-export image utilities from the main utils file for easier access
-export { getImageUrl, isValidUrl } from "./utils";
+export { getImageUrl, getSimpleImageUrl, isValidUrl } from "./utils";
 
 /**
  * Helper function to get image URL with fallback

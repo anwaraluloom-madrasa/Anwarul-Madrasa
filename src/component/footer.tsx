@@ -7,6 +7,7 @@ import { Facebook, Twitter, Instagram, Mail, Phone, MapPin, Heart, GraduationCap
 import { useTranslation } from '@/hooks/useTranslation';
 import { Button } from "@/components/ui/button";
 import { FaWhatsapp } from "react-icons/fa";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Footer = () => {
   const { t: tRaw } = useTranslation('common', { useSuspense: false });
@@ -160,6 +161,9 @@ const Footer = () => {
             <span className="text-sm font-medium">&copy; {new Date().getFullYear()} {t('footer.copyright')}</span>
             <Heart className="h-4 w-4 text-amber-400" />
           </div>
+          
+          {/* Language Selector */}
+          <LanguageSelector />
           
           <div className="flex items-center gap-6 text-sm">
             <Button variant="link" className="text-gray-400 hover:text-amber-300 p-0 h-auto font-medium transition-colors text-sm">

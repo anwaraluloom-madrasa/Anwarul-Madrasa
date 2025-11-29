@@ -4,18 +4,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
-    // Here you would send this data to your Laravel backend
-    // For now, we'll simulate the API call by logging the data
-    console.log('📝 Admission form submission:', JSON.stringify(body, null, 2));
-    
-    // Simulate database save
-    // In production, replace this with actual API call to your Laravel backend
-    // const response = await fetch('https://website.anwarululoom.com/api/admissions', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(body)
-    // });
-    
+
     return NextResponse.json({
       success: true,
       message: 'Admission form submitted successfully',

@@ -5,12 +5,13 @@ import Link from "next/link";
 import { GraduationsApi } from "../../../lib/api";
 import { Calendar, Star, ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getImageUrl } from "@/lib/utils";
+import { getSimpleImageUrl } from "@/lib/utils";
 import PaginationControls from "@/components/PaginationControls";
 import { useTranslation } from "@/hooks/useTranslation";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
+import GraduationCardSkeleton from "./GraduationCardSkeleton";
+import React from "react";
 
 interface Graduation {
   id: number;
@@ -94,7 +95,13 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
   };
 
   if (loading) {
-    return <UnifiedLoader variant="grid" count={8} showFilters={false} />;
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: showAll ? 8 : 3 }).map((_, index) => (
+          <GraduationCardSkeleton key={index} />
+        ))}
+      </div>
+    );
   }
 
   if (error) {
@@ -110,8 +117,8 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
   if (!graduations.length) {
     return (
       <ComingSoonEmptyState
-        title="No graduations found"
-        description="Check back later for upcoming graduation events"
+        title={t('graduationDetail.noGraduations')}
+        description={t('graduationDetail.checkBackLater')}
         className="max-w-2xl mx-auto"
       />
     );
@@ -122,7 +129,7 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
       {/* Graduations Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {graduations.slice(0, PAGE_SIZE).map((grad, idx) => {
-          const coverImage = getImageUrl(grad.main_image, "/placeholder-graduation.jpg") || "/placeholder-graduation.jpg";
+          const coverImage = getSimpleImageUrl(grad.main_image, "/placeholder-graduation.jpg");
           
           return (
             <Link
@@ -132,14 +139,8 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
               dir="rtl"
             >
               {/* Top Section - Full Size Image */}
-              <div className="relative h-52 bg-[#e0f2f2] flex-shrink-0 overflow-hidden group-hover:opacity-95 transition-opacity duration-300">
-                <Image
-                  src={coverImage}
-                  alt={grad.title}
-                  fill
-                  sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="relative h-52 bg-gradient-to-br from-emerald-100 to-emerald-200 flex-shrink-0 overflow-hidden group-hover:opacity-95 transition-opacity duration-300">
+                <GraduationImage src={coverImage} alt={grad.title} />
                 
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -227,3 +228,37 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
     </div>
   );
 }
+
+// Memoized Image component with error handling
+const GraduationImage = React.memo(function GraduationImage({ 
+  src, 
+  alt 
+}: { 
+  src: string; 
+  alt: string;
+}) {
+  const errorRef = React.useRef(false);
+  
+  const imageUrl = React.useMemo(() => {
+    if (errorRef.current) return "/placeholder-graduation.jpg";
+    return src;
+  }, [src]);
+  
+  return (
+    <Image
+      key={imageUrl}
+      src={imageUrl}
+      alt={alt}
+      fill
+      sizes="(min-width: 1280px) 400px, (min-width: 768px) 50vw, 100vw"
+      className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
+      onError={(e) => {
+        if (!errorRef.current) {
+          errorRef.current = true;
+          const target = e.currentTarget as HTMLImageElement;
+          target.src = "/placeholder-graduation.jpg";
+        }
+      }}
+    />
+  );
+});

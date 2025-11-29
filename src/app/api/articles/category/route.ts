@@ -5,9 +5,7 @@ const API_BASE_URL = 'https://website.anwarululoom.com/api';
 export async function GET(request: NextRequest) {
   try {
     // Since the external API doesn't have /articles/category endpoint,
-    // we'll return fallback categories directly
-    console.log('🔍 Articles category endpoint called - returning fallback data');
-    
+    // we return fallback categories
     const fallbackCategories = [
       { id: 1, name: 'General' },
       { id: 2, name: 'Islamic Studies' },
@@ -19,7 +17,6 @@ export async function GET(request: NextRequest) {
       { id: 8, name: 'Aqeedah' }
     ];
     
-    console.log('✅ Returning fallback categories:', fallbackCategories.length, 'items');
     
     return NextResponse.json(fallbackCategories, {
       status: 200,

@@ -205,7 +205,7 @@ function Contact() {
                   </p>
                   <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 bg-amber-500 rounded-full"></span>
-                    info@example.com
+                    info@anwarululoom.com
                   </p>
                 </div>
               </div>

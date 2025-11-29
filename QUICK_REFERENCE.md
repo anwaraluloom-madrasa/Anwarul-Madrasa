@@ -311,7 +311,7 @@ export const apiConfig = {
 - [ ] Replace custom error UI with `ErrorDisplay`
 - [ ] Add `toast` notifications for user feedback
 - [ ] Wrap detail pages in `ErrorBoundary`
-- [ ] Update API class to use `logger` instead of `console.log`
+- [ ] Update API class to use `logger` instead of `console.log` 
 - [ ] Ensure list endpoints return fallback data
 - [ ] Ensure detail endpoints throw errors
 - [ ] Test loading, error, and success states

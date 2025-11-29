@@ -49,8 +49,7 @@ export default function AdmissionPage() {
     const fetchDegrees = async () => {
       try {
         setLoadingDegrees(true);
-        console.log('📚 [ADMISSION] Fetching degrees from API...');
-        
+    
         const result = await DegreesApi.getAll({ limit: 100 });
         
         if (result.success && Array.isArray(result.data) && result.data.length > 0) {
@@ -59,9 +58,7 @@ export default function AdmissionPage() {
             id: Number(degree.id) || degree.id,
             name: degree.name || degree.title || String(degree.id),
           }));
-          
-          console.log('✅ [ADMISSION] Degrees fetched successfully:', formattedDegrees);
-          setDegrees(formattedDegrees);
+        setDegrees(formattedDegrees);
           
           // Set default degree_id to first degree from API
           if (formattedDegrees.length > 0) {
@@ -242,19 +239,10 @@ export default function AdmissionPage() {
         location: formData.location || "",
       };
 
-      console.log('📝 [FORM] Submitting admission data to API...');
-      console.log('📝 [FORM] Submission data:', JSON.stringify(submissionData, null, 2));
-      
-      // Ensure we're calling the API
-      console.log('🌐 [FORM] About to call AdmissionsApi.submit...');
-      
       const result = await AdmissionsApi.submit(submissionData);
       
-      console.log('📥 [FORM] API response received:', result);
-      console.log('📥 [FORM] Response success status:', result?.success);
-      
+ 
       if (result && result.success) {
-        console.log('✅ [FORM] Form submitted successfully to Laravel dashboard!');
         setSubmitSuccess(true);
         toast.success("Admission form submitted successfully to the dashboard!");
         

@@ -9,86 +9,44 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { ArrowLeft, BookOpen, Tag, Search, X } from "lucide-react";
 
 import { ArticlesApi } from "@/lib/api";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import PaginationControls from "@/components/PaginationControls";
 import { usePaginatedResource } from "@/hooks/usePaginatedResource";
-import { getImageUrl } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import ErrorDisplay from "@/components/ErrorDisplay";
+import ArticleCardSkeleton from "./articles/ArticleCardSkeleton";
 
-// Image component with error handling
-function ArticleImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
-  const [imgSrc, setImgSrc] = React.useState<string | null>(null);
-  const [hasError, setHasError] = React.useState(false);
-  const [isLoading, setIsLoading] = React.useState(true);
+import { getSimpleImageUrl } from "@/lib/utils";
+
+// Simple Image component with memoization to prevent reloads
+const ArticleImage = React.memo(function ArticleImage({ src, alt, className }: { src: string | null | undefined; alt: string; className?: string }) {
+  const errorRef = React.useRef(false);
   
-  React.useEffect(() => {
-    if (!src) {
-      setImgSrc("/placeholder-blog.jpg");
-      setIsLoading(false);
-      return;
-    }
-    
-    const newUrl = getImageUrl(src, "/placeholder-blog.jpg");
-    setImgSrc(newUrl);
-    setHasError(false);
-    setIsLoading(true);
-    
-    // Log image URL for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🖼️ Article image:', {
-        original: src,
-        processed: newUrl,
-        alt
-      });
-    }
-  }, [src, alt]);
-  
-  const handleError = () => {
-    console.warn('⚠️ Image failed to load:', imgSrc);
-    setHasError(true);
-    setImgSrc("/placeholder-blog.jpg");
-    setIsLoading(false);
-  };
-  
-  const handleLoad = () => {
-    setIsLoading(false);
-  };
-  
-  if (hasError || !imgSrc) {
-    return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-    );
-  }
+  // Memoize image URL to prevent unnecessary recalculations
+  const imageUrl = React.useMemo(() => {
+    if (errorRef.current) return "/placeholder-blog.jpg";
+    return getSimpleImageUrl(src, "/placeholder-blog.jpg");
+  }, [src]);
   
   return (
-    <>
-      {isLoading && (
-        <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-          <svg className="w-8 h-8 text-gray-400 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        </div>
-      )}
       <Image
-        src={imgSrc}
+      key={imageUrl}
+      src={imageUrl}
         alt={alt}
         fill
         sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
         className={className}
-        onError={handleError}
-        onLoad={handleLoad}
+      onError={(e) => {
+        if (!errorRef.current) {
+          errorRef.current = true;
+          e.currentTarget.src = "/placeholder-blog.jpg";
+        }
+      }}
       />
-    </>
   );
-}
+});
 
 type RawArticle = {
   id: number;
@@ -329,7 +287,29 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
     : filteredArticles;
 
   if (isLoadingInitial) {
-    return <UnifiedLoader variant="grid" count={6} showFilters={!homePage} />;
+    return (
+      <div className={`${homePage ? '' : 'min-h-screen'} bg-gray-50`} dir="rtl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8" dir="rtl">
+          {/* Category filter skeleton */}
+          {!homePage && (
+            <div className="mb-8">
+              <div className="flex flex-wrap items-center gap-3 justify-center bg-white py-4 px-4 rounded-xl border border-gray-200 shadow-sm">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="h-9 bg-gray-200 rounded-lg w-24 animate-pulse"></div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Articles grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <ArticleCardSkeleton key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -349,16 +329,16 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8" dir="rtl">
         {/* Modern Category Filter - Hidden on Homepage */}
         {!homePage && (
-          <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-3 justify-center bg-white py-4 px-4 rounded-xl border border-gray-200 shadow-sm">
+          <div className="mb-10">
+            <div className="flex flex-wrap items-center gap-3 justify-center bg-white py-5 px-6 rounded-2xl border-2 border-gray-200/60 shadow-lg">
               {/* All Button */}
               <button
                 onClick={() => setSelectedCategory("")}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300
+                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-300
                   ${
                     selectedCategory === ""
-                      ? "bg-gray-800 text-white shadow-sm"
-                      : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                      ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg scale-105"
+                      : "bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300"
                   }
                 `}
               >
@@ -371,11 +351,11 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.name)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300
+                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-300
                       ${
                         selectedCategory === cat.name
-                          ? "bg-gray-800 text-white shadow-sm"
-                          : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200"
+                          ? "bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg scale-105"
+                          : "bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200 hover:border-gray-300"
                       }
                     `}
                   >
@@ -388,7 +368,7 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
               {categories.length > 4 && (
                 <button
                   onClick={() => setShowAllCategories(!showAllCategories)}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+                  className="px-5 py-2.5 rounded-xl text-sm font-bold border-2 border-gray-200 bg-gray-100 text-gray-700 hover:bg-gray-200 hover:border-gray-300 transition-all duration-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-300"
                 >
                   {showAllCategories ? t('home.showLess') : `+${categories.length - 4} ${t('home.showMore')}`}
                 </button>
@@ -399,57 +379,59 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
 
         {/* Modern Article List Design */}
         {displayArticles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
             {displayArticles.map((article, index) => (
               <Link
                 key={article.id}
                 href={`/articles/${article.slug}`}
-                className="group relative bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-gray-300 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 block"
+                className="group relative bg-white rounded-2xl border-2 border-gray-200/60 overflow-hidden hover:border-emerald-300/60 hover:shadow-2xl hover:shadow-emerald-100/30 transition-all duration-300 hover:-translate-y-2 flex flex-col h-full"
                 dir="rtl"
               >
                 {/* Decorative right border accent */}
-                <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-gray-400 via-gray-300 to-gray-200 group-hover:from-gray-500 group-hover:via-gray-400 group-hover:to-gray-300 transition-colors"></div>
-                
-                {/* Subtle pattern overlay */}
-                <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.05] transition-opacity" style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='0.4'%3E%3Cpath d='M20 20c0-5.523-4.477-10-10-10s-10 4.477-10 10 4.477 10 10 10 10-4.477 10-10zm-10 0c0-2.762 2.238-5 5-5s5 2.238 5 5-2.238 5-5 5-5-2.238-5-5z'/%3E%3C/g%3E%3C/svg%3E")`
-                }}></div>
-                
-                {/* Decorative corner element */}
-                <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-bl from-gray-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-400 via-emerald-300 to-emerald-200 group-hover:from-emerald-500 group-hover:via-emerald-400 group-hover:to-emerald-300 transition-colors"></div>
                 
                 {/* Image Section */}
-                <div className="relative w-full h-48 overflow-hidden bg-gray-100">
+                <div className="relative w-full h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                   <ArticleImage 
                     src={article.image} 
                     alt={article.title}
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   
+                  {/* Gradient overlay on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  {/* Shine effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                  
                   {/* Category Badge */}
-                  <div className="absolute top-4 right-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-lg text-xs font-medium bg-white/90 backdrop-blur-sm text-gray-700 border border-gray-200">
+                  <div className="absolute top-4 right-4 z-10">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-white/95 backdrop-blur-md text-emerald-700 border border-emerald-200/50 shadow-lg group-hover:shadow-xl transition-shadow">
+                      <Tag className="w-3 h-3" />
                       {String(article.category)}
                     </span>
                   </div>
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 sm:p-8 relative z-10">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-gray-700 transition-colors line-clamp-2 leading-tight" style={{ fontFamily: 'Amiri, serif' }}>
+                <div className="p-6 sm:p-7 relative z-10 flex flex-col flex-1 min-h-0">
+                  <div className="flex-1 min-h-0">
+                    <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-emerald-700 transition-colors line-clamp-2 leading-tight" style={{ fontFamily: 'Amiri, serif' }}>
                     {article.title}
                   </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-4" style={{ fontFamily: 'Amiri, serif' }}>
+                    <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 mb-5" style={{ fontFamily: 'Amiri, serif' }}>
                     {article.description}
                   </p>
+                  </div>
                   
-                  {/* Arrow Icon */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                    <span className="text-gray-600 text-sm font-medium">د لوستلو لپاره</span>
-                    <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center transition-colors">
-                      <svg className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                      </svg>
+                  {/* Footer with arrow - Fixed height */}
+                  <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-100 h-[3.5rem] flex-shrink-0">
+                    <div className="flex items-center gap-2 text-gray-500 text-xs font-medium">
+                      <BookOpen className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                      <span>د لوستلو لپاره</span>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-50 to-emerald-100 group-hover:from-emerald-100 group-hover:to-emerald-200 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg flex-shrink-0">
+                      <ArrowLeft className="w-4 h-4 text-emerald-600 group-hover:text-emerald-700 transition-colors" />
                     </div>
                   </div>
                 </div>
@@ -457,8 +439,12 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white rounded-xl border border-gray-200 shadow-sm" dir="rtl">
-            <div className="text-gray-300 text-6xl mb-6">📚</div>
+          <div className="text-center py-20 bg-white rounded-2xl border-2 border-gray-200/60 shadow-lg" dir="rtl">
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                <BookOpen className="w-10 h-10 text-gray-400" />
+              </div>
+            </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Amiri, serif' }}>
               مقالې ونه موندل شوې
             </h3>
@@ -470,8 +456,9 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors font-medium"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:from-emerald-700 hover:to-emerald-800 transition-all duration-300 font-bold shadow-lg hover:shadow-xl"
               >
+                <X className="w-4 h-4" />
                 لټون پاک کړئ
               </button>
             )}

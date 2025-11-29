@@ -9,9 +9,9 @@ import { Book } from "../../../lib/types";
 import PaginationControls from "@/components/PaginationControls";
 import { BookOpen, Calendar, UserRound, ChevronLeft } from "lucide-react";
 import { cleanText } from "../../../lib/textUtils";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
+import BookCardSkeleton from "./BookCardSkeleton";
 
 interface BooksSectionProps {
   showAll?: boolean; // Show all books or only limited
@@ -66,7 +66,13 @@ export default function BooksSection({ showAll = false, showHero = false }: Book
   };
 
   if (loading) {
-    return <UnifiedLoader variant="grid" count={8} showFilters={false} />;
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <BookCardSkeleton key={index} />
+        ))}
+      </div>
+    );
   }
 
   if (displayBooks.length === 0) {

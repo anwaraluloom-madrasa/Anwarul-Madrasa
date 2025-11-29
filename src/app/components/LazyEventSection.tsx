@@ -4,7 +4,7 @@ import Event from "./event/eventCard";
 import { Event as EventType } from "../../lib/types";
 import { EventsApi } from "../../lib/api";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import EventCardSkeleton from "./event/EventCardSkeleton";
 
 export default function LazyEventSection() {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -31,7 +31,15 @@ export default function LazyEventSection() {
   }, []);
 
   if (loading) {
-    return <UnifiedLoader variant="grid" count={3} className="pt-0" />;
+    return (
+      <section className="w-full px-4 md:px-8 md:pt-10 max-w-7xl mx-auto" dir="rtl">
+        <div className="space-y-12">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <EventCardSkeleton key={index} />
+          ))}
+        </div>
+      </section>
+    );
   }
 
   if (events.length === 0) {

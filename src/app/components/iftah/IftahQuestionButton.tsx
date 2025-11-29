@@ -13,7 +13,7 @@ export default function IftahQuestionButton({ variant = "header" }: IftahQuestio
 
   const buttonClasses = 
     variant === "floating"
-      ? `fixed bottom-6 right-6 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:via-teal-700 hover:to-emerald-700 text-white px-4 py-3 rounded-full transition-all duration-300 group shadow-2xl hover:shadow-emerald-500/50 transform hover:scale-110 font-bold text-sm backdrop-blur-sm border-2 border-white/20 animate-bounce-subtle`
+      ? `fixed bottom-6 left-6 z-50 flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-700 hover:via-teal-700 hover:to-emerald-700 text-white px-4 py-3 rounded-full transition-all duration-300 group shadow-2xl hover:shadow-emerald-500/50 transform hover:scale-110 font-bold text-sm backdrop-blur-sm border-2 border-white/20 animate-bounce-subtle`
       : variant === "prominent"
       ? "inline-flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-4 rounded-xl transition-all duration-150 group shadow-lg hover:shadow-xl transform hover:-translate-y-1 font-semibold text-lg"
       : "inline-flex items-center gap-2 bg-white/15 hover:bg-white/25 px-5 py-3 rounded-lg transition-all duration-150 group border border-white/20 backdrop-blur-sm";

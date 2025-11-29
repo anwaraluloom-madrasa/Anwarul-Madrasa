@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         hostname: "via.placeholder.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "website.anwarululoom.com",
+        pathname: "/**",
+      },
     ],
     // Performance optimizations
     formats: ["image/webp", "image/avif"],

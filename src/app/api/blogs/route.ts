@@ -8,10 +8,6 @@ export async function GET(request: NextRequest) {
     const queryString = searchParams.toString();
     const apiUrl = `${API_BASE_URL}/blogs${queryString ? `?${queryString}` : ''}`;
 
-    console.log('=== BLOG API CALL ===');
-    console.log('API URL:', apiUrl);
-    console.log('Query params:', Object.fromEntries(searchParams.entries()));
-
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
@@ -28,9 +24,7 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
     
-    console.log('API Response:', JSON.stringify(data, null, 2));
-    console.log('=== END BLOG API CALL ===');
-    
+
     return NextResponse.json(data, {
       status: 200,
       headers: {

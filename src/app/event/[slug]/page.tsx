@@ -3,11 +3,14 @@ import { EventsApi, extractArray } from "../../../lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getImageUrl } from "@/lib/utils";
+import { getSimpleImageUrl } from "@/lib/utils";
 import { cleanText } from "@/lib/textUtils";
 import { cookies } from "next/headers";
 import { getTranslation } from "@/lib/translations";
 import Breadcrumb from "@/components/Breadcrumb";
+import IslamicHeader from "../../components/IslamicHeader";
+import { Calendar, Clock, MapPin, ExternalLink } from "lucide-react";
+import EventDetailImage from "../../components/event/EventDetailImage";
 
 interface Event {
   id: number;
@@ -96,153 +99,153 @@ export default async function EventDetailsPage({ params }: Params) {
   };
 
   return (
-    <main className="min-h-screen my-[60] bg-gradient-to-b from-amber-50/20 to-white pt-28 pb-16">
-      <Breadcrumb />
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-gradient-to-b from-emerald-50/30 via-white to-gray-50" dir="rtl">
+      <IslamicHeader 
+        pageType="events"
+        title={event.title}
+        alignment="center"
+      />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
+        <Breadcrumb />
+
+        {/* Hero Section with Enhanced Image */}
+        <div className="relative mb-10">
+          {event.image ? (
+            <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+              <EventDetailImage
+                src={event.image}
+                alt={event.title}
+                priority
+              />
+              {/* Enhanced gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+              
+              {/* Status Badge */}
+              <div className="absolute top-6 right-6 z-10">
+                <span
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold shadow-2xl border-2 border-white/80 backdrop-blur-md ${getStatusColor(
+                    event.status
+                  )}`}
+                >
+                  {(event.status
+                    ? event.status.charAt(0).toUpperCase() + event.status.slice(1)
+                    : "Unknown")}
+                </span>
+              </div>
+
+              {/* Title Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight mb-4 drop-shadow-2xl" style={{ fontFamily: 'Amiri, serif' }}>
+                  {event.title}
+                </h1>
+              </div>
+            </div>
+          ) : (
+            <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 p-12 md:p-16 lg:p-20">
+              {/* Decorative background */}
+              <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-300/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+              
+              <div className="relative z-10">
+                <div className="absolute top-6 right-6 z-10">
+                  <span
+                    className={`px-5 py-2.5 rounded-xl text-sm font-bold shadow-2xl border-2 border-white/80 backdrop-blur-md ${getStatusColor(
+                      event.status
+                    )}`}
+                  >
+                    {(event.status
+                      ? event.status.charAt(0).toUpperCase() + event.status.slice(1)
+                      : "Unknown")}
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight drop-shadow-2xl" style={{ fontFamily: 'Amiri, serif' }}>
+                  {event.title}
+                </h1>
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            {/* Event Header */}
-            <article className="bg-white rounded-2xl shadow-sm border border-amber-100 overflow-hidden mb-8">
-              {/* Featured Image */}
-              {event.image && (
-                <div className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden">
-                  <Image
-                    src={
-                      getImageUrl(event.image, "/placeholder-event.jpg") ||
-                      "/placeholder-event.jpg"
-                    }
-                    alt={event.title}
-                    fill
-                    sizes="100vw"
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute top-4 right-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        event.status
-                      )}`}
-                    >
-                      {(event.status
-                        ? event.status.charAt(0).toUpperCase() + event.status.slice(1)
-                        : "Unknown")}
-                    </span>
-                  </div>
-                </div>
-              )}
+            {/* Event Details Card */}
+            <article className="bg-white rounded-3xl shadow-xl border-2 border-gray-200 overflow-hidden mb-8">
+              <div className="p-6 md:p-8 lg:p-10">
 
-              <div className="p-6 md:p-8">
-                <h1 className="text-xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                  {event.title}
-                </h1>
-
-                {/* Event Details Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-6 border-y border-gray-100">
-                  <div className="flex gap-4 items-start space-x-3">
-                    <div className="bg-amber-100 p-2 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-amber-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
+                {/* Event Details Grid - Enhanced */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+                  <div className="group relative flex gap-5 items-start p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-emerald-100/50 to-emerald-50 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                    {/* Decorative background */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div className="relative flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      <Calendar className="h-8 w-8 text-white" />
                     </div>
-                    <div>
-                      <p className="text-md font-medium text-gray-500">{t('eventsPage.date')}</p>
-                      <p className=" text-[14px] md:font-medium ">
+                    <div className="relative flex-1">
+                      <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">{t('eventsPage.date')}</p>
+                      <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Amiri, serif' }}>
                         {formatDate(event.date)}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start space-x-3">
-                    <div className="bg-amber-100 p-2 rounded-lg">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 text-amber-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
+                  <div className="group relative flex gap-5 items-start p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-emerald-100/50 to-emerald-50 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-lg transition-all duration-300 overflow-hidden">
+                    {/* Decorative background */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div className="relative flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                      <Clock className="h-8 w-8 text-white" />
                     </div>
-                    <div>
-                      <p className="text-md font-medium   text-gray-500">{t('eventsPage.duration')}</p>
-                      <p className="text-[14px]  md:font-medium">
+                    <div className="relative flex-1">
+                      <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">{t('eventsPage.duration')}</p>
+                      <p className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Amiri, serif' }}>
                         {event.duration || "Not specified"}
                       </p>
                     </div>
                   </div>
 
                   {event.live_link && (
-                    <div className="flex gap-4 items-start space-x-3 md:col-span-2">
-                      <div className="bg-amber-100 p-2 rounded-lg">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-amber-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                          />
-                        </svg>
+                    <div className="group relative flex gap-5 items-start p-6 rounded-2xl bg-gradient-to-br from-blue-50 via-blue-100/50 to-blue-50 border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition-all duration-300 md:col-span-2 overflow-hidden">
+                      {/* Decorative background */}
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-blue-200/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                      
+                      <div className="relative flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                        <ExternalLink className="h-8 w-8 text-white" />
                       </div>
-                      <div className="space-x-6">
-                        <p className="text-sm text-gray-500">{t('eventsPage.liveStream')}</p>
+                      <div className="relative flex-1">
+                        <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-2">{t('eventsPage.liveStream')}</p>
                         <a
                           href={event.live_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-medium text-amber-600 hover:text-amber-700 inline-flex items-center mt-1"
+                          className="font-bold text-lg text-blue-700 hover:text-blue-800 inline-flex items-center gap-2 transition-colors group/link"
+                          style={{ fontFamily: 'Amiri, serif' }}
                         >
                           {event.live_link_type || t('eventsPage.watchLive')}
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4 ml-1"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                            />
-                          </svg>
+                          <ExternalLink className="h-5 w-5 group-hover/link:translate-x-1 transition-transform" />
                         </a>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Description */}
+                {/* Description - Enhanced */}
                 {event.description && (
-                  <div className="mt-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-900">{t('eventsPage.aboutThisEvent')}</h2>
-                    <div className="prose max-w-none text-gray-700">
-                      <p className="whitespace-pre-line">{cleanText(event.description)}</p>
+                  <div className="relative pt-8 border-t-2 border-gray-200">
+                    {/* Decorative background */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-100/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div className="relative">
+                      <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-8 flex items-center gap-4" style={{ fontFamily: 'Amiri, serif' }}>
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-xl">
+                          <MapPin className="w-7 h-7 text-white" />
+                        </div>
+                        {t('eventsPage.aboutThisEvent')}
+                      </h2>
+                      <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 rounded-3xl p-8 md:p-10 lg:p-12 border-2 border-emerald-100/50 shadow-lg [&_p]:mb-6 [&_p]:text-lg [&_p]:font-medium" style={{ fontFamily: 'Amiri, serif' }}>
+                        <p className="whitespace-pre-line">{cleanText(event.description)}</p>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -252,64 +255,53 @@ export default async function EventDetailsPage({ params }: Params) {
 
           {/* Sidebar */}
           <div className="lg:col-span-1 flex flex-col gap-8">
-            {/* Related Events - sticky/fixed on scroll */}
+            {/* Related Events - Enhanced */}
             {relatedEvents.length > 0 && (
               <div
-                className="
-                  bg-white rounded-2xl shadow-sm border border-amber-100 p-6 mb-0 flex flex-col gap-5
-                  sticky top-8 transition-all duration-150
-                "
+                className="relative bg-white rounded-3xl shadow-2xl border-2 border-gray-200 p-6 mb-0 flex flex-col gap-6 sticky top-8 transition-all duration-300 hover:border-emerald-400 hover:shadow-2xl overflow-hidden"
                 style={{
                   zIndex: 10,
                 }}
               >
-                <h3 className="text-xl font-bold text-amber-700 mb-2 flex items-center gap-2">
-                  <svg
-                    className="h-6 w-6 text-amber-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20 10 10 0 000-20z"
-                    />
-                  </svg>
-                  {t('eventsPage.relatedEvents')}
-                </h3>
-                <div className="flex flex-col gap-6">
-                  {relatedEvents.map((event) => (
-                    <Link
-                      key={event.slug}
-                      href={`/event/${event.slug}`}
-                      className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 rounded-xl transition-colors hover:bg-amber-100"
-                    >
-                      <div className="flex items-center gap-4 p-3 bg-amber-50 rounded-xl shadow-sm">
-                        <div className="flex-shrink-0 relative h-16 w-16 md:h-20 md:w-20 rounded-lg overflow-hidden border border-amber-200 bg-gray-100">
-                          <Image
-                            src={getImageUrl(event.image, "/placeholder-event.jpg") || "/placeholder-event.jpg"}
-                            alt={event.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 40vw, 15vw"
-                            className="object-cover"
-                          />
+                {/* Decorative background */}
+                <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-100/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                
+                <div className="relative">
+                  <h3 className="text-xl md:text-2xl font-bold text-emerald-700 mb-6 flex items-center gap-3" style={{ fontFamily: 'Amiri, serif' }}>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                      <Calendar className="h-6 w-6 text-white" />
+                    </div>
+                    {t('eventsPage.relatedEvents')}
+                  </h3>
+                  <div className="flex flex-col gap-4">
+                    {relatedEvents.map((relatedEvent) => (
+                      <Link
+                        key={relatedEvent.slug}
+                        href={`/event/${relatedEvent.slug}`}
+                        className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-2xl transition-all duration-300 hover:scale-[1.02]"
+                      >
+                        <div className="relative flex items-center gap-4 p-5 bg-gradient-to-br from-emerald-50 via-emerald-100/50 to-emerald-50 rounded-2xl border-2 border-emerald-200 group-hover:border-emerald-400 group-hover:shadow-lg transition-all overflow-hidden">
+                          {/* Hover effect background */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-emerald-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          
+                          <div className="relative flex-shrink-0 w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-300 bg-gray-100 shadow-lg group-hover:shadow-xl transition-shadow">
+                            <EventDetailImage
+                              src={relatedEvent.image}
+                              alt={relatedEvent.title}
+                            />
+                          </div>
+                          <div className="relative flex-1 min-w-0">
+                            <p className="text-base font-bold text-gray-900 truncate group-hover:text-emerald-700 transition-colors mb-1" style={{ fontFamily: 'Amiri, serif' }}>
+                              {relatedEvent.title}
+                            </p>
+                            <p className="text-xs text-emerald-600 font-semibold">
+                              {formatDate(relatedEvent.date)}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-base font-semibold text-gray-900 truncate group-hover:text-amber-700 transition-colors">
-                            {event.title}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {formatDate(event.date)}
-                          </p>
-                        </div>
-                        <div className="flex items-center">
-                          {/* Intentionally left empty */}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}

@@ -14,14 +14,14 @@ export default function SanadPage() {
   };
 
   return (
-    <main className="notranlate w-full min-h-screen bg-gradient-to-b from-amber-50 to-white">
+    <main className="w-full min-h-screen bg-gradient-to-b from-emerald-50/30 via-white to-gray-50" dir="rtl">
       <IslamicHeader 
         pageType="sanad" 
         title={t('sanad.title')}
         subtitle={t('sanad.description')}
         alignment="center"
       />
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
         <SanadSection showAll={true} showHero={false} />
       </div>
     </main>

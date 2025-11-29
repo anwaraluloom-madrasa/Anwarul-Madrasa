@@ -19,7 +19,6 @@ import GraduationsSection from "./components/graduation/TopGraduations";
 import LazyGallerySection from "./components/LazyGallerySection";
 import BooksSection from "./components/books/BooksSection";
 import ShajaraSection from "./components/sanad/SanadSection";
-import WhatsAppButton from "./components/WhatsAppButton";
 
 export default function HomePage() {
   const { t: tRaw } = useTranslation('common', { useSuspense: false });
@@ -341,9 +340,6 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
-
-      {/* WhatsApp Button */}
-      <WhatsAppButton />
 
     </div>
   );

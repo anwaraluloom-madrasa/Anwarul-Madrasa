@@ -39,11 +39,11 @@ export default function IslamicLoader() {
               <div
                 key={i}
                 className="absolute"
-                style={{
+              style={{
                   left: '50%',
                   top: '50%',
                   transform: `translate(${x}px, ${y}px) rotate(${angle + 90}deg)`,
-                }}
+              }}
               >
                 <svg width="10" height="18" viewBox="0 0 10 18" fill="none">
                   <path
@@ -55,7 +55,7 @@ export default function IslamicLoader() {
               </div>
             );
           })}
-        </div>
+          </div>
       </div>
     </div>
   );

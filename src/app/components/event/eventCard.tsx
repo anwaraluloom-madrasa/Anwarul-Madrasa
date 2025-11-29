@@ -2,15 +2,13 @@
 import Link from "next/link";
 
 import Image from "next/image";
-import { Calendar, MapPin, Clock, Users } from "lucide-react";
-import RTLArrowIcon from "@/components/RTLArrowIcon";
-import { getImageUrl } from "../../../lib/utils";
+import { Calendar, MapPin, Clock, Users, ArrowLeft } from "lucide-react";
+import { getSimpleImageUrl } from "../../../lib/utils";
 import { motion } from "framer-motion";
 import { Event } from "../../../lib/types";
-import { FaSearchLocation, FaTimes } from "react-icons/fa";
-import { FaBuildingCircleExclamation, FaClock, FaTimeline } from "react-icons/fa6";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getLanguageDirection } from "@/lib/i18n";
+import React from "react";
 
 interface EventsSectionProps {
   events: Event[];
@@ -21,6 +19,42 @@ interface EventsSectionProps {
 }
 
 const fallbackEventImage = "/placeholder-event.jpg";
+
+// Memoized Image component with error handling
+const EventImage = React.memo(function EventImage({ 
+  src, 
+  alt,
+  className 
+}: { 
+  src: string | null | undefined; 
+  alt: string;
+  className?: string;
+}) {
+  const errorRef = React.useRef(false);
+  
+  const imageUrl = React.useMemo(() => {
+    if (errorRef.current) return fallbackEventImage;
+    return getSimpleImageUrl(src, fallbackEventImage);
+  }, [src]);
+  
+  return (
+    <Image
+      key={imageUrl}
+      src={imageUrl}
+      alt={alt}
+      fill
+      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
+      className={className}
+      onError={(e) => {
+        if (!errorRef.current) {
+          errorRef.current = true;
+          const target = e.currentTarget as HTMLImageElement;
+          target.src = fallbackEventImage;
+        }
+      }}
+    />
+  );
+});
 
 const stripHtml = (value?: string | null) => {
   if (!value) return "";
@@ -88,64 +122,37 @@ export default function EventsSection({
   const displayEvents = showAll ? sortedEvents : sortedEvents.slice(0, 3);
 
   return (
-    <div className="min-h-screen">
-      {/* Hero Section only shows on event page */}
-    
-
+    <div className="min-h-screen" dir="rtl">
       {/* Events Section */}
-      <section className="w-full px-4 md:px-8 md:pt-10 max-w-7xl mx-auto overflow-x-hidden">
-        <div className="relative text-center mb-10">
-          {/* Subtle background accent */}
-       
-
-          {/* Title */}
-          {showAll ? (
-            <></>
-          ) : (
+      <section className="w-full px-4 md:px-8 md:pt-10 max-w-7xl mx-auto overflow-x-hidden" dir="rtl">
+        {!showAll && (
+          <div className="relative text-center mb-12">
             <motion.div
               className="inline-block relative mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.15 }}
             >
-              <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight ">
-               
-                <span className="relative mt-3 z-10">
-                  <span className="bg-gradient-to-r from-amber-500 via-orange-400 to-orange-600 bg-clip-text text-transparent  text-4xl md:text-6xl font-black tracking-tight">
-                    {t('events.events')}
-                  </span>
+              <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight" style={{ fontFamily: 'Amiri, serif' }}>
+                <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-700 bg-clip-text text-transparent text-4xl md:text-6xl font-black">
+                  {t('events.events')}
                 </span>
               </h2>
-              <p className="mt-4 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium">
+              <p className="mt-4 text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium" style={{ fontFamily: 'Amiri, serif' }}>
                 {t('events.description')}
               </p>
             </motion.div>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="relative overflow-x-hidden">
-          <div className="absolute left-0 md:left-6 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-400 via-orange-200 to-orange-100 rounded-full hidden md:block" />
+          <div className="absolute right-0 md:right-6 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 via-emerald-200 to-emerald-100 rounded-full hidden md:block" />
 
           {displayEvents.map((event, idx) => {
-            const coverImage =
-              getImageUrl(event.image, fallbackEventImage) ?? fallbackEventImage;
             const eventDate = formatEventDate(event.created_at);
             const location = stripHtml(
               event.address || event.branch_name || event.country || t('events.locationComingSoon')
             );
-
-            const liveLabel = (() => {
-              switch (event.live_link_type) {
-                case "facebook":
-                  return t('events.facebookLive');
-                case "youtube":
-                  return t('events.youtubeLive');
-                case "zoom":
-                  return t('events.zoomMeeting');
-                default:
-                  return t('events.joinLive');
-              }
-            })();
 
             return (
               <motion.div
@@ -154,36 +161,34 @@ export default function EventsSection({
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.15 }}
-                className="group relative mb-12 pl-0 md:pl-24"
+                className="group relative mb-12 pr-0 md:pr-24"
               >
-                <div className="pointer-events-none absolute left-0 md:left-6 top-5 h-5 w-5 rounded-full border-4 border-white bg-primary-500 hidden md:block" />
+                <div className="pointer-events-none absolute right-0 md:right-6 top-5 h-5 w-5 rounded-full border-4 border-white bg-emerald-500 hidden md:block shadow-lg" />
                 {idx < displayEvents.length - 1 ? (
-                  <span className="pointer-events-none absolute left-0 md:left-6 top-12 bottom-[-4rem] w-1 bg-gradient-to-b from-primary-500 via-primary-300 to-primary-100 hidden md:block" />
+                  <span className="pointer-events-none absolute right-0 md:right-6 top-12 bottom-[-4rem] w-1 bg-gradient-to-b from-emerald-500 via-emerald-300 to-emerald-100 hidden md:block" />
                 ) : null}
-                <div className="relative flex w-full max-w-full flex-col overflow-hidden bg-white rounded-2xl border border-gray-200  hover:shadow-md transition-all duration-300 md:flex-row group/card">
+                <div className="relative flex w-full max-w-full flex-col overflow-hidden bg-white rounded-3xl border-2 border-gray-200 hover:border-emerald-400 shadow-lg hover:shadow-2xl hover:shadow-emerald-100/50 transition-all duration-300 md:flex-row group/card hover:-translate-y-1">
 
                     {/* Image Section */}
-                    <div className="aspect-[4/3] w-full md:w-1/2 relative overflow-hidden bg-gray-100">
-                      <Image
-                        src={coverImage}
+                    <div className="aspect-[4/3] w-full md:w-1/2 relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                      <EventImage
+                        src={event.image}
                         alt={event.title || 'Event image'}
-                        fill
-                        sizes="(min-width: 1280px) 480px, (min-width: 768px) 50vw, 100vw"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-110"
                       />
                       
                       {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"></div>
 
                       {/* Badges */}
-                      <div className="absolute top-4 left-4 z-10">
-                        <span className="inline-flex items-center gap-2 rounded-full bg-white/95 backdrop-blur-sm px-3 py-1.5 text-xs font-semibold text-primary-700 shadow-lg border border-primary-100">
+                      <div className="absolute top-4 right-4 z-10">
+                        <span className="inline-flex items-center gap-2 rounded-xl bg-white/95 backdrop-blur-md px-4 py-2 text-xs font-bold text-emerald-700 shadow-xl border-2 border-emerald-200/50">
                           {t('events.communityEvent')}
                         </span>
                       </div>
                       {event.branch_name ? (
-                        <div className="absolute bottom-4 right-4 z-10">
-                          <span className="inline-flex items-center gap-2 rounded-full bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white shadow-lg">
+                        <div className="absolute bottom-4 left-4 z-10">
+                          <span className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-xl">
                             {stripHtml(event.branch_name)}
                           </span>
                         </div>
@@ -193,46 +198,46 @@ export default function EventsSection({
                     {/* Content Section */}
                     <div className="w-full min-w-0 flex flex-col gap-6 p-6 md:w-1/2 md:p-8">
                       {/* Header Section */}
-                      <div className="space-y-4 flex-1 min-w-0">
+                      <div className="space-y-5 flex-1 min-w-0">
                         {/* Date Badge */}
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary-50 to-primary-100 border border-primary-200 text-xs font-semibold uppercase tracking-wider text-primary-700 w-fit shadow-sm">
-                          <Calendar className="h-3.5 w-3.5 text-primary-600 flex-shrink-0" />
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 border-2 border-emerald-200 text-xs font-bold uppercase tracking-wider text-emerald-700 w-fit shadow-md">
+                          <Calendar className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                           <span className="whitespace-nowrap">{eventDate}</span>
                         </div>
 
                         {/* Title */}
-                        <h3 className="text-2xl md:text-3xl font-bold leading-tight text-gray-900 tracking-tight group-hover/card:text-primary-700 transition-colors break-words">
+                        <h3 className="text-2xl md:text-3xl font-bold leading-tight text-gray-900 tracking-tight group-hover/card:text-emerald-700 transition-colors break-words" style={{ fontFamily: 'Amiri, serif' }}>
                           {stripHtml(event.title)}
                         </h3>
 
                         {/* Description */}
-                        <p className="text-sm md:text-base leading-relaxed text-gray-600 line-clamp-4 break-words">
+                        <p className="text-base md:text-lg leading-relaxed text-gray-600 line-clamp-4 break-words" style={{ fontFamily: 'Amiri, serif' }}>
                           {stripHtml(event.description)}
                         </p>
                       </div>
 
                       {/* Event Details Grid */}
-                      <div className="grid gap-3 text-sm md:grid-cols-2 border-t border-gray-200 pt-5 min-w-0">
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-primary-50 border border-gray-200 hover:border-primary-200 transition-all duration-200 min-w-0">
-                          <div className="flex-shrink-0 p-2 rounded-lg bg-white shadow-sm">
-                            <MapPin className="h-4 w-4 text-primary-600" />
+                      <div className="grid gap-3 text-sm md:grid-cols-2 border-t-2 border-gray-200 pt-6 min-w-0">
+                        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-200 min-w-0 group/item">
+                          <div className="flex-shrink-0 p-2.5 rounded-xl bg-emerald-100 shadow-md group-hover/item:scale-110 transition-transform">
+                            <MapPin className="h-5 w-5 text-emerald-700" />
                           </div>
-                          <span className="font-medium text-gray-800 line-clamp-1 min-w-0 break-words">{location}</span>
+                          <span className="font-semibold text-gray-800 line-clamp-1 min-w-0 break-words" style={{ fontFamily: 'Amiri, serif' }}>{location}</span>
                         </div>
 
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-primary-50 border border-gray-200 hover:border-primary-200 transition-all duration-200 min-w-0">
-                          <div className="flex-shrink-0 p-2 rounded-lg bg-white shadow-sm">
-                            <Clock className="h-4 w-4 text-primary-600" />
+                        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-200 min-w-0 group/item">
+                          <div className="flex-shrink-0 p-2.5 rounded-xl bg-emerald-100 shadow-md group-hover/item:scale-110 transition-transform">
+                            <Clock className="h-5 w-5 text-emerald-700" />
                           </div>
-                          <span className="font-medium text-gray-800 min-w-0 break-words">{stripHtml(event.duration) || t('events.flexible')}</span>
+                          <span className="font-semibold text-gray-800 min-w-0 break-words" style={{ fontFamily: 'Amiri, serif' }}>{stripHtml(event.duration) || t('events.flexible')}</span>
                         </div>
 
                         {event.contact ? (
-                          <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-primary-50 border border-gray-200 hover:border-primary-200 transition-all duration-200 md:col-span-2 min-w-0">
-                            <div className="flex-shrink-0 p-2 rounded-lg bg-white shadow-sm">
-                              <Users className="h-4 w-4 text-primary-600" />
+                          <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100/50 hover:from-emerald-100 hover:to-emerald-200 border-2 border-emerald-100 hover:border-emerald-300 transition-all duration-200 md:col-span-2 min-w-0 group/item">
+                            <div className="flex-shrink-0 p-2.5 rounded-xl bg-emerald-100 shadow-md group-hover/item:scale-110 transition-transform">
+                              <Users className="h-5 w-5 text-emerald-700" />
                             </div>
-                            <span className="font-medium text-gray-800 line-clamp-1 min-w-0 break-words">{stripHtml(event.contact)}</span>
+                            <span className="font-semibold text-gray-800 line-clamp-1 min-w-0 break-words" style={{ fontFamily: 'Amiri, serif' }}>{stripHtml(event.contact)}</span>
                           </div>
                         ) : null}
 
@@ -247,37 +252,28 @@ export default function EventsSection({
                       </div>
 
                       {/* Footer Section */}
-                      <div className="mt-auto pt-6 border-t border-gray-200 min-w-0">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0">
-                          {/* <div className="inline-flex items-center gap-2 text-sm font-medium text-gray-600">
-                            <Users className="h-4 w-4 text-primary-500" />
-                            <span>{t('events.organizedBy')}</span>
-                          </div> */}
-
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto min-w-0">
-                            {event.live_link ? (
-                              
-                              <a
-                                href={event.live_link}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-primary-50 border border-primary-200 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-semibold text-primary-700 hover:bg-primary-100 hover:border-primary-300 hover:shadow-sm transition-all duration-200 flex-1 w-full sm:flex-initial sm:w-auto min-w-0"
-                              >
-                                
-                                <span className="truncate">{t('events.joinLive')}</span>
-                               
-                              </a>
-                            ) : null}
-
-                            <Link
-                              href={`/event/${event.slug}`}
-                              className="inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl bg-gradient-to-r from-amber-500 via-primary-600 to-primary-700 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-lg hover:shadow-xl hover:scale-105 hover:from-primary-700 hover:to-amber-500 transition-all duration-200 flex-1 w-full sm:flex-initial sm:w-auto min-w-0"
+                      <div className="mt-auto pt-6 border-t-2 border-gray-200 min-w-0">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full min-w-0">
+                          {event.live_link ? (
+                            <a
+                              href={event.live_link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-200 px-4 py-3 text-sm font-bold text-blue-700 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex-1 sm:flex-initial sm:w-auto min-w-0 group/btn"
+                              style={{ fontFamily: 'Amiri, serif' }}
                             >
-                               
-                              <span className="truncate">{t('events.eventDetails')}</span>
-                            
-                            </Link>
-                          </div>
+                              <span className="truncate">{t('events.joinLive')}</span>
+                            </a>
+                          ) : null}
+
+                          <Link
+                            href={`/event/${event.slug}`}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 px-4 py-3 text-sm font-bold text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 flex-1 sm:flex-initial sm:w-auto min-w-0 group/btn"
+                            style={{ fontFamily: 'Amiri, serif' }}
+                          >
+                            <span className="truncate">{t('events.eventDetails')}</span>
+                            <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover/btn:-translate-x-1" />
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -291,10 +287,11 @@ export default function EventsSection({
           <div className="mt-12 text-center">
             <Link
               href="/event"
-              className="inline-flex items-center gap-2 px-6 py-2 bg-amber-600 text-white font-medium rounded-lg border-2 border-amber-500"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white font-bold rounded-xl border-2 border-emerald-500 shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+              style={{ fontFamily: 'Amiri, serif' }}
             >
               <span>{t('events.viewAllEvents')}</span>
-              <RTLArrowIcon className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4" />
             </Link>
           </div>
         )}

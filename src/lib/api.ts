@@ -2351,16 +2351,57 @@ export class TasawwufApi {
 
   static async getBySlug(slug: string) {
     try {
+      // First try direct API call
       const result = await apiClient.get(`${endpoints.tasawwuf}/${slug}`, {
         cache: "no-store",
       });
-      if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+      if (result.success && result.data) {
+        return result;
       }
-      return result;
+      
+      // If direct call fails, try to get all and find by slug
+      const allPosts = await this.getAll({ limit: 1000 });
+      if (allPosts.success && Array.isArray(allPosts.data)) {
+        const post = allPosts.data.find((p: any) => p.slug === slug);
+        if (post) {
+          return {
+            data: post,
+            success: true,
+            message: "Tasawwuf post found by slug"
+          };
+        }
+      }
+      
+      // If still not found, return error
+      return {
+        data: null,
+        success: false,
+        error: 'Tasawwuf post not found'
+      };
     } catch (error) {
       logger.error('Tasawwuf getBySlug failed', { slug, error });
-      throw error;
+      // Try fallback: get all and find by slug
+      try {
+        const allPosts = await this.getAll({ limit: 1000 });
+        if (allPosts.success && Array.isArray(allPosts.data)) {
+          const post = allPosts.data.find((p: any) => p.slug === slug);
+          if (post) {
+            return {
+              data: post,
+              success: true,
+              message: "Tasawwuf post found by slug (fallback)"
+            };
+          }
+        }
+      } catch (fallbackError) {
+        logger.error('Tasawwuf getBySlug fallback failed', { slug, error: fallbackError });
+      }
+      
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : 'Tasawwuf post not found'
+      };
     }
   }
 }
@@ -2534,9 +2575,6 @@ export class ContactApi {
         return token;
       }
 
-      // Step 2: Fetch CSRF cookie from server
-      console.log("🔑 [CONTACT] Fetching CSRF token from server...");
-      console.log("🔑 [CONTACT] CSRF endpoint:", endpoints.csrfCookie);
 
       try {
         const response = await fetch(endpoints.csrfCookie, {
@@ -2548,8 +2586,7 @@ export class ContactApi {
           },
         });
 
-        console.log("📥 [CONTACT] CSRF endpoint response status:", response.status);
-
+   
         if (response.ok) {
           // Check cookies immediately (browser sets cookies synchronously)
           token = this.extractCsrfTokenFromCookies();

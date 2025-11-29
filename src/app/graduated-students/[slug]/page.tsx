@@ -4,10 +4,13 @@ import Image from "next/image";
 import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { GraduationsApi } from "@/lib/api";
-import { getImageUrl } from "@/lib/utils";
+import { getSimpleImageUrl } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import Breadcrumb from "@/components/Breadcrumb";
-import { Calendar, Clock, Star, ChevronLeft, ChevronRight, User, MapPin, Phone, X } from "lucide-react";
+import IslamicHeader from "../../components/IslamicHeader";
+import { Calendar, Clock, Star, ChevronLeft, ChevronRight, User, MapPin, Phone, X, GraduationCap } from "lucide-react";
+import GraduationDetailSkeleton from "../../components/graduation/GraduationDetailSkeleton";
+import StudentCardSkeleton from "../../components/graduation/StudentCardSkeleton";
 
 async function getGraduation(slug: string): Promise<any> {
   const result = await GraduationsApi.getBySlug(slug);
@@ -75,13 +78,14 @@ export default function GraduationDetailPage({
       selectedImageIndex !== -1 &&
       graduation.graduation_images?.length > selectedImageIndex
     ) {
-      return getImageUrl(
-        graduation.graduation_images[selectedImageIndex].image
+      return getSimpleImageUrl(
+        graduation.graduation_images[selectedImageIndex].image,
+        "/placeholder-graduation.jpg"
       );
     } else if (graduation.main_image && selectedImageIndex === -1) {
-      return getImageUrl(graduation.main_image);
+      return getSimpleImageUrl(graduation.main_image, "/placeholder-graduation.jpg");
     }
-    return "";
+    return "/placeholder-graduation.jpg";
   }, [selectedImageIndex, graduation]);
 
   const goToNextImage = () => {
@@ -122,20 +126,49 @@ export default function GraduationDetailPage({
     return cleaned;
   };
 
-  if (loading) return <Loading />;
-  if (error) return <ErrorMessage message={error} />;
-  if (!graduation) return <ErrorMessage message={t('graduationDetail.graduationNotFound')} />;
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-emerald-50/30 via-white to-gray-50" dir="rtl">
+        <IslamicHeader 
+          pageType="graduated-students" 
+          alignment="center"
+        />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
+          <Breadcrumb />
+          <GraduationDetailSkeleton />
+        </div>
+      </main>
+    );
+  }
+  
+  if (error || !graduation) {
+    return (
+      <main className="min-h-screen bg-gradient-to-b from-emerald-50/30 via-white to-gray-50 flex items-center justify-center" dir="rtl">
+        <div className="text-center p-8 bg-white rounded-3xl shadow-xl border-2 border-red-200 max-w-md">
+          <p className="text-red-700 font-bold text-lg" style={{ fontFamily: 'Amiri, serif' }}>
+            {error || t('graduationDetail.graduationNotFound')}
+          </p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="mx-auto mt-16 sm:mt-20 md:mt-24 max-w-7xl px-4 font-sans">
-      <Breadcrumb />
+    <main className="min-h-screen bg-gradient-to-b from-emerald-50/30 via-white to-gray-50" dir="rtl">
+      <IslamicHeader 
+        pageType="graduated-students"
+        title={stripHtml(graduation.title)}
+        alignment="center"
+      />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
+        <Breadcrumb />
       
-      {/* Hero Section - Clean and Modern */}
+      {/* Hero Section - Enhanced */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
-        className="mb-16 relative overflow-hidden rounded-2xl bg-white border border-gray-200"
+        className="mb-16 relative overflow-hidden rounded-3xl bg-white shadow-xl border-2 border-gray-200"
       >
         <div className="flex flex-col lg:flex-row gap-8 p-6 md:p-8 lg:p-10">
           {/* Left Column - Main Image + Thumbnails */}
@@ -185,7 +218,7 @@ export default function GraduationDetailPage({
                     onClick={() => setSelectedImageIndex(index)}
                   >
                     <Image
-                      src={getImageUrl(img.image, "/placeholder-graduation.jpg") || "/placeholder-graduation.jpg"}
+                      src={getSimpleImageUrl(img.image, "/placeholder-graduation.jpg")}
                       alt="Thumbnail"
                       fill
                       sizes="(min-width: 1024px) 12.5vw, 25vw"
@@ -257,39 +290,38 @@ export default function GraduationDetailPage({
         </motion.h2>
 
         {graduation.graduated_students?.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {graduation.graduated_students.map((s: any, index: number) => {
-              const imageUrl = getImageUrl(s.image, "/placeholder-graduation.jpg") || "/placeholder-graduation.jpg";
               return (
                 <motion.div
                   key={s.id}
-                  className="group relative flex h-full flex-col bg-[#e0f2f2] rounded-xl sm:rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-[#d0e8e8] cursor-pointer"
+                  className="group relative flex h-full flex-col bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-emerald-200 hover:border-emerald-400 cursor-pointer"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.15 }}
                   onClick={() => openModal(s)}
                   dir="rtl"
                 >
-                  {/* Top Section - Full Size Image */}
-                  <div className="relative h-32 sm:h-52 bg-[#e0f2f2] flex-shrink-0 overflow-hidden">
-                    <Image
-                      src={imageUrl}
-                      alt={`${s.first_name} ${s.last_name}`}
-                      fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src = "/placeholder-graduation.jpg";
-                      }}
-                    />
+                  {/* Top Section - Name Badge with Icon */}
+                  <div className="relative h-32 sm:h-40 bg-gradient-to-br from-emerald-500 to-emerald-600 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                    {/* Decorative background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-emerald-600/20"></div>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                     
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    {/* Icon and Name */}
+                    <div className="relative z-10 text-center px-4">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/50 flex items-center justify-center mx-auto mb-3 shadow-xl">
+                        <GraduationCap className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+                      </div>
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold text-white leading-tight line-clamp-2 drop-shadow-lg" style={{ fontFamily: 'Amiri, serif' }}>
+                        {s.first_name} {s.last_name}
+                      </h3>
+                    </div>
                     
                     {/* Graduation Type Badge */}
                     {s.graduation_type?.name && (
-                      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:gap-1.5 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-semibold bg-white/95 backdrop-blur-md text-[#4a8a8a] border border-white/50 shadow-lg">
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] sm:text-xs font-bold bg-white/95 backdrop-blur-md text-emerald-700 border border-white/50 shadow-lg">
                           {s.graduation_type.name}
                         </span>
                       </div>
@@ -297,27 +329,35 @@ export default function GraduationDetailPage({
                   </div>
 
                   {/* Bottom Section - White Background */}
-                  <div className="relative flex-1 bg-white p-2.5 sm:p-5 flex flex-col justify-between">
+                  <div className="relative flex-1 bg-white p-4 sm:p-6 flex flex-col justify-between">
                     {/* Content */}
-                    <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-4">
-                      <h3 className="text-xs sm:text-lg md:text-xl font-bold text-[#4a8a8a] leading-tight line-clamp-2" style={{ fontFamily: 'Amiri, serif' }}>
-                        {s.first_name} {s.last_name}
-                      </h3>
-                      <p className="text-[10px] sm:text-sm text-[#4a8a8a] line-clamp-1">
-                        <span className="font-medium">{t('graduationDetail.father')}:</span> <span className="truncate">{s.father_name}</span>
-                      </p>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-emerald-700">
+                        <User className="w-4 h-4 flex-shrink-0" />
+                        <p className="text-xs sm:text-sm text-gray-700 line-clamp-1" style={{ fontFamily: 'Amiri, serif' }}>
+                          <span className="font-semibold">{t('graduationDetail.father')}:</span> <span className="truncate">{s.father_name || t('graduationDetail.notProvided')}</span>
+                        </p>
+                      </div>
+                      {s.grandfather_name && (
+                        <div className="flex items-center gap-2 text-sm text-emerald-700">
+                          <User className="w-4 h-4 flex-shrink-0" />
+                          <p className="text-xs sm:text-sm text-gray-700 line-clamp-1" style={{ fontFamily: 'Amiri, serif' }}>
+                            <span className="font-semibold">{t('graduationDetail.grandfather')}:</span> <span className="truncate">{s.grandfather_name}</span>
+                          </p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Separator */}
-                    <div className="my-1.5 sm:my-3 border-t border-gray-200"></div>
+                    <div className="my-3 border-t-2 border-emerald-100"></div>
 
                     {/* Footer */}
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] sm:text-xs text-[#4a8a8a] font-medium" style={{ fontFamily: 'Amiri, serif' }}>
+                      <span className="text-xs sm:text-sm text-emerald-700 font-bold" style={{ fontFamily: 'Amiri, serif' }}>
                         {t('graduationDetail.viewDetails')}
                       </span>
-                      <div className="w-5 h-5 sm:w-7 sm:h-7 rounded-full bg-[#e0f2f2] flex items-center justify-center group-hover:bg-[#d0e8e8] transition-colors">
-                        <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 text-[#4a8a8a]" />
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center group-hover:from-emerald-200 group-hover:to-emerald-300 transition-all shadow-md">
+                        <ChevronLeft className="w-4 h-4 text-emerald-700" />
                       </div>
                     </div>
                   </div>
@@ -326,9 +366,12 @@ export default function GraduationDetailPage({
             })}
           </div>
         ) : (
-          <p className="text-gray-500 mt-8 text-center text-base sm:text-lg">
-            {t('graduationDetail.noStudents')}
-          </p>
+          <div className="text-center py-12 bg-white rounded-3xl border-2 border-gray-200 shadow-lg">
+            <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 text-lg font-semibold" style={{ fontFamily: 'Amiri, serif' }}>
+              {t('graduationDetail.noStudents')}
+            </p>
+          </div>
         )}
       </section>
 
@@ -360,13 +403,7 @@ export default function GraduationDetailPage({
               <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-4 sm:gap-6 pr-0 sm:pr-10">
                 <div className="relative flex-shrink-0">
                   <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white/40 bg-white/20 flex items-center justify-center overflow-hidden shadow-lg">
-                    <Image
-                      src={getImageUrl(selectedStudent.image, "/placeholder-graduation.jpg") || "/placeholder-graduation.jpg"}
-                      alt={`${selectedStudent.first_name} ${selectedStudent.last_name}`}
-                      width={112}
-                      height={112}
-                      className="object-cover w-full h-full"
-                    />
+                    <GraduationCap className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
                   </div>
                 </div>
                 <div className="flex-1 flex flex-col items-center sm:items-start text-center sm:text-left w-full sm:w-auto">
@@ -471,62 +508,8 @@ export default function GraduationDetailPage({
           </motion.div>
         </motion.div>
       )}
+      </div>
     </main>
-  );
-}
-
-// Helper Components
-function Loading() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#e0f2f2] via-white to-[#f0f9f9] p-8">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 max-w-md w-full border border-[#d0e8e8]">
-        <div className="flex flex-col items-center justify-center space-y-6">
-          {/* Animated Spinner */}
-          <div className="relative">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-[#e0f2f2] border-t-[#4a8a8a] rounded-full animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#4a8a8a] rounded-full opacity-20 animate-pulse"></div>
-            </div>
-          </div>
-          
-          {/* Loading Text */}
-          <div className="text-center space-y-2">
-            <h3 className="text-lg sm:text-xl font-semibold text-[#4a8a8a]" style={{ fontFamily: 'Amiri, serif' }}>
-              Loading graduation details...
-            </h3>
-            <p className="text-sm text-gray-500">
-              Please wait while we fetch the information
-            </p>
-          </div>
-          
-          {/* Animated Dots */}
-          <div className="flex space-x-2">
-            <div 
-              className="w-2 h-2 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '0ms' }}
-            ></div>
-            <div 
-              className="w-2 h-2 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '150ms' }}
-            ></div>
-            <div 
-              className="w-2 h-2 bg-[#4a8a8a] rounded-full animate-bounce" 
-              style={{ animationDelay: '300ms' }}
-            ></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorMessage({ message }: { message: string }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-8">
-      <div className="p-10 text-center text-red-700 font-medium bg-white rounded-2xl shadow-lg">
-        Error: {message}
-      </div>
-    </div>
   );
 }
 

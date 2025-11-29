@@ -294,13 +294,12 @@ const Navbar = memo(function Navbar() {
         aria-label="Primary"
       >
         <div className="max-w-screen-xl mx-auto px-4 lg:px-6 py-2">
-          <div className="flex items-center justify-between gap-4 flex-row-reverse">
-            {/* Logo - Will be on right for RTL */}
+          <div className="flex items-center justify-between gap-4" dir="rtl">
+            {/* Logo - Right side for RTL */}
             <Link
               href="/"
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200 flex-row-reverse"
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200"
             >
-              <div className="flex items-center gap-3 flex-row-reverse">
                 <div className="relative w-12 h-12 sm:w-14 sm:h-14">
                   <Image
                     src="/logo.png"
@@ -310,8 +309,6 @@ const Navbar = memo(function Navbar() {
                     className="object-contain"
                     priority
                   />
-                </div>
-              
               </div>
               <div className="text-right">
                 <div className="text-xl font-bold text-primary-900">
@@ -474,8 +471,26 @@ const Navbar = memo(function Navbar() {
               </ul>
             </div>
 
-            {/* Left side - Search, Mobile Menu, Donation for RTL */}
-            <div className="flex items-center gap-2 flex-row-reverse">
+            {/* Left side - Donation, Search, Mobile Menu for RTL */}
+            <div className="flex items-center gap-2" dir="ltr">
+              {/* Donation Button - Left side for RTL */}
+              <Link href="/donation" className="hidden md:block">
+                <button
+                  className="group relative inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 ease-out hover:scale-105 active:scale-100 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 overflow-hidden border border-primary-500/30"
+                >
+                  {/* Subtle shine effect */}
+                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
+                  
+                  {/* Ripple effect on hover */}
+                  <span className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-all duration-300"></span>
+                  
+                  <span className="whitespace-nowrap relative z-10 tracking-wide">مرسته وکړئ</span>
+                  
+                  {/* Gift icon with up-down animation */}
+                  <Gift className="w-4 h-4 relative z-10 animate-bounce-vertical" />
+                </button>
+              </Link>
+              
               {/* Search Button - Improved Design */}
               <div ref={searchRef} className="relative">
                 <button
@@ -495,7 +510,7 @@ const Navbar = memo(function Navbar() {
                 {isSearchOpen && (
                   <>
                     {/* Search Form - Centered on Mobile, Dropdown on Desktop */}
-                    <div className="fixed inset-x-0 top-16 z-50 flex items-start justify-center pt-4 md:absolute md:inset-x-auto md:top-full md:mt-3 md:right-0 md:pt-0 md:w-96">
+                    <div className="fixed inset-x-0 top-16 z-50 flex items-start justify-center pt-4 md:absolute md:inset-x-auto md:top-full md:mt-3 md:left-0 md:pt-0 md:w-96">
                       <form onSubmit={handleSearch} className="relative w-full max-w-[90%] sm:max-w-md md:max-w-full mx-auto md:mx-0" onClick={(e) => e.stopPropagation()}>
                         <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl border-2 border-primary-200 p-3 sm:p-4 md:p-5">
                           <div className="flex items-center gap-2 sm:gap-3 overflow-hidden">
@@ -535,24 +550,6 @@ const Navbar = memo(function Navbar() {
                   </>
                 )}
               </div>
-              
-              {/* Donation Button - Improved Design */}
-              <Link href="/donation" className="hidden md:block">
-                <button
-                  className="group relative inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold text-sm shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 ease-out hover:scale-105 active:scale-100 active:translate-y-0 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 overflow-hidden border border-primary-500/30"
-                >
-                  {/* Subtle shine effect */}
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out"></span>
-                  
-                  {/* Ripple effect on hover */}
-                  <span className="absolute inset-0 rounded-xl bg-white/0 group-hover:bg-white/10 transition-all duration-300"></span>
-                  
-                  <span className="whitespace-nowrap relative z-10 tracking-wide">مرسته وکړئ</span>
-                  
-                  {/* Gift icon with up-down animation */}
-                  <Gift className="w-4 h-4 relative z-10 animate-bounce-vertical" />
-                </button>
-              </Link>
               
               <button
                 type="button"

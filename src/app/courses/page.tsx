@@ -4,8 +4,8 @@ import { useMemo } from "react";
 
 import CoursesSection from "../components/courses/courseCard";
 import IslamicHeader from "../components/IslamicHeader";
+import CourseCardSkeleton from "../components/courses/CourseCardSkeleton";
 
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import PaginationControls from "@/components/PaginationControls";
 import { usePaginatedResource } from "@/hooks/usePaginatedResource";
 import { CoursesApi } from "@/lib/api";
@@ -55,7 +55,11 @@ export default function CoursesPage() {
 
       <div className="w-full mx-auto py-8 px-4 sm:px-6 lg:px-8" dir="rtl">
         {isLoadingInitial ? (
-          <UnifiedLoader variant="grid" count={6} showFilters={false} />
+          <div className="grid gap-5 md:gap-7 sm:px-0 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <CourseCardSkeleton key={index} />
+            ))}
+          </div>
         ) : error ? (
           <ErrorDisplay 
             error={error} 

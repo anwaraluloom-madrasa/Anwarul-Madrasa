@@ -6,7 +6,7 @@ import { Sanad } from "../../../lib/types";
 import { motion } from "framer-motion";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
 import { useTranslation } from "@/hooks/useTranslation";
-import UnifiedLoader from "@/components/loading/UnifiedLoader";
+import SanadCardSkeleton from "./SanadCardSkeleton";
 
 interface SanadSectionProps {
   showAll?: boolean;
@@ -42,7 +42,27 @@ export default function SanadSection({ showAll = false, showHero = false }: Sana
   }, [showAll]);
 
   if (loading) {
-    return <UnifiedLoader variant="list" count={4} className="pt-0" />;
+    return (
+      <div className="w-full px-4 sm:px-6" dir="rtl">
+        <div className="space-y-4">
+          {/* Featured header skeleton */}
+          <div className="mb-8 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-6 md:p-8 border-2 border-gray-200 shadow-sm animate-pulse">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gray-300 rounded-full mx-auto mb-4"></div>
+                <div className="h-8 bg-gray-300 rounded-md w-3/4 mx-auto mb-3"></div>
+                <div className="h-6 bg-gray-200 rounded-md w-full mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded-md w-5/6 mx-auto"></div>
+              </div>
+            </div>
+          </div>
+          {/* Card skeletons */}
+          {Array.from({ length: showAll ? 8 : 4 }).map((_, index) => (
+            <SanadCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (!sanads.length) {
@@ -69,8 +89,8 @@ export default function SanadSection({ showAll = false, showHero = false }: Sana
         </div>
       )}
 
-      {/* Clean Sanad Display */}
-      <div className="w-full px-4 sm:px-6">
+      {/* Enhanced Sanad Display */}
+      <div className="w-full px-4 sm:px-6" dir="rtl">
         <div className="space-y-4">
           {sanads.map((sanad, idx) => (
             <motion.div
@@ -84,50 +104,41 @@ export default function SanadSection({ showAll = false, showHero = false }: Sana
               className="group"
             >
               {idx === 0 ? (
-                // First item - featured style
-                <div>
-                  <div className="text-center notranslate">
-                   
-                  <div className="mb-8 max-w-4xl mx-auto">
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 md:p-8 border border-green-200/50 shadow-sm">
-                <div className="text-center">
-                  <div className="text-4xl mb-4">📜</div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-black mb-3 rtl" style={{ fontFamily: 'Amiri, serif' }}>
-                    شجرهٔ حضرات کابل
-                  </h2>
-                  <p className="font-bold md:text-lg text-black  leading-relaxed rtl" style={{ fontFamily: 'Amiri, serif' }}>
-                    شجره عالیه حضرات عالي درجات نقشبندیه مجددیه عمریه (قدسنا الله باسرارهم العاليه) خانقاه عالیه مجددیه عمریه ارغندی، پغمان، کابل
-                  </p>
-                </div>
-              </div>
-            </div>
+                // First item - featured style with enhanced design
+                <div className="mb-8 max-w-4xl mx-auto">
+                  <div className="relative bg-gradient-to-br from-emerald-50 via-emerald-100/50 to-emerald-50 rounded-3xl p-6 md:p-8 lg:p-10 border-2 border-emerald-200 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    {/* Decorative background */}
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-200/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                    
+                    <div className="text-center relative z-10">
+                      <div className="text-5xl md:text-6xl mb-6">📜</div>
+                      <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-4" style={{ fontFamily: 'Amiri, serif' }}>
+                        شجرهٔ حضرات کابل
+                      </h2>
+                      <p className="font-bold text-base md:text-lg lg:text-xl text-emerald-800 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
+                        شجره عالیه حضرات عالي درجات نقشبندیه مجددیه عمریه (قدسنا الله باسرارهم العاليه) خانقاه عالیه مجددیه عمریه ارغندی، پغمان، کابل
+                      </p>
+                    </div>
                   </div>
                 </div>
               ) : (
-                // Other items - clean with responsive number
-                <div className="bg-white rounded-lg p-5 sm:p-6 border border-gray-200 shadow-sm">
-                  {/* Mobile: Number on top right, Desktop: Number on right side */}
-                  <div className="relative notranslate">
-                    {/* Mobile: Number badge on top right */}
-                    <div className="absolute top-0 right-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm sm:hidden">
+                // Other items - enhanced design with number on right
+                <div className="bg-white rounded-xl p-4 sm:p-5 border-2 border-gray-200 hover:border-emerald-300 shadow-sm hover:shadow-lg transition-all duration-300 group">
+                  <div className="flex items-center gap-3 md:gap-4" dir="rtl">
+                    {/* Number badge - always on right side, smaller */}
+                    <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xs md:text-sm shadow-md group-hover:scale-110 transition-transform duration-300">
                       {idx}
                     </div>
-                    {/* Desktop: Number on right side */}
-                    <div className="hidden sm:flex sm:flex-row sm:items-center sm:gap-4">
-                      <div className="flex-shrink-0 w-8 h-8"></div>
-                      <p className="text-gray-800 text-lg leading-relaxed font-medium rtl flex-1 w-full text-center">
-                        {sanad.name}
-                      </p>
-                      <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                        {idx}
-                      </div>
-                    </div>
-                    {/* Mobile: Text below number, full width */}
-                    <div className="sm:hidden pt-10">
-                      <p className="text-gray-800 text-base leading-relaxed font-medium rtl w-full text-right">
+                    
+                    {/* Content - takes full width, text aligned right */}
+                    <div className="flex-1 text-right">
+                      <p className="text-gray-800 text-sm md:text-base lg:text-lg leading-relaxed font-semibold" style={{ fontFamily: 'Amiri, serif' }}>
                         {sanad.name}
                       </p>
                     </div>
+                    
+                    {/* Spacer for visual balance */}
+                    <div className="flex-shrink-0 w-7 h-7 md:w-8 md:h-8"></div>
                   </div>
                 </div>
               )}
@@ -138,3 +149,4 @@ export default function SanadSection({ showAll = false, showHero = false }: Sana
     </div>
   );
 }
+

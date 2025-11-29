@@ -161,9 +161,10 @@ export default async function IftahCategoryPage({ params }: PageProps) {
     });
     
     // Merge API subcategories with subcategories from iftahs
+    // PRIORITY: Always show ALL API subcategories that match this tag_id, even if they have 0 questions
     const allSubCategoriesMap = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
     
-    // Add all API subcategories that match this tag_id
+    // FIRST: Add all API subcategories that match this tag_id (this ensures we show all, even with 0 questions)
     apiSubCategories.forEach((subCat: any) => {
       if (subCat.tag_id === foundTagId || subCat.tag?.id === foundTagId) {
         allSubCategoriesMap.set(subCat.id, {
@@ -175,7 +176,8 @@ export default async function IftahCategoryPage({ params }: PageProps) {
       }
     });
     
-    // Add subcategories from iftahs (this will add any that exist in iftahs but not in API)
+    // THEN: Add subcategories from iftahs (this will add any that exist in iftahs but not in API)
+    // This ensures we don't miss any subcategories that might exist in iftahs but not in the API
     subCategoriesFromIftahs.forEach((subCat, subCatId) => {
       allSubCategoriesMap.set(subCatId, subCat);
     });
@@ -221,9 +223,10 @@ export default async function IftahCategoryPage({ params }: PageProps) {
         });
         
         // Merge API subcategories with subcategories from iftahs
+        // PRIORITY: Always show ALL API subcategories that match this tag_id, even if they have 0 questions
         const allSubCategoriesMap = new Map<number, { id: number; name: string; tag_id?: number; tag?: { id: number; name: string } }>();
         
-        // Add all API subcategories that match this tag_id
+        // FIRST: Add all API subcategories that match this tag_id (this ensures we show all, even with 0 questions)
         apiSubCategories.forEach((subCat: any) => {
           if (subCat.tag_id === categoryTagId || subCat.tag?.id === categoryTagId) {
             allSubCategoriesMap.set(subCat.id, {
@@ -235,7 +238,7 @@ export default async function IftahCategoryPage({ params }: PageProps) {
           }
         });
         
-        // Add subcategories from iftahs
+        // THEN: Add subcategories from iftahs (this will add any that exist in iftahs but not in API)
         subCategoriesFromIftahs.forEach((subCat, subCatId) => {
           allSubCategoriesMap.set(subCatId, subCat);
         });
@@ -246,8 +249,37 @@ export default async function IftahCategoryPage({ params }: PageProps) {
     }
     
     // If still no subcategories found, show all API subcategories (fallback)
-    if (subCategories.length === 0) {
-      subCategories = apiSubCategories;
+    // Also, if we have a tag_id but no subcategories yet, try to get all API subcategories for that tag
+    if (subCategories.length === 0 && foundTagId) {
+      // Try to get all API subcategories that match this tag_id
+      const matchingApiSubs = apiSubCategories.filter((subCat: any) => 
+        subCat.tag_id === foundTagId || subCat.tag?.id === foundTagId
+      );
+      if (matchingApiSubs.length > 0) {
+        subCategories = matchingApiSubs.map((subCat: any) => ({
+          id: subCat.id,
+          name: subCat.name,
+          tag_id: subCat.tag_id,
+          tag: subCat.tag
+        }));
+        console.log('📊 Found API subcategories for tag', foundTagId, ':', subCategories.length, 'subcategories');
+      } else {
+        // Last resort: show all API subcategories
+        subCategories = apiSubCategories.map((subCat: any) => ({
+          id: subCat.id,
+          name: subCat.name,
+          tag_id: subCat.tag_id,
+          tag: subCat.tag
+        }));
+        console.log('📊 No matching subcategories found, showing all API subcategories:', subCategories.length, 'subcategories');
+      }
+    } else if (subCategories.length === 0) {
+      subCategories = apiSubCategories.map((subCat: any) => ({
+        id: subCat.id,
+        name: subCat.name,
+        tag_id: subCat.tag_id,
+        tag: subCat.tag
+      }));
       console.log('📊 No matching subcategories found, showing all API subcategories:', subCategories.length, 'subcategories');
     }
   }

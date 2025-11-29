@@ -8,8 +8,6 @@ export async function GET(request: NextRequest) {
     const queryString = searchParams.toString();
     const apiUrl = `${API_BASE_URL}/darul-ifta${queryString ? `?${queryString}` : ''}`;
 
-    console.log('🔍 Iftah API endpoint called - fetching from external API:', apiUrl);
-
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
@@ -40,8 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log('✅ Iftah data received from API');
-    
+
     // Handle different response formats
     // API returns { data: [...], pagination: {...} }
     if (data && Array.isArray(data.data)) {

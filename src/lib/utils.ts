@@ -303,7 +303,27 @@ export const buildStorageUrl = (path?: string | null) => {
   return `${trimmedBase}/${normalizedPath}`;
 };
 
-// General image URL function that can be used everywhere
+// Simple image URL function - just prepend backend URL (recommended for most use cases)
+// This is the preferred method for getting image URLs across the website
+export const getSimpleImageUrl = (
+  path: string | null | undefined,
+  fallback: string = "/placeholder-blog.jpg"
+): string => {
+  if (!path) return fallback;
+  
+  // If already a full URL, return as is
+  if (path.startsWith("http")) {
+    return path;
+  }
+  
+  // Remove leading slash if present
+  const cleanPath = path.replace(/^\/+/, "");
+  
+  // Prepend backend storage URL
+  return `https://website.anwarululoom.com/storage/${cleanPath}`;
+};
+
+// General image URL function that can be used everywhere (legacy - use getSimpleImageUrl for new code)
 export const getImageUrl = (img?: string | null, fallback?: string | null) => {
   const fallbackUrl = resolveFallback(fallback);
 
@@ -312,7 +332,7 @@ export const getImageUrl = (img?: string | null, fallback?: string | null) => {
   const rawValue = `${img}`.trim();
   if (!rawValue) return fallbackUrl;
 
-  if (rawValue.startsWith("/api/images/")) {
+  if (rawValue.startsWith("/images/")) {
     return rawValue;
   }
 
