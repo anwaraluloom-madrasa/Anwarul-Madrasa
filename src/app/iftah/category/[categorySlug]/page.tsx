@@ -114,8 +114,6 @@ export default async function IftahCategoryPage({ params }: PageProps) {
   const subCategoriesResult = await IftahApi.getSubCategories({ limit: 100 });
   const apiSubCategories = Array.isArray(subCategoriesResult.data) ? subCategoriesResult.data : [];
   
-  console.log('📊 Fetched subcategories from API:', apiSubCategories.length);
-  
   // If tag ID found, fetch tag data using the tag API endpoint
   if (foundTagId) {
     const tagResult = await IftahApi.getTagById(foundTagId);
@@ -132,7 +130,6 @@ export default async function IftahCategoryPage({ params }: PageProps) {
       tagId = responseData.tag_id || foundTagId;
     } else {
       // Tag API failed, try fallback: fetch all iftahs and filter by tag name
-      console.log('🔄 Fallback: Fetching all iftahs and filtering by tag name');
       const res = await IftahApi.getAll({ limit: 100 });
       const allIftahs = Array.isArray(res.data) ? (res.data as Iftah[]) : [];
       

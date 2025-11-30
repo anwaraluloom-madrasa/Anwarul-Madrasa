@@ -184,11 +184,9 @@ export default function BlogsPreview({ limit, homePage }: BlogsPreviewProps) {
       
       // If no top blogs found, show first 3 published blogs as fallback
       if (topBlogs.length === 0) {
-        console.log('ℹ️ No featured blogs found. Showing first 3 published blogs.');
         return publishedBlogs.slice(0, 3);
       }
       
-      console.log(`✅ Found ${topBlogs.length} featured blogs for home page`);
       return topBlogs;
     }
     return publishedBlogs;

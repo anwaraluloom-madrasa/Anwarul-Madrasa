@@ -172,20 +172,16 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        console.log("🔍 Fetching categories from ArticlesApi");
         const response = await ArticlesApi.getCategories();
         
         if (response.success) {
           const data = response.data;
-          console.log("📋 Categories data:", data);
           setCategories(Array.isArray(data) ? data : []);
         } else {
-          console.error("❌ Category API failed:", response.error);
           // Optionally set an empty array or fallback categories on error
           setCategories([]); 
         }
       } catch (err) {
-        console.error("❌ Failed to fetch categories:", err);
         setCategories([]);
       }
     };
@@ -195,7 +191,6 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
 
   const mappedArticles = useMemo<ArticleCardData[]>(
     () => {
-      console.log("📄 Processing articles:", items.length);
       const mapped = items.map((item) => {
         let categoryName = "General";
         let categoryId: number | null = null;
@@ -239,14 +234,12 @@ export default function ArticlesCard({ limit, showAll = true, homePage = false }
     if (mappedArticles.length > 0) {
       // Extract unique categories from articles
       const articleCategories = [...new Set(mappedArticles.map(article => article.category))];
-      console.log("🏷️ Categories found in articles:", articleCategories);
       
       // Create categories from articles if API categories are empty or different
       if (categories.length === 0 || 
           (categories.length > 0 && !articleCategories.every(cat => 
             categories.some(apiCat => apiCat.name === cat)
           ))) {
-        console.log("🔄 Updating categories from articles");
         const fallbackCategories = articleCategories.map((name, index) => ({
           id: index + 1,
           name: name
