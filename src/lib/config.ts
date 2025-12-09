@@ -4,7 +4,7 @@
 export const appConfig = {
   name: process.env.NEXT_PUBLIC_APP_NAME || 'Anwarul Uloom',
   description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Islamic Learning Platform',
-  url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  url: process.env.NEXT_PUBLIC_APP_URL || 'https://www.anwarululoom.com',
   version: '1.0.0',
 } as const;
 

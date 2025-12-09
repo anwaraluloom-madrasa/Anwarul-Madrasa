@@ -66,6 +66,8 @@ export default function IslamicHeader({
   const { t: tRaw } = useTranslation('common', { useSuspense: false });
 
   // Get defaults based on page type using useMemo for optimization
+  // Note: tRaw is excluded from dependencies to prevent hydration mismatches
+  // since translations are static and the function reference is stable
   const pageDefaults = useMemo(() => {
     // Create a wrapper that always returns a string
     const t = (key: string): string => {
@@ -167,7 +169,8 @@ export default function IslamicHeader({
     };
     
     return defaults[pageType] || defaults.default;
-  }, [pageType, tRaw]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageType]);
   
   // Use provided props or fall back to page defaults
   const finalTitle = title || pageDefaults.title;

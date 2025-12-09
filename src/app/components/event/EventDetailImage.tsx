@@ -42,3 +42,4 @@ export default function EventDetailImage({ src, alt, priority = false }: EventDe
 
 
 
+

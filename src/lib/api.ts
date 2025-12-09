@@ -134,7 +134,7 @@ class ApiClient {
         } else {
           // Server-side: try to use app URL if available, otherwise use relative
           // Relative URLs work in Next.js server components via fetch
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.anwarululoom.com';
           url = `${appUrl}${endpoint}`;
         }
       } else {

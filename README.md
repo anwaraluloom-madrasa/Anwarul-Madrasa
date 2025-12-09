@@ -106,7 +106,7 @@ NEXT_PUBLIC_ARTICLES_API_URL=https://your-api-domain.com/api/articles
 # App Configuration
 NEXT_PUBLIC_APP_NAME=Madsreqa
 NEXT_PUBLIC_APP_DESCRIPTION=Islamic Learning Platform
-NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=https://www.anwarululoom.com
 
 # Cache Configuration
 NEXT_PUBLIC_CACHE_DURATION=3600
@@ -158,7 +158,7 @@ NEXT_PUBLIC_ENABLE_SEARCH=true
    ```
 
 5. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+   Navigate to [https://www.anwarululoom.com](https://www.anwarululoom.com)
 
 ## 📦 Available Scripts
 

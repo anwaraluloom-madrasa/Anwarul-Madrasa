@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { IftahQuestionApi } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 import { 
@@ -33,7 +33,6 @@ export default function IftahQuestionFormInline() {
     email: "",
     phone: "",
     whatsapp: "",
-    category: "",
     question: "",
   });
   const [loading, setLoading] = useState(false);
@@ -46,36 +45,8 @@ export default function IftahQuestionFormInline() {
     email: "",
     phone: "",
     whatsapp: "",
-    category: "",
     question: "",
   });
-  const [categories, setCategories] = useState<any[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-
-  // Fetch categories from API
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const response = await IftahQuestionApi.getCategories();
-        
-        if (response.success && response.data) {
-          setCategories(response.data);
-          console.log('✅ Iftah categories loaded:', response.data);
-        } else {
-          console.log('⚠️ No categories available');
-          setCategories([]);
-        }
-      } catch (error) {
-        console.error('❌ Failed to fetch categories:', error);
-        setCategories([]);
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   // Helper function to check if form is valid
   const isFormValid = () => {
@@ -83,7 +54,6 @@ export default function IftahQuestionFormInline() {
            /^[a-zA-Z\s\u0600-\u06FF]+$/.test(form.name.trim()) &&
            form.email.trim() && 
            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) &&
-           form.category.trim() &&
            form.question.trim().length >= 15 &&
            form.question.trim().length <= 1000 &&
            (!form.phone.trim() || /^[\+]?[0-9\s\-\(\)]{10,15}$/.test(form.phone.trim())) &&
@@ -108,7 +78,6 @@ export default function IftahQuestionFormInline() {
       email: "",
       phone: "",
       whatsapp: "",
-      category: "",
       question: "",
     };
 
@@ -132,12 +101,6 @@ export default function IftahQuestionFormInline() {
       isValid = false;
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = t('iftah.form.validation.validEmailAddress');
-      isValid = false;
-    }
-
-    // Validate category
-    if (!form.category.trim()) {
-      newErrors.category = t('iftah.form.validation.pleaseSelectCategory');
       isValid = false;
     }
 
@@ -196,7 +159,7 @@ export default function IftahQuestionFormInline() {
       
       console.log('✅ Form submitted successfully');
       setSuccess(t('iftah.form.questionSubmittedSuccess'));
-      setForm({ name: "", email: "", phone: "", whatsapp: "", category: "", question: "" });
+      setForm({ name: "", email: "", phone: "", whatsapp: "", question: "" });
       
       
       // Show success modal
@@ -347,7 +310,6 @@ export default function IftahQuestionFormInline() {
                       <div className="flex flex-wrap gap-1">
                         {errors.name && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.name}</span>}
                         {errors.email && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.email}</span>}
-                        {errors.category && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.category}</span>}
                         {errors.phone && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.phone}</span>}
                         {errors.whatsapp && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.whatsapp}</span>}
                         {errors.question && <span className="bg-red-100 px-2 py-1 rounded text-xs font-medium">{errors.question}</span>}
@@ -463,49 +425,6 @@ export default function IftahQuestionFormInline() {
                       </p>
                     )}
                   </div>
-                </div>
-
-                {/* Dynamic Category Section - Simple Dropdown */}
-                <div className="space-y-1.5">
-                  <label className="font-semibold text-gray-800 mb-1.5 flex items-center gap-2 text-xs sm:text-sm">
-                    <div className="w-5 h-5 bg-indigo-100 rounded-md flex items-center justify-center shadow-sm">
-                      <FaQuestionCircle className="text-indigo-600 text-xs" />
-                    </div>
-                    {t('iftah.form.questionCategory')} *
-                  </label>
-                  
-                  {categoriesLoading ? (
-                    <div className="flex items-center justify-center py-4">
-                      <div className="w-5 h-5 border-2 border-amber-200 border-t-amber-600 rounded-full animate-spin"></div>
-                      <span className="ml-3 text-sm text-gray-600">{t('iftah.form.loadingCategories')}</span>
-                    </div>
-                  ) : (
-                    <select 
-                      name="category" 
-                      value={form.category} 
-                      onChange={handleChange} 
-                      required 
-                      className={`w-full border-2 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-200 shadow-sm hover:border-amber-300 text-xs sm:text-sm bg-gray-50 focus:bg-white ${
-                        errors.category ? "border-red-300 focus:ring-red-500 focus:border-red-500" : "border-gray-200"
-                      }`}
-                      dir="rtl"
-                    >
-                      <option value="">{t('iftah.form.selectCategory')}</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.name}>
-                          {category.icon ? `${category.icon} ` : ''}{category.name}
-                          {category.name_en ? ` (${category.name_en})` : ''}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  
-                  {errors.category && (
-                    <p className="text-red-500 text-xs flex items-center gap-1 mt-1">
-                      <span>⚠️</span>
-                      {errors.category}
-                    </p>
-                  )}
                 </div>
 
                 {/* Question Section */}
