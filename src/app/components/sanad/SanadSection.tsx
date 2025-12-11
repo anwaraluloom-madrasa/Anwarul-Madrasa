@@ -123,7 +123,6 @@ export default function SanadSection({
                         className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-3 sm:mb-4 px-2"
                         style={{ fontFamily: "Amiri, serif" }}
                         lang="ar"
-                        dir="rtl"
                         data-no-translate="true"
                         translate="no"
                       >
@@ -133,7 +132,6 @@ export default function SanadSection({
                         className="font-bold text-sm sm:text-base md:text-lg lg:text-xl text-emerald-800 leading-relaxed px-2"
                         style={{ fontFamily: "Amiri, serif" }}
                         lang="ar"
-                        dir="rtl"
                         data-no-translate="true"
                         translate="no"
                       >

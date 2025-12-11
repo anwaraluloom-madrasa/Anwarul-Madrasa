@@ -12,7 +12,8 @@ import WhatsAppButton from "./components/WhatsAppButton";
 
 export const metadata: Metadata = {
   title: "Anwar ul-Uloom al-Islamiyyah - Islamic Learning Platform",
-  description: "Discover authentic Islamic teachings, connect with scholars, and strengthen your faith",
+  description:
+    "Discover authentic Islamic teachings, connect with scholars, and strengthen your faith",
   generator: "Next.js",
   verification: {
     google: "xHlujaXdwIQvRWIiCX6Yw12-P1Ol7iekJvWcGdFKEZM",
@@ -27,7 +28,6 @@ export default function RootLayout({
   return (
     <html data-scroll-behavior="smooth" dir="rtl" lang="ps">
       <body suppressHydrationWarning>
-
         <ToastProvider>
           <DocumentAttributes />
           <Suspense fallback={null}>
@@ -38,7 +38,7 @@ export default function RootLayout({
             <Breadcrumb />
             {children}
           </main>
-          <Footer/>
+          <Footer />
           <WhatsAppButton />
         </ToastProvider>
       </body>
