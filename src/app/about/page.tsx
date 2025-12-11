@@ -843,7 +843,7 @@ const AboutPage = () => {
                         className="text-2xl md:text-3xl font-bold text-gray-900"
                         style={{ fontFamily: "Amiri, serif" }}
                       >
-                        د ده مشهور خليفه ګان
+                     د ده مبارک هغه مشهور خليفه ګان  چې  په خپلو لاسونو یې ورته دخلافت دستار ورپه سر کړي وه   
                       </h3>
                     </div>
                     <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#4a8a8a]/30 to-transparent mx-auto mb-8"></div>
@@ -887,7 +887,9 @@ const AboutPage = () => {
                         className="text-2xl md:text-3xl font-bold text-gray-900"
                         style={{ fontFamily: "Amiri, serif" }}
                       >
-                        د خلافت ځای ناستي
+                        د جناب ارغندي خليفه صاحب هغه خليفه صاحبان چې منازل د
+                        سلوک ېې له ارغندي خلیفه صاحب سره طی کړي وو او د خلافت
+                        دستارونه ورته نورو خلیفه صاحبانو ورته په سر کړی وه
                       </h3>
                     </div>
                     <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#4a8a8a]/30 to-transparent mx-auto mb-8"></div>
