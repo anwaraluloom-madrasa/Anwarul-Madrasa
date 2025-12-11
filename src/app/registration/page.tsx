@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export default function RegistrationPage() {
   const [formData, setFormData] = useState({
@@ -103,7 +104,10 @@ export default function RegistrationPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50 pt-32 pb-8">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
         {/* Header */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center px-3 py-1 bg-white/90 backdrop-blur-sm text-amber-700 text-xs font-medium rounded-full mb-3 shadow-sm border border-amber-200/60">

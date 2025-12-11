@@ -3,6 +3,7 @@ import { IftahApi } from "../../lib/api";
 import Link from "next/link";
 import IftahQuestionButton from "../components/iftah/IftahQuestionButton";
 import IslamicHeader from "../components/IslamicHeader";
+import Breadcrumb from "@/components/Breadcrumb";
 
 interface IftahCategory {
   id: number;
@@ -117,7 +118,10 @@ export default async function IftahPage() {
       <IftahQuestionButton variant="floating" />
 
       {/* Categories Grid Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12" dir="rtl">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-12" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
         <div className="text-right mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Amiri, serif' }}>
             فتاویٰ ډولونه

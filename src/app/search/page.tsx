@@ -9,6 +9,7 @@ import { getImageUrl } from '@/lib/utils';
 import { useTranslation } from '@/hooks/useTranslation';
 import UnifiedLoader from '@/components/loading/UnifiedLoader';
 import ErrorDisplay from '@/components/ErrorDisplay';
+import Breadcrumb from '@/components/Breadcrumb';
 
 interface SearchResult {
   type: 'blog' | 'course' | 'author' | 'book' | 'event' | 'fatwa' | 'article' | 'awlyaa' | 'tasawwuf';
@@ -247,7 +248,10 @@ export default function SearchPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50 pt-20 sm:pt-24 md:pt-32 pb-8 sm:pb-12 md:pb-16">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
         {/* Search Header - Mobile Optimized */}
         <div className="mb-4 sm:mb-6 md:mb-8">
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-md sm:shadow-lg border border-primary-100/60 p-4 sm:p-5 md:p-6 lg:p-8">

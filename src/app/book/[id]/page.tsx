@@ -39,10 +39,12 @@ export default async function BookDetailsPage({ params }: Params) {
 
     return (
       <div className="min-h-screen mt-36 md:mt-[100px] bg-gradient-to-br from-slate-50 via-amber-50/20 to-white" dir="rtl">
-        <Breadcrumb  />
         {/* Compact Header Section */}
         <div className="relative bg-white border-b border-gray-200/60">
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="relative max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
+            <div className="mt-4 sm:mt-8 md:mt-12">
+              <Breadcrumb />
+            </div>
             {/* Navigation */}
            
             
@@ -62,7 +64,7 @@ export default async function BookDetailsPage({ params }: Params) {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Left Column - Description */}
             <div className="lg:col-span-2 space-y-5">

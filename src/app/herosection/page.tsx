@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/button";
 
 // ✅ Array of images from public folder
 const images = [
+  "/amin jan agha.jpg",
+  "/amin jan.jpg",
+  "/abobaker agha.jpg",
   "/hero1.jpg",
   "/hero2.jpg",
   "/hero3.jpg",
   "/hero4.jpg",
- "/hero5.jpg",
+  "/hero5.jpg",
   "/hero6.jpg",
   "/hero7.jpg",
   "/hero8.jpg",
@@ -32,7 +35,6 @@ const images = [
   "/hero19.jpg",
   "/hero20.jpg",
   "/hero21.jpg",
-  
 ];
 
 const Ship = "/ship.png";
@@ -75,7 +77,9 @@ const ScrollingRow = ({
           alt={`scrolling-${index}`}
           width={400}
           height={260}
-          className="w-[270px] h-[160px] sm:w-[320px] sm:h-[180px] lg:w-[400px] lg:h-[260px] rounded-lg object-cover shadow-2xl drop-shadow-[8px_8px_16px_rgba(0,0,0,0.8)] hover:shadow-3xl transition-shadow duration-300 flex-shrink-0"
+          className={`w-[270px] h-[160px] sm:w-[320px] sm:h-[180px] lg:w-[400px] lg:h-[260px] rounded-lg object-cover shadow-2xl drop-shadow-[8px_8px_16px_rgba(0,0,0,0.8)] hover:shadow-3xl transition-shadow duration-300 flex-shrink-0 ${
+            img === "/amin jan agha.jpg" ? "object-top" : "object-center"
+          }`}
         />
       ))}
     </motion.div>
@@ -146,60 +150,58 @@ const Hero = () => {
         <div className="overflow-hidden lg:hidden">
           <ScrollingRow direction="left" delay={3} />
         </div>
-    
       </div>
 
       {/* Center Text */}
       <div className="absolute inset-0 z-40 flex items-start justify-center px-4 pt-16 md:pt-60">
-  {/* 🔥 Dark overlay behind text for better contrast */}
-  <div className="absolute inset-0 bg-black/15 rounded-2xl"></div>
+        {/* 🔥 Dark overlay behind text for better contrast */}
+        <div className="absolute inset-0 bg-black/15 rounded-2xl"></div>
 
-  <div className="relative text-white max-w-4xl mx-auto text-center space-y-4 md:space-y-6 pt-20 md:pt-0">
-    {/* Tagline */}
-    <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-sky-200 font-bold px-4 py-2 rounded-full bg-sky-500/40 inline-block shadow-xl drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
-      {t("hero.tagline")}
-    </p>
+        <div className="relative text-white max-w-4xl mx-auto text-center space-y-4 md:space-y-6 pt-20 md:pt-0">
+          {/* Tagline */}
+          <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-sky-200 font-bold px-4 py-2 rounded-full bg-sky-500/40 inline-block shadow-xl drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
+            {t("hero.tagline")}
+          </p>
 
-    {/* Title & Subtitle */}
-    <h1 className="text-3xl pt-2 sm:text-5xl md:text-6xl lg:text-5xl font-bold leading-tight drop-shadow-[0_8px_20px_rgba(0,0,0,1)]">
-      <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
-        {t("hero.title")}
-      </span>
-      <span className="block text-xl pt-2 sm:text-2xl md:text-3xl lg:text-4xl text-white mt-2 drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
-        {t("hero.subtitle")}
-      </span>
-    </h1>
+          {/* Title & Subtitle */}
+          <h1 className="text-3xl pt-2 sm:text-5xl md:text-6xl lg:text-5xl font-bold leading-tight drop-shadow-[0_8px_20px_rgba(0,0,0,1)]">
+            <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
+              {t("hero.title")}
+            </span>
+            <span className="block text-xl pt-2 sm:text-2xl md:text-3xl lg:text-4xl text-white mt-2 drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
+              {t("hero.subtitle")}
+            </span>
+          </h1>
 
-    {/* Description */}
-    <p className="text-base pt-2 sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-3xl mx-auto drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
-      {t("hero.description")}
-    </p>
+          {/* Description */}
+          <p className="text-base pt-2 sm:text-lg md:text-xl text-gray-200 leading-relaxed max-w-3xl mx-auto drop-shadow-[0_6px_12px_rgba(0,0,0,1)]">
+            {t("hero.description")}
+          </p>
 
-    {/* Buttons */}
-    <div className="flex flex-wrap gap-4  justify-center mt-8 pt-2">
-      <Link href="/about">
-        <Button
-          variant="primary"
-          size="lg"
-          className="rounded-full shadow-2xl drop-shadow-[0_6px_16px_rgba(0,0,0,1)] hover:scale-105 transition-transform duration-200"
-        >
-          {t("hero.aboutUs")} <FaArrowLeft className="ml-2" />
-        </Button>
-      </Link>
+          {/* Buttons */}
+          <div className="flex flex-wrap gap-4  justify-center mt-8 pt-2">
+            <Link href="/about">
+              <Button
+                variant="primary"
+                size="lg"
+                className="rounded-full shadow-2xl drop-shadow-[0_6px_16px_rgba(0,0,0,1)] hover:scale-105 transition-transform duration-200"
+              >
+                {t("hero.aboutUs")} <FaArrowLeft className="ml-2" />
+              </Button>
+            </Link>
 
-      <Link href="/courses">
-        <Button
-          variant="outline"
-          size="lg"
-          className="rounded-full shadow-2xl drop-shadow-[0_6px_16px_rgba(0,0,0,1)] bg-white/10 border-orange-400 text-orange-300 hover:bg-orange-500/25 hover:text-white hover:scale-105 transition-transform duration-200"
-        >
-          {t("hero.ourCourses")}
-        </Button>
-      </Link>
-    </div>
-  </div>
-</div>
-
+            <Link href="/courses">
+              <Button
+                variant="outline"
+                size="lg"
+                className="rounded-full shadow-2xl drop-shadow-[0_6px_16px_rgba(0,0,0,1)] bg-white/10 border-orange-400 text-orange-300 hover:bg-orange-500/25 hover:text-white hover:scale-105 transition-transform duration-200"
+              >
+                {t("hero.ourCourses")}
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </section>
   );
 };

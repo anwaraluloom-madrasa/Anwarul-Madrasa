@@ -1,4 +1,4 @@
-import type { NextConfig } from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
@@ -34,16 +34,17 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   webpack: (config: any) => {
-    // Handle JSON imports properly
+    // Handle JSON imports properly (for production builds)
     config.resolve.extensionAlias = {
-      '.js': ['.ts', '.tsx', '.js', '.jsx'],
-      '.json': ['.json'],
+      ".js": [".ts", ".tsx", ".js", ".jsx"],
+      ".json": [".json"],
     };
     return config;
   },
-  // Turbopack configuration
+  // Turbopack configuration (for development)
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
+    // Turbopack handles TypeScript/JSX natively, no additional config needed
   },
 };
 

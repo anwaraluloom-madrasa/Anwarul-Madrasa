@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { GalleryApi, extractArray } from "@/lib/api";
 import Gallery from "./../components/gallery/Gallery";
 import IslamicHeader from "../components/IslamicHeader";
+import Breadcrumb from "@/components/Breadcrumb";
 import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import ErrorDisplay from "@/components/ErrorDisplay";
 
@@ -89,6 +90,11 @@ export default function GalleryPage() {
     return (
       <div>
         <IslamicHeader pageType="gallery" />
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
+          <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+            <Breadcrumb />
+          </div>
+        </div>
         <div className="pb-16">
           <ErrorDisplay 
             error={error} 
@@ -103,6 +109,11 @@ export default function GalleryPage() {
   return (
     <div>
       <IslamicHeader pageType="gallery" />
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
+      </div>
       <div className="pb-16">
         <Gallery initialImages={images} />
       </div>

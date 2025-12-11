@@ -5,6 +5,7 @@ import { AdmissionsApi, DegreesApi } from "@/lib/api";
 import { useToast } from "@/components/Toast";
 import { FiUser, FiPhone, FiMail, FiCalendar, FiMapPin, FiBook, FiHome, FiGlobe } from "react-icons/fi";
 import IslamicHeader from "@/app/components/IslamicHeader";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export default function AdmissionPage() {
   const toast = useToast();
@@ -332,7 +333,10 @@ export default function AdmissionPage() {
       />
 
       {/* Form Section */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-5xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-10">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 sm:p-8 lg:p-10 space-y-10">

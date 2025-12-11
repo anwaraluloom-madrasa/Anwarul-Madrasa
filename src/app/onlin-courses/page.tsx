@@ -24,6 +24,7 @@ import {
   Building
 } from 'lucide-react';
 import IslamicHeader from '../components/IslamicHeader';
+import Breadcrumb from '@/components/Breadcrumb';
 import { useDirection } from '@/hooks/useDirection';
 import { CoursesApi } from '@/lib/api';
 import type { Course } from '@/lib/types';
@@ -113,8 +114,11 @@ export default function OnlineCoursesPage() {
       />
 
       {/* Courses Section */}
-      <section className="w-full mx-auto py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <section className="w-full mx-auto py-6 sm:py-12 px-2 sm:px-4 md:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
+          <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+            <Breadcrumb />
+          </div>
           {/* Section Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

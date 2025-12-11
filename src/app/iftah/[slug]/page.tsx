@@ -126,10 +126,12 @@ export default async function IftahDetailsPage({ params }: PageProps) {
         title={cleanText(iftah.iftah_sub_category?.name)} 
         subtitle={t('header.iftah.subtitle')}
       />
-      <Breadcrumb />
       <IftahQuestionButton variant="floating" />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12" dir="rtl">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-8 sm:py-12" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12">
+          <Breadcrumb />
+        </div>
         {/* Main Fatwa Document */}
 
          
@@ -213,7 +215,7 @@ export default async function IftahDetailsPage({ params }: PageProps) {
             <div className="mt-8 pt-6 border-t border-gray-200">
               <p className="text-sm font-semibold text-gray-700 mb-1">دار الافتاء</p>
               <p className="text-xs text-gray-600 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
-                اَلْجَامِعْةُ اَنوَار الْعُلُوْم اَلْاِسْلاَمِیّة اَلْمَدْرَسَةٌ خلیفه صاحب ارغندی (رح)
+                اَلْجَامِعْةُ اَنوَار الْعُلُوْم اَلْاِسْلاَمِیّة اَلْمَدْرَسَة خلیفه صاحب ارغندی (رح)
               </p>
             </div>
 

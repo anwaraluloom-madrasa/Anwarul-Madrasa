@@ -7,6 +7,7 @@ import { AwlyaaApi } from "../../lib/api";
 import { motion } from "framer-motion";
 import { getImageUrl } from "@/lib/utils";
 import IslamicHeader from "../components/IslamicHeader";
+import Breadcrumb from "@/components/Breadcrumb";
 import UnifiedLoader from "@/components/loading/UnifiedLoader";
 import ErrorDisplay from "@/components/ErrorDisplay";
 import { NoDataEmptyState } from "@/components/EmptyState";
@@ -77,7 +78,10 @@ export default function AwlyaaListPage() {
     return (
       <div className="min-h-screen bg-gray-50" dir="rtl">
         <IslamicHeader pageType="awlayaa" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 relative z-20" dir="rtl">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-12 relative z-20" dir="rtl">
+          <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+            <Breadcrumb />
+          </div>
           {/* Search bar skeleton */}
           <div className="mb-8">
             <div className="max-w-2xl mx-auto">
@@ -100,7 +104,10 @@ export default function AwlyaaListPage() {
     return (
       <div className="min-h-screen bg-gray-50" dir="rtl">
         <IslamicHeader pageType="awlayaa" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16" dir="rtl">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-16" dir="rtl">
+          <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+            <Breadcrumb />
+          </div>
           <ErrorDisplay 
             error={error} 
             variant="full" 
@@ -115,7 +122,10 @@ export default function AwlyaaListPage() {
     <div className="min-h-screen bg-gray-50" dir="rtl">
       <IslamicHeader pageType="awlayaa" />
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 relative z-20" dir="rtl">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 py-12 relative z-20" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12 mb-6 sm:mb-8">
+          <Breadcrumb />
+        </div>
         {/* Search Bar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

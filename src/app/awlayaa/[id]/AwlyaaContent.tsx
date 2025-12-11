@@ -33,8 +33,8 @@ export default function AwlyaaContent({ awlyaa }: AwlyaaContentProps) {
 
   return (
     <main className="min-h-screen bg-gray-50 pt-20 pb-20" dir="rtl">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6" dir="rtl">
-        <div className="mt-12">
+      <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12">
           <Breadcrumb />
         </div>
         {/* Header Section */}

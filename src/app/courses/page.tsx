@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import CoursesSection from "../components/courses/courseCard";
 import IslamicHeader from "../components/IslamicHeader";
 import CourseCardSkeleton from "../components/courses/CourseCardSkeleton";
+import Breadcrumb from "@/components/Breadcrumb";
 
 import PaginationControls from "@/components/PaginationControls";
 import { usePaginatedResource } from "@/hooks/usePaginatedResource";
@@ -53,7 +54,10 @@ export default function CoursesPage() {
         alignment="center"
       />
 
-      <div className="w-full mx-auto py-8 px-4 sm:px-6 lg:px-8" dir="rtl">
+      <div className="w-full mx-auto py-8 px-2 sm:px-4 md:px-6 lg:px-8" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12">
+          <Breadcrumb />
+        </div>
         {isLoadingInitial ? (
           <div className="grid gap-5 md:gap-7 sm:px-0 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 12 }).map((_, index) => (

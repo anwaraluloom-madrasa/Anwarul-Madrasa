@@ -68,8 +68,10 @@ export default async function AuthorDetailPage({ params }: AuthorPageProps) {
         title={`${author.first_name} ${author.last_name}`}
         alignment="center"
       />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
-        <Breadcrumb />
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-8 sm:py-12" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12">
+          <Breadcrumb />
+        </div>
        
         {/* Hero Section - Redesigned */}
         <div className="relative bg-gradient-to-br from-emerald-50 via-white to-emerald-50/30 rounded-3xl border-2 border-emerald-200/60 shadow-2xl overflow-hidden mb-10">

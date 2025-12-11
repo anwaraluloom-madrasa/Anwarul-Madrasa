@@ -1,8 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { FaFacebook, FaWhatsapp, FaMapMarkerAlt, FaClock, FaPhone, FaEnvelope, FaGlobe } from "react-icons/fa";
-import { FiUser, FiMail, FiPhone, FiMessageSquare, FiSend, FiMapPin, FiClock } from "react-icons/fi";
+import {
+  FaFacebook,
+  FaWhatsapp,
+  FaMapMarkerAlt,
+  FaClock,
+  FaPhone,
+  FaEnvelope,
+  FaGlobe,
+} from "react-icons/fa";
+import {
+  FiUser,
+  FiMail,
+  FiPhone,
+  FiMessageSquare,
+  FiSend,
+  FiMapPin,
+  FiClock,
+} from "react-icons/fi";
 import { FaYoutube, FaInstagram, FaTwitter } from "react-icons/fa6";
 import { ContactApi } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -11,18 +27,17 @@ import { useToast } from "@/components/Toast";
 
 // Mock FAQ data (replace with your actual FAQDate import)
 
-
 function Contact() {
-  const { t: tRaw } = useTranslation('common', { useSuspense: false });
-  
+  const { t: tRaw } = useTranslation("common", { useSuspense: false });
+
   // Create a wrapper that always returns a string
   const t = (key: string): string => {
     const result = tRaw(key);
-    return typeof result === 'string' ? result : key;
+    return typeof result === "string" ? result : key;
   };
 
   const toast = useToast();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -41,31 +56,30 @@ function Contact() {
     (data: typeof formData) => ContactApi.submit(data),
     {
       onSuccess: () => {
-        setStatus("✅ " + t('contact.messageSentSuccess'));
+        setStatus("✅ " + t("contact.messageSentSuccess"));
         setFormData({
           name: "",
           email: "",
           phone: "",
           message: "",
         });
-        toast.success(t('contact.messageSentSuccess'));
+        toast.success(t("contact.messageSentSuccess"));
       },
       onError: (error) => {
-        setStatus("❌ " + t('contact.failedToSend'));
-        toast.error(error.message || t('contact.failedToSend'));
+        setStatus("❌ " + t("contact.failedToSend"));
+        toast.error(error.message || t("contact.failedToSend"));
       },
       showSuccessToast: false, // We're handling toasts manually
       showErrorToast: false,
     }
   );
 
-
-
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors({ ...errors, [name]: "" });
@@ -81,32 +95,32 @@ function Contact() {
 
     // Validate name
     if (!formData.name.trim()) {
-      newErrors.name = t('contact.validation.pleaseEnterName');
+      newErrors.name = t("contact.validation.pleaseEnterName");
     }
 
     // Validate email
     if (!formData.email.trim()) {
-      newErrors.email = t('contact.validation.pleaseEnterEmail');
+      newErrors.email = t("contact.validation.pleaseEnterEmail");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = t('contact.validation.validEmailAddress');
+      newErrors.email = t("contact.validation.validEmailAddress");
     }
 
     // Validate message
     if (!formData.message.trim()) {
-      newErrors.message = t('contact.validation.pleaseEnterMessage');
+      newErrors.message = t("contact.validation.pleaseEnterMessage");
     }
 
     setErrors(newErrors);
-    return !Object.values(newErrors).some(error => error !== "");
+    return !Object.values(newErrors).some((error) => error !== "");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Validate form before submitting
     if (!validateForm()) {
-      setStatus("❌ " + t('contact.fillRequiredFields'));
-      toast.error(t('contact.fillRequiredFields'));
+      setStatus("❌ " + t("contact.fillRequiredFields"));
+      toast.error(t("contact.fillRequiredFields"));
       return;
     }
 
@@ -119,8 +133,6 @@ function Contact() {
     }
   };
 
-
-
   return (
     <div className="w-full bg-gradient-to-br from-slate-50 via-amber-50 to-orange-50 py-10 sm:py-16">
       {/* Contact Content */}
@@ -129,15 +141,17 @@ function Contact() {
         <div className="lg:w-1/2 space-y-6 sm:space-y-8">
           <div className="space-y-5">
             <div className="space-y-3">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{t('contact.getInTouch')}</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                {t("contact.getInTouch")}
+              </h2>
               <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
-                {t('contact.loveToHear')}
+                {t("contact.loveToHear")}
               </p>
             </div>
 
             {/* Social Media Icons */}
             <div className="flex flex-wrap gap-3 sm:gap-4 pt-2">
-              <a 
+              <a
                 href="https://www.facebook.com/profile.php?id=100085056932016&mibextid=ZbWKwL"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -146,7 +160,7 @@ function Contact() {
               >
                 <FaFacebook className="text-lg sm:text-xl transition-transform group-hover:scale-110" />
               </a>
-        
+
               <a
                 href={`https://wa.me/+93796148087?text=${encodeURIComponent(
                   `Hi!اسلام علیکم ورحمته الله وبرکاته `
@@ -155,9 +169,9 @@ function Contact() {
                 rel="noopener noreferrer"
                 className="group w-12 h-12 sm:w-14 sm:h-14 bg-green-500 text-white rounded-xl flex items-center justify-center hover:bg-green-600 transition-all duration-150 transform hover:-translate-y-1 hover:scale-105 shadow-md hover:shadow-lg"
               >
-               <FaWhatsapp className="text-lg sm:text-xl transition-transform group-hover:scale-110" />
+                <FaWhatsapp className="text-lg sm:text-xl transition-transform group-hover:scale-110" />
               </a>
-              <a 
+              <a
                 href="https://youtube.com/@Anwar231?si=xp-rKjC7ACzAsyB6"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -166,7 +180,7 @@ function Contact() {
               >
                 <FaYoutube className="text-lg sm:text-xl transition-transform group-hover:scale-110" />
               </a>
-              <a 
+              <a
                 href="https://twitter.com/khaksarpaktiawa/status/1760494499027931617?t=ep_4SWVp_FHLDvsS2w-cQA&s=19"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -186,8 +200,12 @@ function Contact() {
                 <FaMapMarkerAlt className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
               </div>
               <div className="flex-1 space-y-1.5">
-                <h3 className="font-bold text-gray-900 text-base sm:text-lg">{t('contact.address')}</h3>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">ارغندی، پغمان، کابل افغانیستان</p>
+                <h3 className="font-bold text-gray-900 text-base sm:text-lg">
+                  {t("contact.address")}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  ارغندی، پغمان، کابل افغانیستان
+                </p>
               </div>
             </div>
 
@@ -197,11 +215,13 @@ function Contact() {
                 <FaPhone className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
               </div>
               <div className="flex-1 space-y-1.5">
-                <h3 className="font-bold text-gray-900 text-base sm:text-lg">{t('contact.contact')}</h3>
+                <h3 className="font-bold text-gray-900 text-base sm:text-lg">
+                  {t("contact.contact")}
+                </h3>
                 <div className="space-y-1">
                   <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 bg-amber-500 rounded-full"></span>
-                     796148087 93+
+                    796148087 93+
                   </p>
                   <p className="text-sm sm:text-base text-gray-600 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 bg-amber-500 rounded-full"></span>
@@ -217,8 +237,13 @@ function Contact() {
                 <FaClock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
               </div>
               <div className="flex-1 space-y-1.5">
-                <h3 className="font-bold text-gray-900 text-base sm:text-lg">{t('contact.openingHours')}</h3>
-                <p className="text-sm sm:text-base text-gray-600 leading-relaxed"> 6:30am - 11:00pm</p>
+                <h3 className="font-bold text-gray-900 text-base sm:text-lg">
+                  {t("contact.openingHours")}
+                </h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {" "}
+                  6:30am - 11:00pm
+                </p>
               </div>
             </div>
           </div>
@@ -226,12 +251,19 @@ function Contact() {
 
         {/* Right Form */}
         <div className="lg:w-1/2">
-          <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-amber-100" id="contact-form">
+          <div
+            className="bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-amber-100"
+            id="contact-form"
+          >
             <div className="space-y-3 mb-6">
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{t('contact.sendMessage')}</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{t('contact.respondSoon')}</p>
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">
+                {t("contact.sendMessage")}
+              </h3>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                {t("contact.respondSoon")}
+              </p>
             </div>
-          
+
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
               {/* Name Field */}
               <div className="relative">
@@ -241,12 +273,14 @@ function Contact() {
                 <input
                   type="text"
                   name="name"
-                  placeholder={t('contact.yourName') + '*'}
+                  placeholder={t("contact.yourName") + "*"}
                   value={formData.name}
                   onChange={handleChange}
                   required
                   className={`w-full pr-11 pl-4 py-3.5 border-2 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-150 bg-gray-50 focus:bg-white text-sm sm:text-base placeholder-gray-400 ${
-                    errors.name ? "border-red-400 focus:ring-red-500 focus:border-red-500" : "border-gray-200"
+                    errors.name
+                      ? "border-red-400 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
                 {errors.name && (
@@ -265,12 +299,14 @@ function Contact() {
                 <input
                   type="email"
                   name="email"
-                  placeholder={t('contact.yourEmail') + '*'}
+                  placeholder={t("contact.yourEmail") + "*"}
                   value={formData.email}
                   onChange={handleChange}
                   required
                   className={`w-full pr-11 pl-4 py-3.5 border-2 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-150 bg-gray-50 focus:bg-white text-sm sm:text-base placeholder-gray-400 ${
-                    errors.email ? "border-red-400 focus:ring-red-500 focus:border-red-500" : "border-gray-200"
+                    errors.email
+                      ? "border-red-400 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 />
                 {errors.email && (
@@ -289,10 +325,11 @@ function Contact() {
                 <input
                   type="tel"
                   name="phone"
-                  placeholder={t('contact.yourPhone')}
+                  placeholder={t("contact.yourPhone")}
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full pr-11 pl-4 py-3.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-150 bg-gray-50 focus:bg-white text-sm sm:text-base placeholder-gray-400"
+                  dir="rtl"
+                  className="w-full pr-11 pl-4 py-3.5 border-2 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-150 bg-gray-50 focus:bg-white text-sm sm:text-base placeholder-gray-400 border-gray-200 text-right"
                 />
               </div>
 
@@ -303,13 +340,15 @@ function Contact() {
                 </div>
                 <textarea
                   name="message"
-                  placeholder={t('contact.yourMessage') + '*'}
+                  placeholder={t("contact.yourMessage") + "*"}
                   rows={4}
                   value={formData.message}
                   onChange={handleChange}
                   required
                   className={`w-full pr-11 pl-4 py-3.5 border-2 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition-all duration-150 bg-gray-50 focus:bg-white text-sm sm:text-base resize-none placeholder-gray-400 ${
-                    errors.message ? "border-red-400 focus:ring-red-500 focus:border-red-500" : "border-gray-200"
+                    errors.message
+                      ? "border-red-400 focus:ring-red-500 focus:border-red-500"
+                      : "border-gray-200"
                   }`}
                 ></textarea>
                 {errors.message && (
@@ -328,23 +367,45 @@ function Contact() {
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
-                    <span>{t('contact.sending')}</span>
+                    <span>{t("contact.sending")}</span>
                   </>
                 ) : (
                   <>
                     <FiSend className="text-lg sm:text-xl" />
-                    <span>{t('contact.sendMessageButton')}</span>
+                    <span>{t("contact.sendMessageButton")}</span>
                   </>
                 )}
               </button>
 
               {/* Status Message */}
               {status && (
-                <div className={`rounded-lg p-4 text-center text-sm sm:text-base font-medium ${status.startsWith("✅") ? "bg-green-50 text-green-800 border-2 border-green-200" : "bg-red-50 text-red-800 border-2 border-red-200"}`}>
+                <div
+                  className={`rounded-lg p-4 text-center text-sm sm:text-base font-medium ${
+                    status.startsWith("✅")
+                      ? "bg-green-50 text-green-800 border-2 border-green-200"
+                      : "bg-red-50 text-red-800 border-2 border-red-200"
+                  }`}
+                >
                   {status}
                 </div>
               )}

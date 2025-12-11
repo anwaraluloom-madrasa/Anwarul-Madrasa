@@ -43,31 +43,35 @@ export default async function TasawwufSinglePage({
 
   return (
     <main className="w-full min-h-screen bg-gray-50" dir="rtl">
-      <IslamicHeader 
+      <IslamicHeader
         pageType="tasawwuf"
         title={cleanText(post.title)}
         alignment="center"
       />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12" dir="rtl">
-      <Breadcrumb />
-        
+
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 md:px-6 py-12" dir="rtl">
+        <div className="mt-4 sm:mt-8 md:mt-12">
+          <Breadcrumb />
+        </div>
+
         {/* Meta info - Improved Design */}
         <div className="flex flex-wrap items-center gap-4 mb-8 mt-6">
           {post.category?.name && (
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-50 to-emerald-100 border border-emerald-200/50">
               <Tag className="w-4 h-4 text-emerald-600" />
-              <span className="text-sm font-bold text-emerald-700">{post.category.name}</span>
+              <span className="text-sm font-bold text-emerald-700">
+                {post.category.name}
+              </span>
             </div>
           )}
           {post.created_at && (
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200">
               <Calendar className="w-4 h-4 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">
-                {new Date(post.created_at).toLocaleDateString('ps-AF', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
+                {new Date(post.created_at).toLocaleDateString("ps-AF", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             </div>
@@ -75,7 +79,9 @@ export default async function TasawwufSinglePage({
           {post.shared_by && (
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200">
               <User className="w-4 h-4 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">{cleanText(post.shared_by)}</span>
+              <span className="text-sm font-medium text-gray-700">
+                {cleanText(post.shared_by)}
+              </span>
             </div>
           )}
         </div>
@@ -98,11 +104,11 @@ export default async function TasawwufSinglePage({
 
         {/* Content - Improved Design */}
         <article className="bg-white rounded-2xl border-2 border-gray-200/60 p-8 sm:p-10 shadow-lg">
-          <div 
+          <div
             className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap"
-            style={{ fontFamily: 'Amiri, serif' }}
+            style={{ fontFamily: "Amiri, serif" }}
           >
-          {cleanText(post.description)}
+            {cleanText(post.description)}
           </div>
         </article>
       </div>

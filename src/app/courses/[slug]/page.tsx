@@ -167,8 +167,6 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-      <Breadcrumb />
-      
       {/* Hero Section - Using IslamicHeader Component */}
       <IslamicHeader
         pageType="courses"
@@ -179,6 +177,9 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
       />
 
       <div className="max-w-7xl z-50 mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-6">
+        <div className="mt-4 sm:mt-8 md:mt-12">
+          <Breadcrumb />
+        </div>
       {/* Video Section - Enhanced Design */}
     
       {course.short_video && (
@@ -213,13 +214,13 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
       )}
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8 lg:py-0 lg:mt-8 relative flex flex-col lg:flex-row gap-10 items-start">
+      <div className="max-w-7xl mx-auto px-1 sm:px-2 md:px-4 py-8 lg:py-0 lg:mt-8 relative flex flex-col lg:flex-row gap-6 sm:gap-8 md:gap-10 items-start">
 
         {/* Main Info Section */}
-        <div className="flex-1 rounded-3xl bg-white/95 p-8 space-y-10 border border-amber-50">
+        <div className="flex-1 rounded-3xl bg-white/95 p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 space-y-8 sm:space-y-10 border border-amber-50">
 
           {/* About this Course */}
-          <section className="rounded-xl sm:rounded-2xl overflow-hidden pt-4 sm:pt-6 px-2 sm:px-4 md:px-6 lg:px-10 mb-6 sm:mb-8">
+          <section className="rounded-xl sm:rounded-2xl overflow-hidden pt-2 sm:pt-4 md:pt-6 px-0 sm:px-2 md:px-4 lg:px-6 xl:px-8 mb-4 sm:mb-6 md:mb-8">
             <header className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
               <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-full flex-shrink-0">
                 <FaGraduationCap className="text-xl sm:text-2xl text-amber-600" />
@@ -231,11 +232,11 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
             <div>
               {course.description ? (
                 <div className="prose prose-sm sm:prose-base md:prose-lg prose-amber max-w-none text-gray-800 leading-relaxed animate-fade-in">
-                  <p className="whitespace-pre-line text-sm sm:text-base md:text-lg">{cleanHtml(course.description)}</p>
+                  <p className="whitespace-pre-line text-sm sm:text-base md:text-lg break-words">{cleanHtml(course.description)}</p>
                 </div>
               ) : (
-                <div className="bg-amber-50 border-l-4 border-amber-500 px-4 sm:px-6 py-3 sm:py-4 rounded-md animate-fade-in shadow-inner">
-                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                <div className="bg-amber-50 border-l-4 border-amber-500 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 rounded-md animate-fade-in shadow-inner">
+                  <p className="text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg break-words">
                     {t('courses.defaultDescription')}
                   </p>
                 </div>
@@ -245,7 +246,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
 
           {/* Book Card */}
           {book && (
-            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm bg-gradient-to-br from-white via-amber-50 to-amber-100/60 border border-amber-200">
+            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl sm:rounded-2xl shadow-sm bg-gradient-to-br from-white via-amber-50 to-amber-100/60 border border-amber-200">
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 border-2 border-amber-300 bg-white/50 shadow mx-auto md:mx-0">
                 <Image
                   src={getImageUrl(book?.image, "/placeholder-book.jpg")}
@@ -268,7 +269,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
                   <span className="hidden sm:inline">|</span>
                   <span>{t('courses.year')}: <span className="font-semibold">{book.written_year || "N/A"}</span></span>
                 </div>
-                <div className="text-gray-700 text-sm sm:text-base leading-relaxed mb-3 whitespace-pre-line">{cleanHtml(book.description)}</div>
+                <div className="text-gray-700 text-sm sm:text-base leading-relaxed mb-3 whitespace-pre-line break-words">{cleanHtml(book.description)}</div>
                 {book.pdf_file && (
                   <a
                     href={getImageUrl(book.pdf_file)}
@@ -285,7 +286,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
           )}
           {/* Recorder Card */}
           {recordedBy && (
-            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm bg-gradient-to-br from-white via-emerald-50 to-emerald-100/70 border border-emerald-100">
+            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 md:gap-8 p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl sm:rounded-2xl shadow-sm bg-gradient-to-br from-white via-emerald-50 to-emerald-100/70 border border-emerald-100">
               <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 relative rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 border-2 border-emerald-300 bg-white/50 shadow mx-auto md:mx-0">
                 <Image
                   src={getImageUrl(recordedBy?.image, "/placeholder-author.jpg")}
@@ -308,7 +309,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
                     </span>
                   )}
                   {recordedBy.description && (
-                    <span className="text-gray-700 text-sm sm:text-base whitespace-pre-line">{cleanHtml(recordedBy.description)}</span>
+                    <span className="text-gray-700 text-sm sm:text-base whitespace-pre-line break-words">{cleanHtml(recordedBy.description)}</span>
                   )}
                 </div>
                 {recordedBy.contact_no && (
@@ -323,7 +324,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
         </div>
 
         {/* Sidebar with get course info and details, FLEXED beside main */}
-        <aside className="lg:w-96 w-full bg-gradient-to-br from-amber-100 to-white/90 p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border-2 border-amber-100 lg:sticky lg:top-24 shadow space-y-4 sm:space-y-6 md:space-y-8 z-20 flex flex-col items-stretch">
+        <aside className="lg:w-96 w-full bg-gradient-to-br from-amber-100 to-white/90 p-3 sm:p-4 md:p-6 lg:p-8 rounded-2xl sm:rounded-3xl border-2 border-amber-100 lg:sticky lg:top-24 shadow space-y-4 sm:space-y-6 md:space-y-8 z-20 flex flex-col items-stretch">
 
           {/* Desktop Get Course Info (hidden on mobile, visible on lg+) */}
           <div className="">
@@ -347,7 +348,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
           </div>
 
           {/* Course Details from API */}
-          <div className="space-y-3 sm:space-y-4 md:space-y-5 bg-white/90 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border border-amber-100 shadow-sm">
+          <div className="space-y-3 sm:space-y-4 md:space-y-5 bg-white/90 p-3 sm:p-4 md:p-5 lg:p-6 rounded-xl sm:rounded-2xl border border-amber-100 shadow-sm">
             <h3 className="text-lg sm:text-xl font-bold text-amber-800 mb-3 sm:mb-4 tracking-tight flex items-center gap-2">
               <FaGraduationCap className="text-lg sm:text-xl text-amber-500" />
               {t('courses.courseDetails')}

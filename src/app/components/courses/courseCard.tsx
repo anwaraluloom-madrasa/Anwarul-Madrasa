@@ -116,7 +116,7 @@ export default function CoursesSection({
   }
 
   return (
-    <section className="px- pb-16 pt-2 sm:px-6 lg:px-8" dir="rtl">
+    <section className="px-2 sm:px-4 md:px-6 lg:px-8 pb-16 pt-2" dir="rtl">
       <div className="mx-auto max-w-7xl space-y-10">
         {heading ? (
           <motion.header

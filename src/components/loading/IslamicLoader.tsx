@@ -31,8 +31,9 @@ export default function IslamicLoader() {
             const angle = (i * 360) / 12;
             const radian = (angle * Math.PI) / 180;
             const radius = 28;
-            const x = Math.cos(radian) * radius;
-            const y = Math.sin(radian) * radius;
+            // Round to 4 decimal places to ensure consistent server/client rendering
+            const x = Math.round(Math.cos(radian) * radius * 10000) / 10000;
+            const y = Math.round(Math.sin(radian) * radius * 10000) / 10000;
             const color = brandColors[Math.floor((i / 12) * (brandColors.length - 1))];
             
             return (

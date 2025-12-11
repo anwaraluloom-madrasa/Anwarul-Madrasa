@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import EventsSection from "./../components/event/eventCard";
 import IslamicHeader from "../components/IslamicHeader";
 import EventCardSkeleton from "../components/event/EventCardSkeleton";
+import Breadcrumb from "@/components/Breadcrumb";
 
 import PaginationControls from "@/components/PaginationControls";
 import { usePaginatedResource } from "@/hooks/usePaginatedResource";
@@ -42,8 +43,13 @@ export default function EventsPage() {
     <main className="w-full min-h-screen bg-gradient-to-b from-gray-50 to-white" dir="rtl">
       <IslamicHeader pageType="events" title="علمی مجالس " />
       <div className="pb-16" dir="rtl">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+          <div className="mt-4 sm:mt-8 md:mt-12">
+            <Breadcrumb />
+          </div>
+        </div>
         {isLoadingInitial ? (
-          <section className="w-full px-4 md:px-8 md:pt-10 max-w-7xl mx-auto">
+          <section className="w-full px-2 sm:px-4 md:px-6 lg:px-8 md:pt-10 max-w-7xl mx-auto">
             <div className="space-y-12">
               {Array.from({ length: 6 }).map((_, index) => (
                 <EventCardSkeleton key={index} />
