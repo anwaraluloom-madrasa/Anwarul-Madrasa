@@ -122,12 +122,20 @@ export default function SanadSection({
                       <h2
                         className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-emerald-900 mb-3 sm:mb-4 px-2"
                         style={{ fontFamily: "Amiri, serif" }}
+                        lang="ar"
+                        dir="rtl"
+                        data-no-translate="true"
+                        translate="no"
                       >
                         شجرهٔ حضرات کابل
                       </h2>
                       <p
                         className="font-bold text-sm sm:text-base md:text-lg lg:text-xl text-emerald-800 leading-relaxed px-2"
                         style={{ fontFamily: "Amiri, serif" }}
+                        lang="ar"
+                        dir="rtl"
+                        data-no-translate="true"
+                        translate="no"
                       >
                         شجره عالیه حضرات عالي درجات نقشبندیه مجددیه عمریه (قدسنا
                         الله باسرارهم العاليه) خانقاه عالیه مجددیه عمریه ارغندی،
@@ -153,6 +161,10 @@ export default function SanadSection({
                       <p
                         className="text-gray-800 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed font-semibold break-words"
                         style={{ fontFamily: "Amiri, serif" }}
+                        lang="ar"
+                        dir="rtl"
+                        data-no-translate="true"
+                        translate="no"
                       >
                         {sanad.name}
                       </p>

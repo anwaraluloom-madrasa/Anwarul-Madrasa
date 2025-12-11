@@ -155,10 +155,20 @@ export default function HomePage() {
             <div className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-primary-400/20 to-primary-500/20 text-primary-700 text-sm font-semibold rounded-full mb-6 animate-fade-in backdrop-blur-sm">
               <span className="icon-scroll">📜</span> زموږ د سند
             </div>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-primary-700 mb-5 ">
+            <h2
+              className="text-4xl md:text-5xl font-extrabold text-primary-700 mb-5 "
+              lang="ar"
+              // data-no-translate="true"
+              // translate="no"
+            >
               شجره نقشبندیه
             </h2>
-            <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed ">
+            <p
+              className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed "
+              lang="ar"
+              // data-no-translate="true"
+              // translate="no"
+            >
               د اولیاؤ او عارفانو روحاني سلسله
             </p>
           </div>
