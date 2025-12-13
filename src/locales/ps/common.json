@@ -772,7 +772,11 @@
     "recentlyUpdated": "وروسته تازه شوی",
     "noBlogsAvailable": "بلاګونه شتون نلري",
     "checkBackSoon": "مهرباني وکړئ وروسته بیا وګورئ",
-    "noSummaryAvailable": "لنډیز شتون نلري"
+    "noSummaryAvailable": "لنډیز شتون نلري",
+    "moreArticlesYouMightLike": "نور مقالې چې تاسو یې خوښولی شئ",
+    "featuredPost": "غوره پوسټ",
+    "featured": "غوره",
+    "articleTags": "د مقالې نښې"
   },
   "contact": {
     "sendMessage": "پیغام واستوئ",
