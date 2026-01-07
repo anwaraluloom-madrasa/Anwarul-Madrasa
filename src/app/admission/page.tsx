@@ -325,7 +325,7 @@ export default function AdmissionPage() {
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
       {/* Islamic Hero Header */}
       <IslamicHeader
-        title="د محصلینو د نوم لیکنې فورم"
+        title="د طالب العلمانو د نوم لیکنې فورم"
         subtitle="مهرباني وکړئ خپل معلومات په دقت سره داخل کړئ"
         theme="amber"
         alignment="center"
@@ -476,7 +476,7 @@ export default function AdmissionPage() {
                   className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-[#4a8a8a] focus:border-[#4a8a8a] transition-all duration-200 text-sm ${
                     errors.blood_type ? "border-red-400 bg-red-50" : "border-gray-300 bg-white hover:border-[#4a8a8a]"
                   }`}
-                  placeholder="د وینې ډوله * (مثال: O+ یا A-)"
+                  placeholder="د وینې ګروپ  (مثال: O+ یا A-)"
                   style={{ fontFamily: 'Amiri, serif' }}
                 />
                 {errors.blood_type && (

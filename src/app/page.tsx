@@ -153,7 +153,7 @@ export default function HomePage() {
           {/* Hero Text */}
           <div className="mb-14">
             <div className="inline-flex items-center px-5 py-2 bg-gradient-to-r from-primary-400/20 to-primary-500/20 text-primary-700 text-sm font-semibold rounded-full mb-6 animate-fade-in backdrop-blur-sm">
-              <span className="icon-scroll">📜</span> زموږ د سند
+              <span className="icon-scroll">📜</span> زموږ  سند
             </div>
             <h2
               className="text-4xl md:text-5xl font-extrabold text-primary-700 mb-5 "
@@ -161,7 +161,8 @@ export default function HomePage() {
               // data-no-translate="true"
               // translate="no"
             >
-              شجره نقشبندیه
+             
+د نقشبندیې شریفې طریقې شجره
             </h2>
             <p
               className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed "

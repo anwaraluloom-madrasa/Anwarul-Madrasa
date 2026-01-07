@@ -586,7 +586,7 @@ export default function OnlineCoursesPage() {
                 <div className="flex-1">
                   <h4 className="text-white font-semibold mb-2">د کار وخت</h4>
                   <p className="text-white/80 text-sm">
-                    شنبه - جمعې: 6:۰۰ بجو - 10:۰۰ بجو
+               7:00am - 7:00pm
                   </p>
                 </div>
               </motion.div>

@@ -242,7 +242,7 @@ function Contact() {
                 </h3>
                 <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                   {" "}
-                  6:30am - 11:00pm
+                  7:00am - 7:00pm
                 </p>
               </div>
             </div>
