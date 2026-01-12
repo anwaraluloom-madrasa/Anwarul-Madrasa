@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getTranslation } from "@/lib/translations";
+import { CommentAboutSheikApi } from "@/lib/api";
+import { useEffect, useState } from "react";
 import img from "../../../public/1.jpg";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -70,6 +72,106 @@ const CustomPrevArrow = ({ onClick }: { onClick?: () => void }) => (
   </button>
 );
 
+// Comments About Sheik Section Component
+const CommentsAboutSheikSection = () => {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        console.log("🔄 Fetching comment about sheik categories...");
+        setLoading(true);
+        setError(null);
+        const result = await CommentAboutSheikApi.getCategories();
+        console.log("📥 API Response:", result);
+        if (result.success && Array.isArray(result.data)) {
+          console.log("✅ Categories fetched:", result.data.length);
+          setCategories(result.data);
+        } else {
+          console.warn("⚠️ API returned no data or error:", result);
+          setError(result.error || "No categories found");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching categories:", error);
+        setError(
+          error instanceof Error ? error.message : "Failed to fetch categories"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return (
+    <div className="relative py-8">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#4a8a8a]/20 to-transparent"></div>
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center justify-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] rounded-full flex items-center justify-center">
+            <Quote className="h-5 w-5 text-white" />
+          </div>
+          <h4
+            className="text-2xl md:text-3xl font-bold text-gray-900"
+            style={{ fontFamily: "Amiri, serif" }}
+          >
+            د انوارالمشائخ فصل الدین رح په باره کې د علماؤ،مشایخو کرامو، سیاسینو
+            او ولسی وکړو نظری.
+          </h4>
+        </div>
+        <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#4a8a8a]/30 to-transparent mx-auto mb-8"></div>
+      </div>
+
+      {loading && (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#4a8a8a]"></div>
+          <p
+            className="mt-4 text-gray-600"
+            style={{ fontFamily: "Amiri, serif" }}
+          >
+            پورته کول...
+          </p>
+        </div>
+      )}
+
+      {!loading && error && (
+        <div className="text-center py-8">
+          <p className="text-red-600" style={{ fontFamily: "Amiri, serif" }}>
+            {error}
+          </p>
+        </div>
+      )}
+
+      {!loading && !error && categories.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+          {categories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/about/comments/${category.slug}`}
+              className="px-6 py-3 bg-gradient-to-br from-[#4a8a8a] to-[#3a7a7a] text-white font-semibold rounded-lg hover:from-[#5a9a9a] hover:to-[#4a8a8a] transition-all duration-200 shadow-md hover:shadow-lg hover:scale-105"
+              style={{ fontFamily: "Amiri, serif" }}
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {!loading && !error && categories.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-600" style={{ fontFamily: "Amiri, serif" }}>
+            هیڅ دسته بندي نشته
+          </p>
+        </div>
+      )}
+
+      <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#4a8a8a]/20 to-transparent"></div>
+    </div>
+  );
+};
 const AboutPage = () => {
   const { t: tRaw, i18n } = useTranslation("common", { useSuspense: false });
   // Always RTL since website only has RTL languages
@@ -187,9 +289,9 @@ const AboutPage = () => {
                       style={{ fontFamily: "Amiri, serif" }}
                     >
                       انوار المشایخ جناب حضرت مولانا مؤید الدین خلیفه صاحب فضل
-                      الدین رح چې د ارغندۍ په خلیفه صاحب سره یې شهرت درلود؛ د افغانستان
-                      له نومياليو عالمانو او لویو عارفانو څخه وه، پلار یې محمد
-                     زرين نومېده چې یو نیک خویه او متقی انسان و.
+                      الدین رح چې د ارغندۍ په خلیفه صاحب سره یې شهرت درلود؛ د
+                      افغانستان له نومياليو عالمانو او لویو عارفانو څخه وه، پلار
+                      یې محمد زرين نومېده چې یو نیک خویه او متقی انسان و.
                     </p>
                   </div>
                 </div>
@@ -213,8 +315,13 @@ const AboutPage = () => {
                         className="text-base md:text-lg leading-relaxed text-gray-700 px-4 sm:px-6 pr-4"
                         style={{ fontFamily: "Amiri, serif" }}
                       >
-                        انوارالمشائخ رح  خپلې لومړنۍ زده کړې د خپل کلې په ښوونځي کې ترسره کړې او وروسته یې  د افغانستان په مختلفو ديني مدارسو کې
-                     مروج دينـي عـلـوم سـرته ورسول، نوموړي له جناب شیخ الحدیث حضرت مولانا عبدالغفار ننګرهاري چې نوموړی د شیخ الحدیث مولانا نصیرالدین غرغشتوې رح شاګرد وه چې د غزنې په نورالمدارس مدرسه کې شیخ الحدیث وه د تفسیر علم حاصل کړ.
+                        انوارالمشائخ رح خپلې لومړنۍ زده کړې د خپل کلې په ښوونځي
+                        کې ترسره کړې او وروسته یې د افغانستان په مختلفو ديني
+                        مدارسو کې مروج دينـي عـلـوم سـرته ورسول، نوموړي له جناب
+                        شیخ الحدیث حضرت مولانا عبدالغفار ننګرهاري چې نوموړی د
+                        شیخ الحدیث مولانا نصیرالدین غرغشتوې رح شاګرد وه چې د
+                        غزنې په نورالمدارس مدرسه کې شیخ الحدیث وه د تفسیر علم
+                        حاصل کړ.
                       </p>
                     </div>
                   </div>
@@ -236,7 +343,9 @@ const AboutPage = () => {
                         className="text-base md:text-lg leading-relaxed text-gray-700 px-4 sm:px-6"
                         style={{ fontFamily: "Amiri, serif" }}
                       >
-                   انوار المشائخ رح  د حدیثو سند په کابل کې له شیخ الحدیث حضرت مولانا سلطان جان صاحب څخه تر لاسه کړ؛ او له نوموړي څخه یې د حدیثو په برخه کې د تدریس کولو اجازه هم واخیسته.
+                        انوار المشائخ رح د حدیثو سند په کابل کې له شیخ الحدیث
+                        حضرت مولانا سلطان جان صاحب څخه تر لاسه کړ؛ او له نوموړي
+                        څخه یې د حدیثو په برخه کې د تدریس کولو اجازه هم واخیسته.
                       </p>
                     </div>
                   </div>
@@ -271,6 +380,9 @@ const AboutPage = () => {
                   </div>
                   <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#4a8a8a]/20 to-transparent"></div>
                 </div>
+
+                {/* Comments About Sheik Section */}
+                <CommentsAboutSheikSection />
 
                 <div className="relative py-12">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -835,7 +947,8 @@ const AboutPage = () => {
                         className="text-2xl md:text-3xl font-bold text-gray-900"
                         style={{ fontFamily: "Amiri, serif" }}
                       >
-                     د ده مبارک هغه مشهور خليفه ګان  چې  په خپلو لاسونو یې ورته دخلافت دستار ورپه سر کړي وه   
+                        د ده مبارک هغه مشهور خليفه ګان چې په خپلو لاسونو یې ورته
+                        دخلافت دستار ورپه سر کړي وه
                       </h3>
                     </div>
                     <div className="h-px w-32 bg-gradient-to-r from-transparent via-[#4a8a8a]/30 to-transparent mx-auto mb-8"></div>

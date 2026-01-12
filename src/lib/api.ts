@@ -1,4 +1,3 @@
-
 import { apiConfig, endpoints } from "./config";
 import { logger } from "./logger";
 
@@ -88,9 +87,9 @@ class ApiClient {
     this.defaultHeaders = {
       "Content-Type": "application/json",
     };
-    
+
     // Clean up old cache entries periodically
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setInterval(() => this.cleanCache(), 30000); // Every 30 seconds
     }
   }
@@ -104,10 +103,16 @@ class ApiClient {
     }
   }
 
-  private getCacheKey(endpoint: string, params?: Record<string, QueryValue>): string {
-    const sortedParams = params 
-      ? Object.keys(params).sort().map(k => `${k}=${params[k]}`).join('&')
-      : '';
+  private getCacheKey(
+    endpoint: string,
+    params?: Record<string, QueryValue>
+  ): string {
+    const sortedParams = params
+      ? Object.keys(params)
+          .sort()
+          .map((k) => `${k}=${params[k]}`)
+          .join("&")
+      : "";
     return `${endpoint}?${sortedParams}`;
   }
 
@@ -122,24 +127,24 @@ class ApiClient {
       url = endpoint;
     } else {
       const base = this.baseUrl;
-      
+
       // If endpoint is a local route (starts with /), use it as-is
       // Next.js will resolve relative URLs correctly in server components
       // For client-side, we'll need absolute URL
       if (endpoint.startsWith("/")) {
         // For server-side, relative URLs work fine with fetch
         // For client-side, we need absolute URL
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           url = `${window.location.origin}${endpoint}`;
         } else {
           // Server-side: try to use app URL if available, otherwise use relative
           // Relative URLs work in Next.js server components via fetch
-          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.anwarululoom.com';
+          const appUrl =
+            process.env.NEXT_PUBLIC_APP_URL || "https://www.anwarululoom.com";
           url = `${appUrl}${endpoint}`;
         }
       } else {
-        const needsSlash =
-          !base.endsWith("/") && !endpoint.startsWith("/");
+        const needsSlash = !base.endsWith("/") && !endpoint.startsWith("/");
         url = `${base}${needsSlash ? "/" : ""}${endpoint}`;
       }
     }
@@ -180,7 +185,10 @@ class ApiClient {
         return AbortSignal.timeout(this.defaultTimeout);
       } catch (error) {
         // Fall back to manual controller if timeout() fails
-        logger.debug('AbortSignal.timeout() not supported, using manual controller', { error });
+        logger.debug(
+          "AbortSignal.timeout() not supported, using manual controller",
+          { error }
+        );
       }
     }
 
@@ -189,7 +197,7 @@ class ApiClient {
     setTimeout(() => {
       controller.abort();
     }, this.defaultTimeout);
-    
+
     return controller.signal;
   }
 
@@ -205,10 +213,12 @@ class ApiClient {
 
     // Check for timeout in error message
     if (error instanceof Error) {
-      if (error.name === 'AbortError' || 
-          error.message.includes('timeout') || 
-          error.message.includes('timed out') ||
-          error.message.includes('signal timed out')) {
+      if (
+        error.name === "AbortError" ||
+        error.message.includes("timeout") ||
+        error.message.includes("timed out") ||
+        error.message.includes("signal timed out")
+      ) {
         return `Request timed out after ${this.defaultTimeout}ms. Please try again.`;
       }
     }
@@ -247,8 +257,9 @@ class ApiClient {
     }
   }
 
-  private isPaginatedPayload(value: unknown):
-    value is { data: unknown; pagination?: PaginationMeta } {
+  private isPaginatedPayload(
+    value: unknown
+  ): value is { data: unknown; pagination?: PaginationMeta } {
     return (
       typeof value === "object" &&
       value !== null &&
@@ -264,18 +275,18 @@ class ApiClient {
     const { params, ...rest } = options;
     const method = (rest.method ?? "GET").toString().toUpperCase();
     const isGetRequest = method === "GET";
-    
+
     // Check cache for GET requests
     if (isGetRequest) {
       const cacheKey = this.getCacheKey(endpoint, params);
       const cached = this.cache.get(cacheKey);
       const now = Date.now();
-      
-      if (cached && (now - cached.timestamp) < this.CACHE_DURATION) {
+
+      if (cached && now - cached.timestamp < this.CACHE_DURATION) {
         logger.debug(`Cache hit for ${endpoint}`);
         return cached.data;
       }
-      
+
       // Check if same request is already in-flight (deduplication)
       const inFlight = this.inFlightRequests.get(cacheKey);
       if (inFlight) {
@@ -283,7 +294,7 @@ class ApiClient {
         return inFlight;
       }
     }
-    
+
     const url = this.buildUrl(endpoint, params);
     const headers: HeadersInit = {
       ...this.defaultHeaders,
@@ -294,23 +305,29 @@ class ApiClient {
       headers,
       signal: rest.signal ?? this.createTimeoutSignal(method),
       // Add cache control for better performance
-      cache: isGetRequest ? 'default' : 'no-store',
+      cache: isGetRequest ? "default" : "no-store",
     };
 
     const startTime = performance.now();
     logger.apiRequest(endpoint, params);
-    
+
     // Create request promise for deduplication
-    const cacheKey = isGetRequest ? this.getCacheKey(endpoint, params) : '';
-    const requestPromise = this.executeRequest<T>(url, config, endpoint, cacheKey, isGetRequest);
-    
+    const cacheKey = isGetRequest ? this.getCacheKey(endpoint, params) : "";
+    const requestPromise = this.executeRequest<T>(
+      url,
+      config,
+      endpoint,
+      cacheKey,
+      isGetRequest
+    );
+
     if (isGetRequest && cacheKey) {
       this.inFlightRequests.set(cacheKey, requestPromise);
       requestPromise.finally(() => {
         this.inFlightRequests.delete(cacheKey);
       });
     }
-    
+
     return requestPromise;
   }
 
@@ -322,44 +339,58 @@ class ApiClient {
     isGetRequest: boolean
   ): Promise<ApiResponse<T>> {
     const startTime = performance.now();
-    
+
     // Retry logic for failed requests - reduced retries for faster failure
     const maxRetries = Math.min(apiConfig.errorHandling.maxRetries, 2); // Max 2 retries instead of 3
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const response = await fetch(url, config);
         const duration = Math.round(performance.now() - startTime);
-        
-        if (!response.ok) { 
+
+        if (!response.ok) {
           const errorText = await response.text();
           const statusCode: number = response.status;
-          
+
           // Don't retry for client errors (4xx) except 408, 429
-          const shouldRetry = apiConfig.errorHandling.retryableStatusCodes.includes(statusCode as any);
-          
+          const shouldRetry =
+            apiConfig.errorHandling.retryableStatusCodes.includes(
+              statusCode as any
+            );
+
           if (!shouldRetry) {
             // Check if error should be suppressed
-            const shouldSuppress = apiConfig.errorHandling.suppressedStatusCodes.includes(statusCode as any);
+            const shouldSuppress =
+              apiConfig.errorHandling.suppressedStatusCodes.includes(
+                statusCode as any
+              );
             if (!shouldSuppress) {
               logger.apiError(endpoint, new Error(errorText), statusCode);
             }
             throw new Error(`HTTP error! status: ${statusCode}`);
           }
-          
+
           // If it's the last attempt, throw the error
           if (attempt === maxRetries) {
-            const shouldSuppress = apiConfig.errorHandling.suppressedStatusCodes.includes(statusCode as any);
+            const shouldSuppress =
+              apiConfig.errorHandling.suppressedStatusCodes.includes(
+                statusCode as any
+              );
             if (!shouldSuppress) {
               logger.apiError(endpoint, new Error(errorText), statusCode);
             }
             throw new Error(`HTTP error! status: ${statusCode}`);
           }
-          
+
           // Wait before retry (faster exponential backoff)
-          const delay = Math.min(apiConfig.errorHandling.retryDelay * attempt, 2000); // Cap at 2 seconds
-          logger.debug(`Retrying ${endpoint} in ${delay}ms (attempt ${attempt}/${maxRetries})`);
+          const delay = Math.min(
+            apiConfig.errorHandling.retryDelay * attempt,
+            2000
+          ); // Cap at 2 seconds
+          logger.debug(
+            `Retrying ${endpoint} in ${delay}ms (attempt ${attempt}/${maxRetries})`
+          );
           await new Promise((resolve) => setTimeout(resolve, delay));
           continue;
         }
@@ -396,11 +427,12 @@ class ApiClient {
         lastError = normalized;
 
         // Check if it's a timeout error
-        const isTimeoutError = 
-          normalized.name === 'AbortError' ||
-          normalized.message.includes('timeout') ||
-          normalized.message.includes('timed out') ||
-          (normalized instanceof DOMException && normalized.name === 'AbortError');
+        const isTimeoutError =
+          normalized.name === "AbortError" ||
+          normalized.message.includes("timeout") ||
+          normalized.message.includes("timed out") ||
+          (normalized instanceof DOMException &&
+            normalized.name === "AbortError");
 
         // Don't retry on certain errors (auth errors, timeout on last attempt)
         if (
@@ -410,7 +442,10 @@ class ApiClient {
             (isTimeoutError && attempt === maxRetries))
         ) {
           if (isTimeoutError) {
-            logger.apiError(endpoint, new Error(`Request timed out after ${this.defaultTimeout}ms`));
+            logger.apiError(
+              endpoint,
+              new Error(`Request timed out after ${this.defaultTimeout}ms`)
+            );
           } else {
             logger.apiError(endpoint, error);
           }
@@ -419,12 +454,14 @@ class ApiClient {
 
         // For timeout errors, wait a bit longer before retry (but still capped)
         if (attempt < maxRetries) {
-          const delay = isTimeoutError 
+          const delay = isTimeoutError
             ? Math.min(apiConfig.errorHandling.retryDelay * attempt * 1.5, 2000) // Faster retry, cap at 2s
             : Math.min(apiConfig.errorHandling.retryDelay * attempt, 2000);
-          
+
           if (isTimeoutError) {
-            logger.debug(`Timeout error on ${endpoint}, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`);
+            logger.debug(
+              `Timeout error on ${endpoint}, retrying in ${delay}ms (attempt ${attempt}/${maxRetries})`
+            );
           }
           await new Promise((resolve) => setTimeout(resolve, delay));
         }
@@ -433,36 +470,39 @@ class ApiClient {
 
     // Log final error (suppress for endpoints with fallback data)
     if (lastError) {
-      const isTimeoutError = 
-        lastError.message.includes('timeout') || 
-        lastError.message.includes('timed out') ||
-        lastError.name === 'AbortError';
-      
-      const hasFallback = 
-        endpoint.includes('/iftah') ||
-        endpoint.includes('/authors') ||
-        endpoint.includes('/courses') ||
-        endpoint.includes('/books') ||
-        endpoint.includes('/events') ||
-        endpoint.includes('/blogs') ||
-        endpoint.includes('/articles');
-      
-      const shouldSuppress = 
-        (lastError.message.includes('404') && 
-         apiConfig.errorHandling.suppressedStatusCodes.includes(404)) ||
+      const isTimeoutError =
+        lastError.message.includes("timeout") ||
+        lastError.message.includes("timed out") ||
+        lastError.name === "AbortError";
+
+      const hasFallback =
+        endpoint.includes("/iftah") ||
+        endpoint.includes("/authors") ||
+        endpoint.includes("/courses") ||
+        endpoint.includes("/books") ||
+        endpoint.includes("/events") ||
+        endpoint.includes("/blogs") ||
+        endpoint.includes("/articles");
+
+      const shouldSuppress =
+        (lastError.message.includes("404") &&
+          apiConfig.errorHandling.suppressedStatusCodes.includes(404)) ||
         // Suppress timeout errors for endpoints that have graceful fallback handling
         (isTimeoutError && hasFallback);
-      
+
       if (!shouldSuppress) {
         logger.apiError(endpoint, lastError);
       } else {
         // Only log as debug/warn level for endpoints with fallback
-        logger.debug(`API request failed (fallback will be used): ${endpoint}`, { 
-          error: lastError.message 
-        });
+        logger.debug(
+          `API request failed (fallback will be used): ${endpoint}`,
+          {
+            error: lastError.message,
+          }
+        );
       }
     }
-    
+
     return {
       data: null as T,
       success: false,
@@ -548,24 +588,24 @@ export class BlogsApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching blogs from API', { page, limit });
+      logger.info("Fetching blogs from API", { page, limit });
       const result = await apiClient.get(endpoints.blogs, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched blogs', { count: Array.isArray(result.data) ? result.data.length : 0 });
-      
+      logger.info("Successfully fetched blogs", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
+
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
@@ -576,7 +616,7 @@ export class BlogsApi {
         }),
       };
     } catch (error) {
-      logger.error('Blogs API failed', { error });
+      logger.error("Blogs API failed", { error });
       throw error;
     }
   }
@@ -585,11 +625,11 @@ export class BlogsApi {
     try {
       const result = await apiClient.get(`${endpoints.blogs}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Blog getById failed', { id, error });
+      logger.error("Blog getById failed", { id, error });
       throw error;
     }
   }
@@ -604,24 +644,23 @@ export class BlogsApi {
           return {
             data: blog,
             success: true,
-            message: "Blog found by slug"
+            message: "Blog found by slug",
           };
         }
       }
-      
+
       // If not found in list, try direct API call
       const result = await apiClient.get(`${endpoints.blogs}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'Blog not found');
+        throw new Error(result.error || "Blog not found");
       }
       return result;
     } catch (error) {
-      logger.error('Blog getBySlug failed', { slug, error });
+      logger.error("Blog getBySlug failed", { slug, error });
       throw error;
     }
   }
 }
-
 
 export class DonationApi {
   static async getAll(params: ListParams = {}) {
@@ -650,9 +689,7 @@ export class DonationApi {
       return result;
     }
 
-    const total = Array.isArray(result.data)
-      ? result.data.length
-      : limit;
+    const total = Array.isArray(result.data) ? result.data.length : limit;
 
     return {
       ...result,
@@ -664,7 +701,6 @@ export class DonationApi {
     const result = await apiClient.get(`${endpoints.donation}/${id}`);
     if (!result.success) {
       return {
-      
         success: true,
         message: "Using fallback data due to API unavailability",
       };
@@ -676,7 +712,6 @@ export class DonationApi {
     const result = await apiClient.get(`${endpoints.donation}/${slug}`);
     if (!result.success) {
       return {
-     
         success: true,
         message: "Using fallback data due to API unavailability",
       };
@@ -685,8 +720,6 @@ export class DonationApi {
   }
 }
 
-
-
 export class CoursesApi {
   static async getAll(params: ListParams = {}) {
     const { page: rawPage, limit: rawLimit, ...rest } = params;
@@ -694,31 +727,31 @@ export class CoursesApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching courses from API', { page, limit });
+      logger.info("Fetching courses from API", { page, limit });
       const result = await apiClient.get(endpoints.courses, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched courses', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched courses", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Courses API failed', { error });
+      logger.error("Courses API failed", { error });
       throw error;
     }
   }
@@ -727,11 +760,11 @@ export class CoursesApi {
     try {
       const result = await apiClient.get(`${endpoints.courses}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Course getById failed', { id, error });
+      logger.error("Course getById failed", { id, error });
       throw error;
     }
   }
@@ -746,19 +779,19 @@ export class CoursesApi {
           return {
             data: course,
             success: true,
-            message: "Course found by slug"
+            message: "Course found by slug",
           };
         }
       }
-      
+
       // If not found in list, try direct API call
       const result = await apiClient.get(`${endpoints.courses}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'Course not found');
+        throw new Error(result.error || "Course not found");
       }
       return result;
     } catch (error) {
-      logger.error('Course getBySlug failed', { slug, error });
+      logger.error("Course getBySlug failed", { slug, error });
       throw error;
     }
   }
@@ -792,277 +825,277 @@ export interface AdmissionFormData {
 export class AdmissionsApi {
   // 🔹 Helper: Extract CSRF token from cookies with better debugging
   private static extractCsrfTokenFromCookies(): string | null {
-      if (typeof document === "undefined") return null;
+    if (typeof document === "undefined") return null;
 
-      const cookies = document.cookie.split(";");
-      console.log("🍪 [ADMISSIONS] All cookies:", document.cookie);
-      console.log("🍪 [ADMISSIONS] Parsed cookies:", cookies);
+    const cookies = document.cookie.split(";");
+    console.log("🍪 [ADMISSIONS] All cookies:", document.cookie);
+    console.log("🍪 [ADMISSIONS] Parsed cookies:", cookies);
 
-      // Try XSRF-TOKEN first (Laravel Sanctum standard)
-      const xsrfCookie = cookies.find((cookie) =>
-          cookie.trim().startsWith("XSRF-TOKEN=")
+    // Try XSRF-TOKEN first (Laravel Sanctum standard)
+    const xsrfCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("XSRF-TOKEN=")
+    );
+    if (xsrfCookie) {
+      const token = decodeURIComponent(xsrfCookie.split("=")[1].trim());
+      console.log(
+        "✅ [ADMISSIONS] Found XSRF-TOKEN:",
+        token.substring(0, 20) + "..."
       );
-      if (xsrfCookie) {
-          const token = decodeURIComponent(xsrfCookie.split("=")[1].trim());
-          console.log(
-              "✅ [ADMISSIONS] Found XSRF-TOKEN:",
-              token.substring(0, 20) + "..."
-          );
-          return token;
-      }
+      return token;
+    }
 
-      // Try lowercase version
-      const xsrfCookieLower = cookies.find((cookie) =>
-          cookie.trim().toLowerCase().startsWith("xsrf-token=")
+    // Try lowercase version
+    const xsrfCookieLower = cookies.find((cookie) =>
+      cookie.trim().toLowerCase().startsWith("xsrf-token=")
+    );
+    if (xsrfCookieLower) {
+      const token = decodeURIComponent(xsrfCookieLower.split("=")[1].trim());
+      console.log(
+        "✅ [ADMISSIONS] Found xsrf-token (lowercase):",
+        token.substring(0, 20) + "..."
       );
-      if (xsrfCookieLower) {
-          const token = decodeURIComponent(
-              xsrfCookieLower.split("=")[1].trim()
-          );
-          console.log(
-              "✅ [ADMISSIONS] Found xsrf-token (lowercase):",
-              token.substring(0, 20) + "..."
-          );
-          return token;
-      }
+      return token;
+    }
 
-      console.log("❌ [ADMISSIONS] No XSRF-TOKEN found in cookies");
-      return null;
+    console.log("❌ [ADMISSIONS] No XSRF-TOKEN found in cookies");
+    return null;
   }
 
   // 🔹 Get CSRF token (helper method) - IMPROVED VERSION
   static async getCsrfToken(): Promise<string | null> {
-      try {
-          // Step 1: Check if token already exists in cookies
-          let token = this.extractCsrfTokenFromCookies();
-          if (token) {
-              console.log("✅ [ADMISSIONS] CSRF token already in cookies");
-              return token;
-          }
-
-          // Step 2: Fetch CSRF cookie from server
-          console.log("🔑 [ADMISSIONS] Fetching CSRF token from server...");
-          console.log("🔑 [ADMISSIONS] CSRF endpoint:", endpoints.csrfCookie);  
-
-          try {
-              const response = await fetch(endpoints.csrfCookie, {
-                  method: "GET",
-                  credentials: "include", // Must include credentials
-                  headers: {
-                      Accept: "application/json",
-                      "X-Requested-With": "XMLHttpRequest",
-                  },
-              });
-
-              console.log(
-                  "📥 [ADMISSIONS] CSRF endpoint response status:",
-                  response.status
-              );
-              console.log(
-                  "📥 [ADMISSIONS] CSRF endpoint response headers:",
-                  Object.fromEntries(response.headers.entries())
-              );
-
-              if (response.ok) {
-                  // Check cookies immediately (browser sets cookies synchronously)
-                  token = this.extractCsrfTokenFromCookies();
-
-                  if (token) {
-                      console.log(
-                          "✅ [ADMISSIONS] CSRF token obtained from server"
-                      );
-                      return token;
-                  } else {
-                      console.warn(
-                          "⚠ [ADMISSIONS] CSRF endpoint responded OK but no cookie found"
-                      );
-                      console.warn(
-                          "⚠ [ADMISSIONS] Check: 1) Same domain 2) CORS credentials 3) Cookie settings"
-                      );
-                  }
-              } else {
-                  console.error(
-                      "❌ [ADMISSIONS] CSRF endpoint failed:",
-                      response.status,
-                      response.statusText
-                  );
-              }
-          } catch (csrfError) {
-              console.error(
-                  "❌ [ADMISSIONS] Error fetching CSRF token:",
-                  csrfError
-              );
-          }
-
-          console.log("❌ [ADMISSIONS] No CSRF token found");
-          return null;
-      } catch (error) {
-          console.error("❌ [ADMISSIONS] Error in getCsrfToken:", error);
-          return null;
+    try {
+      // Step 1: Check if token already exists in cookies
+      let token = this.extractCsrfTokenFromCookies();
+      if (token) {
+        console.log("✅ [ADMISSIONS] CSRF token already in cookies");
+        return token;
       }
+
+      // Step 2: Fetch CSRF cookie from server
+      console.log("🔑 [ADMISSIONS] Fetching CSRF token from server...");
+      console.log("🔑 [ADMISSIONS] CSRF endpoint:", endpoints.csrfCookie);
+
+      try {
+        const response = await fetch(endpoints.csrfCookie, {
+          method: "GET",
+          credentials: "include", // Must include credentials
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
+
+        console.log(
+          "📥 [ADMISSIONS] CSRF endpoint response status:",
+          response.status
+        );
+        console.log(
+          "📥 [ADMISSIONS] CSRF endpoint response headers:",
+          Object.fromEntries(response.headers.entries())
+        );
+
+        if (response.ok) {
+          // Check cookies immediately (browser sets cookies synchronously)
+          token = this.extractCsrfTokenFromCookies();
+
+          if (token) {
+            console.log("✅ [ADMISSIONS] CSRF token obtained from server");
+            return token;
+          } else {
+            console.warn(
+              "⚠ [ADMISSIONS] CSRF endpoint responded OK but no cookie found"
+            );
+            console.warn(
+              "⚠ [ADMISSIONS] Check: 1) Same domain 2) CORS credentials 3) Cookie settings"
+            );
+          }
+        } else {
+          console.error(
+            "❌ [ADMISSIONS] CSRF endpoint failed:",
+            response.status,
+            response.statusText
+          );
+        }
+      } catch (csrfError) {
+        console.error("❌ [ADMISSIONS] Error fetching CSRF token:", csrfError);
+      }
+
+      console.log("❌ [ADMISSIONS] No CSRF token found");
+      return null;
+    } catch (error) {
+      console.error("❌ [ADMISSIONS] Error in getCsrfToken:", error);
+      return null;
+    }
   }
 
   // ... other methods stay the same ...
 
   // 🔹 Create a new admission (POST) - IMPROVED VERSION
   static async create(data: AdmissionFormData) {
+    try {
+      const apiUrl = endpoints.admissions;
+      console.log("🚀 [ADMISSION API] Starting request to:", apiUrl);
+
+      // ✅ STEP 1: Get CSRF cookie FIRST (CRITICAL!)
+      console.log("🔑 [ADMISSION API] Step 1: Fetching CSRF cookie...");
       try {
-          const apiUrl = endpoints.admissions;
-          console.log("🚀 [ADMISSION API] Starting request to:", apiUrl);
+        const csrfResponse = await fetch(endpoints.csrfCookie, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+          },
+        });
 
-          // ✅ STEP 1: Get CSRF cookie FIRST (CRITICAL!)
-          console.log("🔑 [ADMISSION API] Step 1: Fetching CSRF cookie...");
-          try {
-            const csrfResponse = await fetch(endpoints.csrfCookie, {
-                method: "GET",
-                credentials: "include",
-                headers: {
-                    Accept: "application/json",
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-            });
+        console.log("📥 [ADMISSION API] CSRF cookie response:", {
+          status: csrfResponse.status,
+          statusText: csrfResponse.statusText,
+          ok: csrfResponse.ok,
+        });
 
-            console.log("📥 [ADMISSION API] CSRF cookie response:", {
-                status: csrfResponse.status,
-                statusText: csrfResponse.statusText,
-                ok: csrfResponse.ok,
-            });
-
-            if (!csrfResponse.ok) {
-                console.warn("⚠️ [ADMISSION API] CSRF cookie fetch failed, continuing anyway...");
-                console.warn(`⚠️ [ADMISSION API] Status: ${csrfResponse.status} ${csrfResponse.statusText}`);
-            } else {
-                // Wait for cookie to be set
-                await new Promise((resolve) => setTimeout(resolve, 150));
-            }
-          } catch (csrfError: any) {
-              console.warn("⚠️ [ADMISSION API] CSRF cookie fetch error:", csrfError);
-              console.warn("⚠️ [ADMISSION API] Continuing without CSRF cookie - API may still work");
-          }
-
-          // ✅ STEP 2: Get the CSRF token from cookies
-          console.log(
-              "🔑 [ADMISSION API] Step 2: Extracting CSRF token from cookies..."
+        if (!csrfResponse.ok) {
+          console.warn(
+            "⚠️ [ADMISSION API] CSRF cookie fetch failed, continuing anyway..."
           );
-          const csrfToken = await this.getCsrfToken();
-
-          // ✅ STEP 3: Prepare headers
-          const headers: Record<string, string> = {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              "X-Requested-With": "XMLHttpRequest",
-          };
-
-          // Add CSRF token if available (optional - API routes might not require it)
-          if (csrfToken) {
-              console.log(
-                  "✅ [ADMISSION API] CSRF token obtained:",
-                  csrfToken.substring(0, 30) + "..."
-              );
-              headers["X-XSRF-TOKEN"] = csrfToken; // Laravel Sanctum expects this header name
-          } else {
-              console.warn("⚠️ [ADMISSION API] No CSRF token available (may be due to CORS restrictions)");
-              console.warn("⚠️ [ADMISSION API] Proceeding without CSRF token - API route may not require it");
-          }
-
-          // Prepare request body
-          const requestBody = { ...data };
-
-          console.log("📤 [ADMISSION API] Request URL:", apiUrl);
-          console.log("📤 [ADMISSION API] Request headers:", headers);
-          console.log(
-              "📤 [ADMISSION API] Request body:",
-              JSON.stringify(requestBody, null, 2)
+          console.warn(
+            `⚠️ [ADMISSION API] Status: ${csrfResponse.status} ${csrfResponse.statusText}`
           );
-
-          // ✅ STEP 4: Send POST request with credentials
-          console.log("🌐 [ADMISSION API] Making POST request to:", apiUrl);
-          console.log("🌐 [ADMISSION API] Full fetch URL will be:", apiUrl);
-          
-          const response = await fetch(apiUrl, {
-              method: "POST",
-              mode: "cors",
-              cache: "no-cache",
-              credentials: "include", // Must include credentials to send cookies
-              headers,
-              body: JSON.stringify(requestBody),
-          });
-
-          console.log("📥 [ADMISSION API] Response received!");
-          console.log("📥 [ADMISSION API] Response status:", response.status);
-          console.log(
-              "📥 [ADMISSION API] Response status text:",
-              response.statusText
-          );
-
-          if (!response.ok) {
-              const errorText = await response.text();
-              console.error("❌ [ADMISSION API] Request failed!");
-              console.error("❌ [ADMISSION API] Status:", response.status);
-              console.error("❌ [ADMISSION API] Error response:", errorText);
-
-              try {
-                  const errorJson = JSON.parse(errorText);
-                  console.error("❌ [ADMISSION API] Error JSON:", errorJson);
-
-                  if (
-                      errorJson.message &&
-                      errorJson.message.includes("CSRF")
-                  ) {
-                      throw new Error(
-                          `CSRF token mismatch (${response.status}). The CSRF token may not have been set correctly. Check browser console for cookie information.`
-                      );
-                  }
-              } catch (e) {
-                  // Not JSON, that's fine
-              }
-
-              throw new Error(
-                  `API request failed with status ${response.status}: ${errorText}`
-              );
-          }
-
-          const result = await response.json();
-          console.log(
-              "✅ [ADMISSION API] SUCCESS: Data sent to Laravel dashboard!"
-          );
-          console.log(
-              "✅ [ADMISSION API] Response data:",
-              JSON.stringify(result, null, 2)
-          );
-
-          return {
-              data: result,
-              success: true,
-              message: "Admission submitted successfully",
-          };
-      } catch (error: any) {
-          console.error("❌ [ADMISSION API] Exception occurred:", error);
-          console.error("❌ [ADMISSION API] Error message:", error.message);
-
-          // Don't wrap CSRF errors - let the server's response speak for itself
-          // If the server requires CSRF and we don't have it, it will return a 419 error
-          throw error;
+        } else {
+          // Wait for cookie to be set
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+      } catch (csrfError: any) {
+        console.warn("⚠️ [ADMISSION API] CSRF cookie fetch error:", csrfError);
+        console.warn(
+          "⚠️ [ADMISSION API] Continuing without CSRF cookie - API may still work"
+        );
       }
+
+      // ✅ STEP 2: Get the CSRF token from cookies
+      console.log(
+        "🔑 [ADMISSION API] Step 2: Extracting CSRF token from cookies..."
+      );
+      const csrfToken = await this.getCsrfToken();
+
+      // ✅ STEP 3: Prepare headers
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-Requested-With": "XMLHttpRequest",
+      };
+
+      // Add CSRF token if available (optional - API routes might not require it)
+      if (csrfToken) {
+        console.log(
+          "✅ [ADMISSION API] CSRF token obtained:",
+          csrfToken.substring(0, 30) + "..."
+        );
+        headers["X-XSRF-TOKEN"] = csrfToken; // Laravel Sanctum expects this header name
+      } else {
+        console.warn(
+          "⚠️ [ADMISSION API] No CSRF token available (may be due to CORS restrictions)"
+        );
+        console.warn(
+          "⚠️ [ADMISSION API] Proceeding without CSRF token - API route may not require it"
+        );
+      }
+
+      // Prepare request body
+      const requestBody = { ...data };
+
+      console.log("📤 [ADMISSION API] Request URL:", apiUrl);
+      console.log("📤 [ADMISSION API] Request headers:", headers);
+      console.log(
+        "📤 [ADMISSION API] Request body:",
+        JSON.stringify(requestBody, null, 2)
+      );
+
+      // ✅ STEP 4: Send POST request with credentials
+      console.log("🌐 [ADMISSION API] Making POST request to:", apiUrl);
+      console.log("🌐 [ADMISSION API] Full fetch URL will be:", apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "include", // Must include credentials to send cookies
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log("📥 [ADMISSION API] Response received!");
+      console.log("📥 [ADMISSION API] Response status:", response.status);
+      console.log(
+        "📥 [ADMISSION API] Response status text:",
+        response.statusText
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("❌ [ADMISSION API] Request failed!");
+        console.error("❌ [ADMISSION API] Status:", response.status);
+        console.error("❌ [ADMISSION API] Error response:", errorText);
+
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error("❌ [ADMISSION API] Error JSON:", errorJson);
+
+          if (errorJson.message && errorJson.message.includes("CSRF")) {
+            throw new Error(
+              `CSRF token mismatch (${response.status}). The CSRF token may not have been set correctly. Check browser console for cookie information.`
+            );
+          }
+        } catch (e) {
+          // Not JSON, that's fine
+        }
+
+        throw new Error(
+          `API request failed with status ${response.status}: ${errorText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log(
+        "✅ [ADMISSION API] SUCCESS: Data sent to Laravel dashboard!"
+      );
+      console.log(
+        "✅ [ADMISSION API] Response data:",
+        JSON.stringify(result, null, 2)
+      );
+
+      return {
+        data: result,
+        success: true,
+        message: "Admission submitted successfully",
+      };
+    } catch (error: any) {
+      console.error("❌ [ADMISSION API] Exception occurred:", error);
+      console.error("❌ [ADMISSION API] Error message:", error.message);
+
+      // Don't wrap CSRF errors - let the server's response speak for itself
+      // If the server requires CSRF and we don't have it, it will return a 419 error
+      throw error;
+    }
   }
 
   // 🔹 Submit admission form (wrapper that calls create)
   static async submit(data: AdmissionFormData) {
-    console.log('📝 [ADMISSION SUBMIT] Starting form submission...');
-    console.log('📝 [ADMISSION SUBMIT] Form data:', data);
-    
+    console.log("📝 [ADMISSION SUBMIT] Starting form submission...");
+    console.log("📝 [ADMISSION SUBMIT] Form data:", data);
+
     try {
       const result = await this.create(data);
-      console.log('✅ [ADMISSION SUBMIT] Form submission successful!');
+      console.log("✅ [ADMISSION SUBMIT] Form submission successful!");
       return result;
     } catch (error: any) {
-      console.error('❌ [ADMISSION SUBMIT] API submission failed:', error);
-      console.error('❌ [ADMISSION SUBMIT] Error details:', {
+      console.error("❌ [ADMISSION SUBMIT] API submission failed:", error);
+      console.error("❌ [ADMISSION SUBMIT] Error details:", {
         message: error.message,
         stack: error.stack,
-        name: error.name
+        name: error.name,
       });
-      
+
       throw error;
     }
   }
@@ -1091,31 +1124,31 @@ export class AuthorsApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching authors from API', { page, limit });
+      logger.info("Fetching authors from API", { page, limit });
       const result = await apiClient.get(endpoints.authors, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched authors', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched authors", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Authors API failed', { error });
+      logger.error("Authors API failed", { error });
       throw error;
     }
   }
@@ -1124,11 +1157,11 @@ export class AuthorsApi {
     try {
       const result = await apiClient.get(`${endpoints.authors}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Author getById failed', { id, error });
+      logger.error("Author getById failed", { id, error });
       throw error;
     }
   }
@@ -1141,31 +1174,31 @@ export class BooksApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching books from API', { page, limit });
+      logger.info("Fetching books from API", { page, limit });
       const result = await apiClient.get(endpoints.books, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched books', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched books", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Books API failed', { error });
+      logger.error("Books API failed", { error });
       throw error;
     }
   }
@@ -1174,19 +1207,15 @@ export class BooksApi {
     try {
       const result = await apiClient.get(`${endpoints.book}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Book getById failed', { id, error });
+      logger.error("Book getById failed", { id, error });
       throw error;
     }
   }
 }
-
-
-
-
 
 export class EventsApi {
   static async getAll(params: ListParams = {}) {
@@ -1195,31 +1224,31 @@ export class EventsApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching events from API', { page, limit });
+      logger.info("Fetching events from API", { page, limit });
       const result = await apiClient.get(endpoints.events, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched events', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched events", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Events API failed', { error });
+      logger.error("Events API failed", { error });
       throw error;
     }
   }
@@ -1228,11 +1257,11 @@ export class EventsApi {
     try {
       const result = await apiClient.get(`${endpoints.events}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Event getById failed', { id, error });
+      logger.error("Event getById failed", { id, error });
       throw error;
     }
   }
@@ -1241,22 +1270,17 @@ export class EventsApi {
     try {
       const result = await apiClient.get(`${endpoints.events}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Event getBySlug failed', { slug, error });
+      logger.error("Event getBySlug failed", { slug, error });
       throw error;
     }
   }
 }
 
 // ifah qustion
-
-
-
-
-
 
 export class IftahApi {
   static async getAll(params: ListParams = {}) {
@@ -1265,31 +1289,31 @@ export class IftahApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching iftah from API', { page, limit });
+      logger.info("Fetching iftah from API", { page, limit });
       const result = await apiClient.get(endpoints.iftah, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched iftah', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched iftah", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Iftah API failed', { error });
+      logger.error("Iftah API failed", { error });
       throw error;
     }
   }
@@ -1298,11 +1322,11 @@ export class IftahApi {
     try {
       const result = await apiClient.get(`${endpoints.iftah}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Iftah getById failed', { id, error });
+      logger.error("Iftah getById failed", { id, error });
       throw error;
     }
   }
@@ -1311,11 +1335,11 @@ export class IftahApi {
     try {
       const result = await apiClient.get(`${endpoints.iftah}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Iftah getBySlug failed', { slug, error });
+      logger.error("Iftah getBySlug failed", { slug, error });
       throw error;
     }
   }
@@ -1324,32 +1348,41 @@ export class IftahApi {
     try {
       const result = await apiClient.get(`${endpoints.iftah}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Iftah getIftah failed', { slug, error });
+      logger.error("Iftah getIftah failed", { slug, error });
       throw error;
     }
   }
 
-  static async getBySubCategory(subCategoryId: number, params: ListParams = {}) {
+  static async getBySubCategory(
+    subCategoryId: number,
+    params: ListParams = {}
+  ) {
     const { limit: rawLimit, ...rest } = params;
     const limit = rawLimit ?? 100;
 
     try {
-      logger.info('Fetching iftah by subcategory from API', { subCategoryId, limit });
-      const result = await apiClient.get(`/api/iftah/sub-category/${subCategoryId}`, {
-        params: { limit, ...rest },
+      logger.info("Fetching iftah by subcategory from API", {
+        subCategoryId,
+        limit,
       });
+      const result = await apiClient.get(
+        `/api/iftah/sub-category/${subCategoryId}`,
+        {
+          params: { limit, ...rest },
+        }
+      );
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched iftah by subcategory', { 
-        subCategoryId, 
-        count: Array.isArray(result.data) ? result.data.length : 0 
+      logger.info("Successfully fetched iftah by subcategory", {
+        subCategoryId,
+        count: Array.isArray(result.data) ? result.data.length : 0,
       });
 
       return {
@@ -1357,19 +1390,19 @@ export class IftahApi {
         success: true,
       };
     } catch (error) {
-      logger.warn('Iftah getBySubCategory failed', { subCategoryId, error });
+      logger.warn("Iftah getBySubCategory failed", { subCategoryId, error });
       return {
         data: [],
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
 
   static extractCategories(fatwas: any[]): Array<{ id: number; name: string }> {
     if (!Array.isArray(fatwas) || fatwas.length === 0) {
-      logger.info('extractCategories: No fatwas provided or empty array');
-      console.log('📊 extractCategories: No fatwas provided or empty array');
+      logger.info("extractCategories: No fatwas provided or empty array");
+      console.log("📊 extractCategories: No fatwas provided or empty array");
       return [];
     }
 
@@ -1381,13 +1414,13 @@ export class IftahApi {
       try {
         // Log first item structure for debugging
         if (index === 0) {
-          console.log('🔍 Sample fatwa structure:', {
+          console.log("🔍 Sample fatwa structure:", {
             id: fatwa.id,
             title: fatwa.title,
             has_iftah_sub_category: !!fatwa?.iftah_sub_category,
             iftah_sub_category: fatwa?.iftah_sub_category,
             direct_tag: fatwa?.tag,
-            tag_id: fatwa?.tag_id
+            tag_id: fatwa?.tag_id,
           });
         }
 
@@ -1418,8 +1451,7 @@ export class IftahApi {
           tagId = fatwa.tag_id;
           tagName = `Tag ${tagId}`;
           processedCount++;
-        }
-        else {
+        } else {
           skippedCount++;
           return; // Skip items without any category information
         }
@@ -1431,49 +1463,71 @@ export class IftahApi {
           });
         }
       } catch (error) {
-        logger.warn(`extractCategories: Error processing fatwa at index ${index}`, { error, fatwa });
-        console.error(`❌ extractCategories: Error at index ${index}:`, error, fatwa);
+        logger.warn(
+          `extractCategories: Error processing fatwa at index ${index}`,
+          { error, fatwa }
+        );
+        console.error(
+          `❌ extractCategories: Error at index ${index}:`,
+          error,
+          fatwa
+        );
         skippedCount++;
       }
     });
 
     const categories = Array.from(categoryMap.values());
-    logger.info(`extractCategories: Extracted ${categories.length} categories from ${fatwas.length} fatwas (processed: ${processedCount}, skipped: ${skippedCount})`);
-    console.log(`📊 extractCategories: Extracted ${categories.length} categories from ${fatwas.length} fatwas`, {
-      categories,
-      processedCount,
-      skippedCount
-    });
-    
+    logger.info(
+      `extractCategories: Extracted ${categories.length} categories from ${fatwas.length} fatwas (processed: ${processedCount}, skipped: ${skippedCount})`
+    );
+    console.log(
+      `📊 extractCategories: Extracted ${categories.length} categories from ${fatwas.length} fatwas`,
+      {
+        categories,
+        processedCount,
+        skippedCount,
+      }
+    );
+
     return categories;
   }
 
   static extractSubCategories(
-    fatwas: any[], 
+    fatwas: any[],
     categoryId?: number | string | null
   ): Array<{ id: number; name: string; tag_id: number }> {
     if (!Array.isArray(fatwas) || fatwas.length === 0) {
-      logger.info('extractSubCategories: No fatwas provided or empty array');
-      console.log('📊 extractSubCategories: No fatwas provided or empty array');
+      logger.info("extractSubCategories: No fatwas provided or empty array");
+      console.log("📊 extractSubCategories: No fatwas provided or empty array");
       return [];
     }
 
-    console.log(`🔍 extractSubCategories START: Processing ${fatwas.length} fatwas with categoryId: ${categoryId} (type: ${typeof categoryId})`);
+    console.log(
+      `🔍 extractSubCategories START: Processing ${
+        fatwas.length
+      } fatwas with categoryId: ${categoryId} (type: ${typeof categoryId})`
+    );
 
-    const subCategoryMap = new Map<number, { id: number; name: string; tag_id: number }>();
+    const subCategoryMap = new Map<
+      number,
+      { id: number; name: string; tag_id: number }
+    >();
     let processedCount = 0;
     let skippedCount = 0;
     let noSubCategoryCount = 0;
     let categoryMismatchCount = 0;
 
     // Normalize categoryId to number for comparison
-    const categoryIdNum = categoryId !== null && categoryId !== undefined ? Number(categoryId) : null;
+    const categoryIdNum =
+      categoryId !== null && categoryId !== undefined
+        ? Number(categoryId)
+        : null;
 
     fatwas.forEach((fatwa, index) => {
       try {
         // Handle null iftah_sub_category - only process items that have it
         const subCategory = fatwa?.iftah_sub_category;
-        
+
         if (!subCategory || !subCategory.id) {
           noSubCategoryCount++;
           skippedCount++;
@@ -1482,43 +1536,53 @@ export class IftahApi {
 
         // Get tag_id from nested tag structure or direct tag_id
         // Priority: subCategory.tag.id > subCategory.tag_id
-        const subCategoryTagId = subCategory.tag?.id ?? subCategory.tag_id ?? null;
-        
+        const subCategoryTagId =
+          subCategory.tag?.id ?? subCategory.tag_id ?? null;
+
         // Convert to number for comparison
-        const subCategoryTagIdNum = subCategoryTagId !== null ? Number(subCategoryTagId) : null;
-        
+        const subCategoryTagIdNum =
+          subCategoryTagId !== null ? Number(subCategoryTagId) : null;
+
         // If categoryId is specified, only include subcategories for that category
         if (categoryIdNum !== null) {
           // Match if tag.id OR tag_id matches the category
           const matchesCategory = subCategoryTagIdNum === categoryIdNum;
-          
+
           if (!matchesCategory) {
             categoryMismatchCount++;
             // Log first few non-matching items for debugging
             if (categoryMismatchCount <= 3) {
-              console.log(`❌ Subcategory "${subCategory.name}" (ID: ${subCategory.id}) doesn't match category ${categoryIdNum}:`, {
-                subCategoryTagId: subCategoryTagId,
-                subCategoryTagIdNum: subCategoryTagIdNum,
-                categoryIdNum: categoryIdNum,
-                tagObject: subCategory.tag,
-                directTagId: subCategory.tag_id,
-                fullSubCategory: subCategory
-              });
+              console.log(
+                `❌ Subcategory "${subCategory.name}" (ID: ${subCategory.id}) doesn't match category ${categoryIdNum}:`,
+                {
+                  subCategoryTagId: subCategoryTagId,
+                  subCategoryTagIdNum: subCategoryTagIdNum,
+                  categoryIdNum: categoryIdNum,
+                  tagObject: subCategory.tag,
+                  directTagId: subCategory.tag_id,
+                  fullSubCategory: subCategory,
+                }
+              );
             }
             return; // Skip if doesn't match category
           }
-          
+
           // Log ALL matching items for debugging
-          console.log(`✅ MATCH: Subcategory "${subCategory.name}" (ID: ${subCategory.id}) matches category ${categoryIdNum}`, {
-            subCategoryTagId: subCategoryTagId,
-            subCategoryTagIdNum: subCategoryTagIdNum,
-            categoryIdNum: categoryIdNum,
-            tagObject: subCategory.tag
-          });
+          console.log(
+            `✅ MATCH: Subcategory "${subCategory.name}" (ID: ${subCategory.id}) matches category ${categoryIdNum}`,
+            {
+              subCategoryTagId: subCategoryTagId,
+              subCategoryTagIdNum: subCategoryTagIdNum,
+              categoryIdNum: categoryIdNum,
+              tagObject: subCategory.tag,
+            }
+          );
         } else {
           // No category filter - log first few items
           if (index < 3) {
-            console.log(`📋 No category filter: Processing subcategory "${subCategory.name}" (ID: ${subCategory.id}, tag_id: ${subCategoryTagId})`);
+            console.log(
+              `📋 No category filter: Processing subcategory "${subCategory.name}" (ID: ${subCategory.id}, tag_id: ${subCategoryTagId})`
+            );
           }
         }
 
@@ -1527,22 +1591,33 @@ export class IftahApi {
           processedCount++;
           subCategoryMap.set(subCategory.id, {
             id: Number(subCategory.id),
-            name: String(subCategory.name || 'Unnamed'),
+            name: String(subCategory.name || "Unnamed"),
             tag_id: Number(subCategoryTagId || 0),
           });
-          console.log(`➕ Added subcategory "${subCategory.name}" (ID: ${subCategory.id}, tag_id: ${subCategoryTagId}) to map`);
+          console.log(
+            `➕ Added subcategory "${subCategory.name}" (ID: ${subCategory.id}, tag_id: ${subCategoryTagId}) to map`
+          );
         } else {
-          console.log(`⏭️ Subcategory "${subCategory.name}" (ID: ${subCategory.id}) already in map, skipping duplicate`);
+          console.log(
+            `⏭️ Subcategory "${subCategory.name}" (ID: ${subCategory.id}) already in map, skipping duplicate`
+          );
         }
       } catch (error) {
-        logger.warn(`extractSubCategories: Error processing fatwa at index ${index}`, { error, fatwa });
-        console.error(`❌ extractSubCategories: Error at index ${index}:`, error, fatwa);
+        logger.warn(
+          `extractSubCategories: Error processing fatwa at index ${index}`,
+          { error, fatwa }
+        );
+        console.error(
+          `❌ extractSubCategories: Error at index ${index}:`,
+          error,
+          fatwa
+        );
         skippedCount++;
       }
     });
 
     const subCategories = Array.from(subCategoryMap.values());
-    
+
     // Comprehensive final summary
     console.log(`📊 extractSubCategories FINAL SUMMARY:`, {
       totalFatwas: fatwas.length,
@@ -1551,34 +1626,49 @@ export class IftahApi {
       processedCount,
       skippedCount,
       noSubCategoryCount,
-      categoryMismatchCount: categoryIdNum !== null ? categoryMismatchCount : 'N/A (no filter)',
-      extractedSubCategoriesList: subCategories.map(s => ({ 
-        id: s.id, 
-        name: s.name, 
-        tag_id: s.tag_id 
-      }))
+      categoryMismatchCount:
+        categoryIdNum !== null ? categoryMismatchCount : "N/A (no filter)",
+      extractedSubCategoriesList: subCategories.map((s) => ({
+        id: s.id,
+        name: s.name,
+        tag_id: s.tag_id,
+      })),
     });
-    
-    logger.info(`extractSubCategories: Extracted ${subCategories.length} subcategories from ${fatwas.length} fatwas${categoryIdNum ? ` for category ${categoryIdNum}` : ''} (processed: ${processedCount}, skipped: ${skippedCount}, no subcategory: ${noSubCategoryCount}, mismatch: ${categoryMismatchCount})`);
-    
+
+    logger.info(
+      `extractSubCategories: Extracted ${
+        subCategories.length
+      } subcategories from ${fatwas.length} fatwas${
+        categoryIdNum ? ` for category ${categoryIdNum}` : ""
+      } (processed: ${processedCount}, skipped: ${skippedCount}, no subcategory: ${noSubCategoryCount}, mismatch: ${categoryMismatchCount})`
+    );
+
     return subCategories;
   }
 
-  static async getSubCategories(params: ListParams = {}): Promise<ApiResponse<any[]>> {
+  static async getSubCategories(
+    params: ListParams = {}
+  ): Promise<ApiResponse<any[]>> {
     const { page: rawPage, limit: rawLimit, ...rest } = params;
     const page = rawPage ?? 1;
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching iftah subcategories from API', { page, limit, ...rest });
+      logger.info("Fetching iftah subcategories from API", {
+        page,
+        limit,
+        ...rest,
+      });
       // Use local API route proxy which forwards to external API
-      const result = await apiClient.get('/api/iftah/sub-categories', {
+      const result = await apiClient.get("/api/iftah/sub-categories", {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
         // API endpoint might not exist, return empty array gracefully
-        logger.info('Iftah subcategories API not available, returning empty array');
+        logger.info(
+          "Iftah subcategories API not available, returning empty array"
+        );
         return {
           data: [],
           success: true, // Return success: true so calling code doesn't treat it as an error
@@ -1588,8 +1678,8 @@ export class IftahApi {
       }
 
       const subCategoriesData = Array.isArray(result.data) ? result.data : [];
-      logger.info('Successfully fetched iftah subcategories', { 
-        count: subCategoriesData.length 
+      logger.info("Successfully fetched iftah subcategories", {
+        count: subCategoriesData.length,
       });
 
       if (result.pagination) {
@@ -1608,7 +1698,9 @@ export class IftahApi {
       } as ApiResponse<any[]>;
     } catch (error) {
       // API endpoint doesn't exist or failed, return empty array gracefully
-      logger.info('Iftah getSubCategories API not available, returning empty array');
+      logger.info(
+        "Iftah getSubCategories API not available, returning empty array"
+      );
       return {
         data: [],
         success: true, // Return success: true so calling code doesn't treat it as an error
@@ -1619,35 +1711,48 @@ export class IftahApi {
   }
 
   // Get subcategory by ID (includes all iftah items for that subcategory)
-  static async getSubCategoryById(subCategoryId: number | string): Promise<ApiResponse<{ sub_category_id: string | number; total: number; data: any[] }>> {
+  static async getSubCategoryById(subCategoryId: number | string): Promise<
+    ApiResponse<{
+      sub_category_id: string | number;
+      total: number;
+      data: any[];
+    }>
+  > {
     try {
-      logger.info('Fetching subcategory by ID from API', { subCategoryId });
+      logger.info("Fetching subcategory by ID from API", { subCategoryId });
       // Use local API route proxy which forwards to external API
-      const result = await apiClient.get(`/api/iftah/sub-category/${subCategoryId}`);
+      const result = await apiClient.get(
+        `/api/iftah/sub-category/${subCategoryId}`
+      );
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
       // The API route returns: { data: { sub_category_id: "1", total: 2, data: [...] }, success: true }
       // But apiClient might unwrap it. Check both structures
       let responseData = result.data as any;
-      
+
       // If the apiClient unwrapped the response, the structure might be different
       // Check if we have the nested structure: { data: { sub_category_id, total, data: [...] } }
-      if (responseData && typeof responseData === 'object') {
+      if (responseData && typeof responseData === "object") {
         // If responseData has a data property with sub_category_id, that's our structure
-        if (responseData.sub_category_id !== undefined || responseData.data !== undefined) {
+        if (
+          responseData.sub_category_id !== undefined ||
+          responseData.data !== undefined
+        ) {
           // This is the correct structure: { sub_category_id: "1", total: 2, data: [...] }
-          logger.info('Successfully fetched subcategory by ID', { 
+          logger.info("Successfully fetched subcategory by ID", {
             subCategoryId,
             hasSubCategoryId: !!responseData?.sub_category_id,
             hasData: !!responseData?.data,
-            dataCount: Array.isArray(responseData?.data) ? responseData.data.length : 0,
+            dataCount: Array.isArray(responseData?.data)
+              ? responseData.data.length
+              : 0,
             total: responseData?.total,
-            keys: Object.keys(responseData)
+            keys: Object.keys(responseData),
           });
-          
+
           return {
             ...result,
             data: responseData,
@@ -1655,25 +1760,29 @@ export class IftahApi {
           };
         }
       }
-      
+
       // Fallback: try to use result.data as is
-      logger.info('Using fallback response structure', { 
+      logger.info("Using fallback response structure", {
         subCategoryId,
         dataType: typeof result.data,
-        keys: result.data ? Object.keys(result.data as any) : []
+        keys: result.data ? Object.keys(result.data as any) : [],
       });
-      
+
       return {
         ...result,
-        data: responseData || { sub_category_id: subCategoryId, total: 0, data: [] },
+        data: responseData || {
+          sub_category_id: subCategoryId,
+          total: 0,
+          data: [],
+        },
         success: true,
       };
     } catch (error) {
-      logger.warn('Iftah getSubCategoryById failed', { subCategoryId, error });
+      logger.warn("Iftah getSubCategoryById failed", { subCategoryId, error });
       return {
         data: { sub_category_id: subCategoryId, total: 0, data: [] },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         pagination: null,
       };
     }
@@ -1686,19 +1795,19 @@ export class IftahApi {
     const limit = rawLimit ?? 100; // Default to 100 for tags
 
     try {
-      logger.info('Fetching iftah tags from API', { page, limit, ...rest });
+      logger.info("Fetching iftah tags from API", { page, limit, ...rest });
       // Use local API route proxy which forwards to external API
-      const result = await apiClient.get('/api/iftah/tags', {
+      const result = await apiClient.get("/api/iftah/tags", {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
       const tagsData = Array.isArray(result.data) ? result.data : [];
-      logger.info('Successfully fetched iftah tags', { 
-        count: tagsData.length 
+      logger.info("Successfully fetched iftah tags", {
+        count: tagsData.length,
       });
 
       if (result.pagination) {
@@ -1716,39 +1825,42 @@ export class IftahApi {
         pagination: createPaginationMeta({ page, limit, total }),
       } as ApiResponse<any[]>;
     } catch (error) {
-      logger.warn('Iftah getTags failed', { error });
+      logger.warn("Iftah getTags failed", { error });
       return {
         data: [],
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         pagination: createPaginationMeta({ page, limit, total: 0 }),
       };
     }
   }
 
   // Get iftah items by tag ID (fetches all iftah with this tag)
-  static async getByTag(tagId: number | string, params: ListParams = {}): Promise<ApiResponse<any[]>> {
+  static async getByTag(
+    tagId: number | string,
+    params: ListParams = {}
+  ): Promise<ApiResponse<any[]>> {
     const { limit: rawLimit, ...rest } = params;
     const limit = rawLimit ?? 100;
 
     try {
-      logger.info('Fetching iftah by tag from API', { tagId, limit });
+      logger.info("Fetching iftah by tag from API", { tagId, limit });
       const result = await apiClient.get(endpoints.iftah, {
-        params: { 
+        params: {
           tag_id: tagId,
-          limit, 
-          ...rest 
+          limit,
+          ...rest,
         },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
       const iftahData = Array.isArray(result.data) ? result.data : [];
-      logger.info('Successfully fetched iftah by tag', { 
-        tagId, 
-        count: iftahData.length 
+      logger.info("Successfully fetched iftah by tag", {
+        tagId,
+        count: iftahData.length,
       });
 
       if (result.pagination) {
@@ -1767,35 +1879,41 @@ export class IftahApi {
         pagination: createPaginationMeta({ page: 1, limit, total }),
       };
     } catch (error) {
-      logger.warn('Iftah getByTag failed', { tagId, error });
+      logger.warn("Iftah getByTag failed", { tagId, error });
       return {
         data: [],
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         pagination: createPaginationMeta({ page: 1, limit, total: 0 }),
       };
     }
   }
 
   // Get tag information by tag ID (includes tag info and all iftah items for that tag)
-  static async getTagById(tagId: number | string): Promise<ApiResponse<{ tag_id: string | number; data: any[]; pagination?: any }>> {
+  static async getTagById(
+    tagId: number | string
+  ): Promise<
+    ApiResponse<{ tag_id: string | number; data: any[]; pagination?: any }>
+  > {
     try {
-      logger.info('Fetching tag by ID from API', { tagId });
+      logger.info("Fetching tag by ID from API", { tagId });
       // Use local API route proxy which forwards to external API
       const result = await apiClient.get(`/api/iftah/tag/${tagId}`);
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
       // The API returns: { tag_id: "1", data: [...], pagination: {...} }
       const responseData = result.data as any;
-      logger.info('Successfully fetched tag by ID', { 
-        tagId, 
+      logger.info("Successfully fetched tag by ID", {
+        tagId,
         hasData: !!responseData?.data,
-        dataCount: Array.isArray(responseData?.data) ? responseData.data.length : 0 
+        dataCount: Array.isArray(responseData?.data)
+          ? responseData.data.length
+          : 0,
       });
-      
+
       return {
         ...result,
         data: responseData || { tag_id: tagId, data: [], pagination: null },
@@ -1803,11 +1921,11 @@ export class IftahApi {
         pagination: responseData?.pagination || result.pagination || null,
       };
     } catch (error) {
-      logger.warn('Iftah getTagById failed', { tagId, error });
+      logger.warn("Iftah getTagById failed", { tagId, error });
       return {
         data: { tag_id: tagId, data: [], pagination: null },
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : "Unknown error",
         pagination: null,
       };
     }
@@ -1819,47 +1937,53 @@ export class IftahQuestionApi {
   static async getCsrfToken(): Promise<string | null> {
     try {
       // Try to get CSRF token from meta tag first
-      const metaToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const metaToken = document
+        .querySelector('meta[name="csrf-token"]')
+        ?.getAttribute("content");
       if (metaToken) {
-        console.log('🔑 CSRF token found in meta tag:', metaToken);
+        console.log("🔑 CSRF token found in meta tag:", metaToken);
         return metaToken;
       }
 
       // If not in meta tag, try to get from cookies
-      const cookies = document.cookie.split(';');
-      const csrfCookie = cookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='));
+      const cookies = document.cookie.split(";");
+      const csrfCookie = cookies.find((cookie) =>
+        cookie.trim().startsWith("XSRF-TOKEN=")
+      );
       if (csrfCookie) {
-        const token = decodeURIComponent(csrfCookie.split('=')[1]);
-        console.log('🔑 CSRF token found in cookies:', token);
+        const token = decodeURIComponent(csrfCookie.split("=")[1]);
+        console.log("🔑 CSRF token found in cookies:", token);
         return token;
       }
 
       // Try to fetch CSRF token from Laravel Sanctum endpoint
-      console.log('🔑 Fetching CSRF token from server...');
+      console.log("🔑 Fetching CSRF token from server...");
       const response = await fetch(endpoints.csrfCookie, {
-        method: 'GET',
+        method: "GET",
         // Remove credentials to avoid CORS wildcard issue
         headers: {
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
+          Accept: "application/json",
+          "X-Requested-With": "XMLHttpRequest",
         },
       });
-      
+
       if (response.ok) {
         // Extract CSRF token from cookies after the request
-        const updatedCookies = document.cookie.split(';');
-        const updatedCsrfCookie = updatedCookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='));
+        const updatedCookies = document.cookie.split(";");
+        const updatedCsrfCookie = updatedCookies.find((cookie) =>
+          cookie.trim().startsWith("XSRF-TOKEN=")
+        );
         if (updatedCsrfCookie) {
-          const token = decodeURIComponent(updatedCsrfCookie.split('=')[1]);
-          console.log('🔑 CSRF token obtained from server:', token);
+          const token = decodeURIComponent(updatedCsrfCookie.split("=")[1]);
+          console.log("🔑 CSRF token obtained from server:", token);
           return token;
         }
       }
-      
-      console.log('❌ No CSRF token found');
+
+      console.log("❌ No CSRF token found");
       return null;
     } catch (error) {
-      console.error('❌ Error fetching CSRF token:', error);
+      console.error("❌ Error fetching CSRF token:", error);
       return null;
     }
   }
@@ -1873,8 +1997,8 @@ export class IftahQuestionApi {
     tagId?: number; // Changed from tag_id to tagId
     iftah_sub_category_id?: number;
   }) {
-    logger.info('Submitting Iftah question', { payload });
-    
+    logger.info("Submitting Iftah question", { payload });
+
     try {
       const apiUrl = endpoints.IftahQuestionForm;
       console.log("🚀 [IFTAH QUESTION API] Starting request to:", apiUrl);
@@ -1898,18 +2022,27 @@ export class IftahQuestionApi {
         });
 
         if (!csrfResponse.ok) {
-          console.warn("⚠️ [IFTAH QUESTION API] CSRF cookie fetch failed, continuing anyway...");
+          console.warn(
+            "⚠️ [IFTAH QUESTION API] CSRF cookie fetch failed, continuing anyway..."
+          );
         } else {
           // Wait for cookie to be set
           await new Promise((resolve) => setTimeout(resolve, 150));
         }
       } catch (csrfError: any) {
-        console.warn("⚠️ [IFTAH QUESTION API] CSRF cookie fetch error:", csrfError);
-        console.warn("⚠️ [IFTAH QUESTION API] Continuing without CSRF cookie - API may still work");
+        console.warn(
+          "⚠️ [IFTAH QUESTION API] CSRF cookie fetch error:",
+          csrfError
+        );
+        console.warn(
+          "⚠️ [IFTAH QUESTION API] Continuing without CSRF cookie - API may still work"
+        );
       }
 
       // ✅ STEP 2: Get the CSRF token from cookies
-      console.log("🔑 [IFTAH QUESTION API] Step 2: Extracting CSRF token from cookies...");
+      console.log(
+        "🔑 [IFTAH QUESTION API] Step 2: Extracting CSRF token from cookies..."
+      );
       const csrfToken = await this.getCsrfToken();
 
       // ✅ STEP 3: Prepare headers
@@ -1921,56 +2054,73 @@ export class IftahQuestionApi {
 
       // Add CSRF token if available
       if (csrfToken) {
-        console.log("✅ [IFTAH QUESTION API] CSRF token obtained:", csrfToken.substring(0, 30) + "...");
+        console.log(
+          "✅ [IFTAH QUESTION API] CSRF token obtained:",
+          csrfToken.substring(0, 30) + "..."
+        );
         headers["X-XSRF-TOKEN"] = csrfToken; // Laravel Sanctum expects this header name
       } else {
-        console.warn("⚠️ [IFTAH QUESTION API] No CSRF token available (may be due to CORS restrictions)");
-        console.warn("⚠️ [IFTAH QUESTION API] Proceeding without CSRF token - API route may not require it");
+        console.warn(
+          "⚠️ [IFTAH QUESTION API] No CSRF token available (may be due to CORS restrictions)"
+        );
+        console.warn(
+          "⚠️ [IFTAH QUESTION API] Proceeding without CSRF token - API route may not require it"
+        );
       }
 
       // Prepare request body for iftah_questions table
       // Database columns: name, email, phone, whatsapp, question, tag_id, iftah_sub_category_id, created_at, updated_at
-      
+
       const requestBody: Record<string, string | number> = {
         name: payload.name.trim(),
         email: payload.email.trim(),
         question: payload.question.trim(),
       };
-      
+
       // Only include phone if it's provided and not empty
       if (payload.phone && payload.phone.trim()) {
         requestBody.phone = payload.phone.trim();
       }
-      
+
       // Only include whatsapp if it's provided and not empty
       if (payload.whatsapp && payload.whatsapp.trim()) {
         requestBody.whatsapp = payload.whatsapp.trim();
       }
-      
+
       // Include tagId if provided (send as "tagId" to backend)
       if (payload.tagId && payload.tagId > 0) {
         requestBody.tagId = payload.tagId;
         console.log("🏷️ [IFTAH QUESTION API] Including tagId:", payload.tagId);
       }
-      
+
       // Include iftah_sub_category_id if provided
       if (payload.iftah_sub_category_id && payload.iftah_sub_category_id > 0) {
         requestBody.iftah_sub_category_id = payload.iftah_sub_category_id;
-        console.log("📁 [IFTAH QUESTION API] Including iftah_sub_category_id:", payload.iftah_sub_category_id);
+        console.log(
+          "📁 [IFTAH QUESTION API] Including iftah_sub_category_id:",
+          payload.iftah_sub_category_id
+        );
       }
-      
+
       const safeRequestBody = requestBody;
 
       console.log("📤 [IFTAH QUESTION API] Request URL:", apiUrl);
       console.log("📤 [IFTAH QUESTION API] Request headers:", headers);
-      console.log("📤 [IFTAH QUESTION API] Request body (final):", JSON.stringify(safeRequestBody, null, 2));
-      console.log("📤 [IFTAH QUESTION API] Request body keys:", Object.keys(safeRequestBody));
+      console.log(
+        "📤 [IFTAH QUESTION API] Request body (final):",
+        JSON.stringify(safeRequestBody, null, 2)
+      );
+      console.log(
+        "📤 [IFTAH QUESTION API] Request body keys:",
+        Object.keys(safeRequestBody)
+      );
       console.log("📤 [IFTAH QUESTION API] Fields included:", {
-        hasTagId: 'tagId' in safeRequestBody,
-        hasSubCategoryId: 'iftah_sub_category_id' in safeRequestBody,
-        tagIdValue: safeRequestBody.tagId || 'not included',
-        subCategoryIdValue: safeRequestBody.iftah_sub_category_id || 'not included',
-        bodyKeys: Object.keys(safeRequestBody)
+        hasTagId: "tagId" in safeRequestBody,
+        hasSubCategoryId: "iftah_sub_category_id" in safeRequestBody,
+        tagIdValue: safeRequestBody.tagId || "not included",
+        subCategoryIdValue:
+          safeRequestBody.iftah_sub_category_id || "not included",
+        bodyKeys: Object.keys(safeRequestBody),
       });
 
       // ✅ STEP 4: Send POST request with credentials
@@ -1986,48 +2136,83 @@ export class IftahQuestionApi {
 
       console.log("📥 [IFTAH QUESTION API] Response received!");
       console.log("📥 [IFTAH QUESTION API] Response status:", response.status);
-      console.log("📥 [IFTAH QUESTION API] Response status text:", response.statusText);
+      console.log(
+        "📥 [IFTAH QUESTION API] Response status text:",
+        response.statusText
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error("❌ [IFTAH QUESTION API] Request failed!");
         console.error("❌ [IFTAH QUESTION API] Status:", response.status);
-        console.error("❌ [IFTAH QUESTION API] Status Text:", response.statusText);
-        console.error("❌ [IFTAH QUESTION API] Error response (raw):", errorText);
-        console.error("❌ [IFTAH QUESTION API] Request body that was sent:", JSON.stringify(requestBody, null, 2));
+        console.error(
+          "❌ [IFTAH QUESTION API] Status Text:",
+          response.statusText
+        );
+        console.error(
+          "❌ [IFTAH QUESTION API] Error response (raw):",
+          errorText
+        );
+        console.error(
+          "❌ [IFTAH QUESTION API] Request body that was sent:",
+          JSON.stringify(requestBody, null, 2)
+        );
 
         let errorMessage = `API request failed with status ${response.status}`;
         let errorDetails: any = null;
-        
+
         try {
           const errorJson = JSON.parse(errorText);
-          console.error("❌ [IFTAH QUESTION API] Error JSON:", JSON.stringify(errorJson, null, 2));
+          console.error(
+            "❌ [IFTAH QUESTION API] Error JSON:",
+            JSON.stringify(errorJson, null, 2)
+          );
           errorMessage = errorJson.message || errorJson.error || errorMessage;
           errorDetails = errorJson;
-          
+
           // Show more details for 500 errors
           if (response.status === 500) {
-            console.error("❌ [IFTAH QUESTION API] 500 Internal Server Error Details:");
+            console.error(
+              "❌ [IFTAH QUESTION API] 500 Internal Server Error Details:"
+            );
             console.error("   - Message:", errorJson.message);
             console.error("   - Error:", errorJson.error);
             console.error("   - File:", errorJson.file);
             console.error("   - Line:", errorJson.line);
             console.error("   - Trace:", errorJson.trace);
-            
+
             // Get tag/subcategory names from payload for better error messages
-            const tagName = payload.tagId ? `Tag ID: ${payload.tagId}` : 'No tag';
-            const subCategoryName = payload.iftah_sub_category_id ? `Subcategory ID: ${payload.iftah_sub_category_id}` : 'No subcategory';
-            
-            if (errorJson.message?.includes("Column not found") || errorJson.message?.includes("tagId") || errorJson.message?.includes("tag_id")) {
-              errorMessage = `خطای پایگاه داده: ستون tagId در جدول iftah_questions وجود ندارد. ${tagName !== 'No tag' ? `(${tagName})` : ''} لطفاً به مدیر سیستم اطلاع دهید.`;
+            const tagName = payload.tagId
+              ? `Tag ID: ${payload.tagId}`
+              : "No tag";
+            const subCategoryName = payload.iftah_sub_category_id
+              ? `Subcategory ID: ${payload.iftah_sub_category_id}`
+              : "No subcategory";
+
+            if (
+              errorJson.message?.includes("Column not found") ||
+              errorJson.message?.includes("tagId") ||
+              errorJson.message?.includes("tag_id")
+            ) {
+              errorMessage = `خطای پایگاه داده: ستون tagId در جدول iftah_questions وجود ندارد. ${
+                tagName !== "No tag" ? `(${tagName})` : ""
+              } لطفاً به مدیر سیستم اطلاع دهید.`;
             } else if (errorJson.message?.includes("iftah_sub_category_id")) {
-              errorMessage = `خطای پایگاه داده: ستون iftah_sub_category_id در جدول iftah_questions وجود ندارد. ${subCategoryName !== 'No subcategory' ? `(${subCategoryName})` : ''} لطفاً به مدیر سیستم اطلاع دهید.`;
+              errorMessage = `خطای پایگاه داده: ستون iftah_sub_category_id در جدول iftah_questions وجود ندارد. ${
+                subCategoryName !== "No subcategory"
+                  ? `(${subCategoryName})`
+                  : ""
+              } لطفاً به مدیر سیستم اطلاع دهید.`;
             } else {
               // Generic 500 error with context
-              errorMessage = `خطای سرور (500). ${tagName !== 'No tag' || subCategoryName !== 'No subcategory' ? `${tagName}, ${subCategoryName}. ` : ''}لطفاً بعداً تلاش کنید یا با مدیر سیستم تماس بگیرید.`;
+              errorMessage = `خطای سرور (500). ${
+                tagName !== "No tag" || subCategoryName !== "No subcategory"
+                  ? `${tagName}, ${subCategoryName}. `
+                  : ""
+              }لطفاً بعداً تلاش کنید یا با مدیر سیستم تماس بگیرید.`;
             }
           }
-          
+
           if (errorMessage.includes("CSRF")) {
             throw new Error(
               `CSRF token mismatch (${response.status}). The CSRF token may not have been set correctly. Check browser console for cookie information.`
@@ -2035,12 +2220,22 @@ export class IftahQuestionApi {
           }
         } catch (e) {
           // Not JSON, use the text as is
-          const tagName = payload.tagId ? `Tag ID: ${payload.tagId}` : '';
-          if (errorText.includes("Column not found") || errorText.includes("tagId") || errorText.includes("tag_id")) {
-            errorMessage = `خطای پایگاه داده: ستون tagId در جدول iftah_questions وجود ندارد. ${tagName ? `(${tagName})` : ''} لطفاً به مدیر سیستم اطلاع دهید.`;
+          const tagName = payload.tagId ? `Tag ID: ${payload.tagId}` : "";
+          if (
+            errorText.includes("Column not found") ||
+            errorText.includes("tagId") ||
+            errorText.includes("tag_id")
+          ) {
+            errorMessage = `خطای پایگاه داده: ستون tagId در جدول iftah_questions وجود ندارد. ${
+              tagName ? `(${tagName})` : ""
+            } لطفاً به مدیر سیستم اطلاع دهید.`;
           } else if (errorText.includes("iftah_sub_category_id")) {
-            const subCategoryName = payload.iftah_sub_category_id ? `Subcategory ID: ${payload.iftah_sub_category_id}` : '';
-            errorMessage = `خطای پایگاه داده: ستون iftah_sub_category_id در جدول iftah_questions وجود ندارد. ${subCategoryName ? `(${subCategoryName})` : ''} لطفاً به مدیر سیستم اطلاع دهید.`;
+            const subCategoryName = payload.iftah_sub_category_id
+              ? `Subcategory ID: ${payload.iftah_sub_category_id}`
+              : "";
+            errorMessage = `خطای پایگاه داده: ستون iftah_sub_category_id در جدول iftah_questions وجود ندارد. ${
+              subCategoryName ? `(${subCategoryName})` : ""
+            } لطفاً به مدیر سیستم اطلاع دهید.`;
           }
         }
 
@@ -2051,42 +2246,53 @@ export class IftahQuestionApi {
       }
 
       const result = await response.json();
-      console.log("✅ [IFTAH QUESTION API] SUCCESS: Data sent to Laravel dashboard!");
-      console.log("✅ [IFTAH QUESTION API] Response data:", JSON.stringify(result, null, 2));
+      console.log(
+        "✅ [IFTAH QUESTION API] SUCCESS: Data sent to Laravel dashboard!"
+      );
+      console.log(
+        "✅ [IFTAH QUESTION API] Response data:",
+        JSON.stringify(result, null, 2)
+      );
 
       return {
         success: true,
         data: result.data || result,
-        message: result.message || 'Question submitted successfully',
+        message: result.message || "Question submitted successfully",
       };
-
     } catch (error: any) {
       console.error("❌ [IFTAH QUESTION API] Exception occurred:", error);
       console.error("❌ [IFTAH QUESTION API] Error message:", error.message);
-      logger.error('Iftah question submission failed', { error, payload });
-      
+      logger.error("Iftah question submission failed", { error, payload });
+
       // Try to store in localStorage as fallback (for manual processing)
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         try {
           const questionData = {
             id: Date.now(),
             timestamp: new Date().toISOString(),
             ...payload,
-            status: 'pending',
-            source: 'iftah-form',
-            error: error?.message || 'API submission failed'
+            status: "pending",
+            source: "iftah-form",
+            error: error?.message || "API submission failed",
           };
-          
-          const existingQuestions = JSON.parse(localStorage.getItem('iftah-questions') || '[]');
+
+          const existingQuestions = JSON.parse(
+            localStorage.getItem("iftah-questions") || "[]"
+          );
           existingQuestions.unshift(questionData);
-          localStorage.setItem('iftah-questions', JSON.stringify(existingQuestions));
-          
-          console.log('📝 [IFTAH QUESTION] Data stored in localStorage as fallback');
+          localStorage.setItem(
+            "iftah-questions",
+            JSON.stringify(existingQuestions)
+          );
+
+          console.log(
+            "📝 [IFTAH QUESTION] Data stored in localStorage as fallback"
+          );
         } catch (storageError) {
-          console.error('Failed to store in localStorage:', storageError);
+          console.error("Failed to store in localStorage:", storageError);
         }
       }
-      
+
       // Re-throw the error so the UI can handle it
       throw error;
     }
@@ -2097,11 +2303,11 @@ export class IftahQuestionApi {
 
   static async getCategories(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await fetch('/api/iftah/category', {
-        method: 'GET',
+      const response = await fetch("/api/iftah/category", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
       });
 
@@ -2111,19 +2317,19 @@ export class IftahQuestionApi {
       }
 
       const data = await response.json();
-      console.log('✅ Iftah categories received:', data);
-      
+      console.log("✅ Iftah categories received:", data);
+
       // Handle different response formats
       if (Array.isArray(data)) {
         return { data, success: true };
       } else if (data && Array.isArray(data.data)) {
         return { data: data.data, success: true };
       } else {
-        console.warn('⚠️ Unexpected Iftah categories data format:', data);
+        console.warn("⚠️ Unexpected Iftah categories data format:", data);
         return { data: [], success: true };
       }
     } catch (error) {
-      console.error('❌ Failed to fetch Iftah categories:', error);
+      console.error("❌ Failed to fetch Iftah categories:", error);
       return { data: [], success: true };
     }
   }
@@ -2136,19 +2342,21 @@ export class ArticlesApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching articles from API', { page, limit });
+      logger.info("Fetching articles from API", { page, limit });
       const result = await apiClient.get(endpoints.articles, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched articles', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched articles", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
       return result;
     } catch (error) {
-      logger.error('Articles API failed', { error });
+      logger.error("Articles API failed", { error });
       throw error;
     }
   }
@@ -2157,11 +2365,11 @@ export class ArticlesApi {
     try {
       const result = await apiClient.get(`${endpoints.articles}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.warn('Article getById failed', { id, error });
+      logger.warn("Article getById failed", { id, error });
       if (!apiConfig.fallback.useForDetailEndpoints) {
         throw error;
       }
@@ -2173,11 +2381,11 @@ export class ArticlesApi {
     try {
       const result = await apiClient.get(`${endpoints.articles}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.warn('Article getBySlug failed', { slug, error });
+      logger.warn("Article getBySlug failed", { slug, error });
       if (!apiConfig.fallback.useForDetailEndpoints) {
         throw error;
       }
@@ -2187,51 +2395,55 @@ export class ArticlesApi {
 
   static async getCategories(): Promise<ApiResponse<any[]>> {
     try {
-      const response = await fetch('/api/articles/category', {
-        method: 'GET',
+      const response = await fetch("/api/articles/category", {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
       });
 
       if (!response.ok) {
-        logger.warn('Articles categories API failed', { status: response.status });
+        logger.warn("Articles categories API failed", {
+          status: response.status,
+        });
         const fallbackCategories = [
-          { id: 1, name: 'General' },
-          { id: 2, name: 'Islamic Studies' },
-          { id: 3, name: 'Quran' },
-          { id: 4, name: 'Hadith' },
-          { id: 5, name: 'Fiqh' }
+          { id: 1, name: "General" },
+          { id: 2, name: "Islamic Studies" },
+          { id: 3, name: "Quran" },
+          { id: 4, name: "Hadith" },
+          { id: 5, name: "Fiqh" },
         ];
         return { data: fallbackCategories, success: true };
       }
 
       const data = await response.json();
-      logger.info('Categories received', { count: Array.isArray(data) ? data.length : 'unknown' });
-      
+      logger.info("Categories received", {
+        count: Array.isArray(data) ? data.length : "unknown",
+      });
+
       // Handle different response formats
       if (Array.isArray(data)) {
         return { data, success: true };
       } else if (data && Array.isArray(data.data)) {
         return { data: data.data, success: true };
       } else {
-        logger.warn('Unexpected categories data format');
+        logger.warn("Unexpected categories data format");
         const fallbackCategories = [
-          { id: 1, name: 'General' },
-          { id: 2, name: 'Islamic Studies' },
-          { id: 3, name: 'Quran' }
+          { id: 1, name: "General" },
+          { id: 2, name: "Islamic Studies" },
+          { id: 3, name: "Quran" },
         ];
         return { data: fallbackCategories, success: true };
       }
     } catch (error) {
-      logger.error('Failed to fetch categories', error);
+      logger.error("Failed to fetch categories", error);
       const fallbackCategories = [
-        { id: 1, name: 'General' },
-        { id: 2, name: 'Islamic Studies' },
-        { id: 3, name: 'Quran' },
-        { id: 4, name: 'Hadith' },
-        { id: 5, name: 'Fiqh' }
+        { id: 1, name: "General" },
+        { id: 2, name: "Islamic Studies" },
+        { id: 3, name: "Quran" },
+        { id: 4, name: "Hadith" },
+        { id: 5, name: "Fiqh" },
       ];
       return { data: fallbackCategories, success: true };
     }
@@ -2245,31 +2457,31 @@ export class GraduationsApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching graduations from API', { page, limit });
+      logger.info("Fetching graduations from API", { page, limit });
       const result = await apiClient.get(endpoints.graduated, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched graduations', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched graduations", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Graduations API failed', { error });
+      logger.error("Graduations API failed", { error });
       throw error;
     }
   }
@@ -2278,11 +2490,11 @@ export class GraduationsApi {
     try {
       const result = await apiClient.get(`${endpoints.graduated}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Graduation getById failed', { id, error });
+      logger.error("Graduation getById failed", { id, error });
       throw error;
     }
   }
@@ -2291,11 +2503,11 @@ export class GraduationsApi {
     try {
       const result = await apiClient.get(`${endpoints.graduated}/${slug}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.error('Graduation getBySlug failed', { slug, error });
+      logger.error("Graduation getBySlug failed", { slug, error });
       throw error;
     }
   }
@@ -2308,24 +2520,22 @@ export class TasawwufApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching tasawwuf from API', { page, limit });
+      logger.info("Fetching tasawwuf from API", { page, limit });
       const result = await apiClient.get(endpoints.tasawwuf, {
         params: { page, limit, ...rest },
         cache: "no-store",
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched tasawwuf', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched tasawwuf", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       const payload = extractArray<unknown>(result.data);
-      const data = payload.length
-        ? payload
-        : result.data
-          ? [result.data]
-          : [];
+      const data = payload.length ? payload : result.data ? [result.data] : [];
 
       if (result.pagination) {
         return {
@@ -2344,7 +2554,7 @@ export class TasawwufApi {
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Tasawwuf API failed', { error });
+      logger.error("Tasawwuf API failed", { error });
       throw error;
     }
   }
@@ -2358,7 +2568,7 @@ export class TasawwufApi {
       if (result.success && result.data) {
         return result;
       }
-      
+
       // If direct call fails, try to get all and find by slug
       const allPosts = await this.getAll({ limit: 1000 });
       if (allPosts.success && Array.isArray(allPosts.data)) {
@@ -2367,19 +2577,19 @@ export class TasawwufApi {
           return {
             data: post,
             success: true,
-            message: "Tasawwuf post found by slug"
+            message: "Tasawwuf post found by slug",
           };
         }
       }
-      
+
       // If still not found, return error
       return {
         data: null,
         success: false,
-        error: 'Tasawwuf post not found'
+        error: "Tasawwuf post not found",
       };
     } catch (error) {
-      logger.error('Tasawwuf getBySlug failed', { slug, error });
+      logger.error("Tasawwuf getBySlug failed", { slug, error });
       // Try fallback: get all and find by slug
       try {
         const allPosts = await this.getAll({ limit: 1000 });
@@ -2389,18 +2599,150 @@ export class TasawwufApi {
             return {
               data: post,
               success: true,
-              message: "Tasawwuf post found by slug (fallback)"
+              message: "Tasawwuf post found by slug (fallback)",
             };
           }
         }
       } catch (fallbackError) {
-        logger.error('Tasawwuf getBySlug fallback failed', { slug, error: fallbackError });
+        logger.error("Tasawwuf getBySlug fallback failed", {
+          slug,
+          error: fallbackError,
+        });
       }
-      
+
       return {
         data: null,
         success: false,
-        error: error instanceof Error ? error.message : 'Tasawwuf post not found'
+        error:
+          error instanceof Error ? error.message : "Tasawwuf post not found",
+      };
+    }
+  }
+}
+
+// Comment About Sheik API
+export class CommentAboutSheikApi {
+  static async getCategories(): Promise<ApiResponse<any[]>> {
+    try {
+      logger.info("Fetching comment about sheik categories from API");
+      const result = await apiClient.get(endpoints.commentAboutSheikCategories);
+
+      if (!result.success) {
+        logger.warn("CommentAboutSheik getCategories API failed", {
+          error: result.error,
+        });
+        return {
+          data: [],
+          success: false,
+          error: result.error || "API request failed",
+        };
+      }
+
+      // Handle different response formats
+      let categoriesData: any[] = [];
+      if (Array.isArray(result.data)) {
+        categoriesData = result.data;
+      } else if (
+        result.data &&
+        typeof result.data === "object" &&
+        "data" in result.data &&
+        Array.isArray((result.data as { data: any[] }).data)
+      ) {
+        categoriesData = (result.data as { data: any[] }).data;
+      }
+
+      logger.info("Successfully fetched comment about sheik categories", {
+        count: categoriesData.length,
+        rawData: result.data,
+      });
+
+      return {
+        ...result,
+        data: categoriesData,
+        success: true,
+      };
+    } catch (error) {
+      logger.warn("CommentAboutSheik getCategories failed", { error });
+      return {
+        data: [],
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  static async getCategoryBySlug(slug: string): Promise<ApiResponse<any>> {
+    try {
+      logger.info("Fetching comment about sheik category by slug from API", {
+        slug,
+      });
+      const result = await apiClient.get(
+        endpoints.commentAboutSheikCategory(slug)
+      );
+
+      if (!result.success) {
+        throw new Error(result.error || "API request failed");
+      }
+
+      logger.info("Successfully fetched comment about sheik category by slug", {
+        slug,
+      });
+
+      return {
+        ...result,
+        success: true,
+      };
+    } catch (error) {
+      logger.warn("CommentAboutSheik getCategoryBySlug failed", {
+        slug,
+        error,
+      });
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  static async getCommentBySlug(slug: string): Promise<ApiResponse<any>> {
+    try {
+      logger.info("Fetching comment about sheik comment by slug from API", {
+        slug,
+      });
+      const result = await apiClient.get(
+        endpoints.commentAboutSheikComment(slug)
+      );
+
+      if (!result.success) {
+        logger.warn("CommentAboutSheik getCommentBySlug API failed", {
+          slug,
+          error: result.error,
+        });
+        return {
+          data: null,
+          success: false,
+          error: result.error || "API request failed",
+        };
+      }
+
+      logger.info("Successfully fetched comment about sheik comment by slug", {
+        slug,
+      });
+
+      return {
+        ...result,
+        success: true,
+      };
+    } catch (error) {
+      logger.warn("CommentAboutSheik getCommentBySlug failed", {
+        slug,
+        error,
+      });
+      return {
+        data: null,
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
@@ -2413,17 +2755,19 @@ export class GalleryApi {
     const { page: _page, limit: _limit, ...rest } = params;
 
     try {
-      logger.info('Fetching gallery from API', { page, limit });
+      logger.info("Fetching gallery from API", { page, limit });
       const result = await apiClient.get(endpoints.gallery, {
         cache: "no-store",
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched gallery', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched gallery", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       const data = extractArray<unknown>(result.data);
 
@@ -2444,7 +2788,7 @@ export class GalleryApi {
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.error('Gallery API failed', { error });
+      logger.error("Gallery API failed", { error });
       throw error;
     }
   }
@@ -2457,16 +2801,18 @@ export class DegreesApi {
     const limit = rawLimit ?? 100; // Default to 100 for degrees
 
     try {
-      logger.info('Fetching degrees from API', { page, limit });
+      logger.info("Fetching degrees from API", { page, limit });
       const result = await apiClient.get(endpoints.degrees, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched degrees', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched degrees", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       // Extract array from response
       const degreesData = extractArray<any>(result.data);
@@ -2486,22 +2832,22 @@ export class DegreesApi {
         pagination: createPaginationMeta({ page, limit, total }),
       } as ApiResponse<any[]>;
     } catch (error) {
-      logger.warn('Degrees API failed, using fallback data', { error });
-      
+      logger.warn("Degrees API failed, using fallback data", { error });
+
       // Fallback degrees data
       const fallbackDegrees = [
-        { id: 1, name: 'درجه اول' },
-        { id: 2, name: 'درجه دوم' },
-        { id: 3, name: 'درجه سوم' },
-        { id: 4, name: 'درجه چهارم' },
-        { id: 5, name: 'درجه پنجم' },
+        { id: 1, name: "درجه اول" },
+        { id: 2, name: "درجه دوم" },
+        { id: 3, name: "درجه سوم" },
+        { id: 4, name: "درجه چهارم" },
+        { id: 5, name: "درجه پنجم" },
       ];
-      
+
       return {
         data: fallbackDegrees,
         success: true,
-        message: apiConfig.fallback.showFallbackMessage 
-          ? "Using cached data due to API unavailability" 
+        message: apiConfig.fallback.showFallbackMessage
+          ? "Using cached data due to API unavailability"
           : undefined,
         pagination: createPaginationMeta({
           page,
@@ -2516,16 +2862,16 @@ export class DegreesApi {
     try {
       const result = await apiClient.get(`${endpoints.degrees}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.warn('Degree getById failed', { id, error });
+      logger.warn("Degree getById failed", { id, error });
       if (!apiConfig.fallback.useForDetailEndpoints) {
         throw error;
       }
       return {
-        data: { id: 1, name: 'درجه اول' },
+        data: { id: 1, name: "درجه اول" },
         success: true,
         message: "Using cached data due to API unavailability",
       };
@@ -2547,7 +2893,10 @@ export class ContactApi {
     );
     if (xsrfCookie) {
       const token = decodeURIComponent(xsrfCookie.split("=")[1].trim());
-      console.log("✅ [CONTACT] Found XSRF-TOKEN:", token.substring(0, 20) + "...");
+      console.log(
+        "✅ [CONTACT] Found XSRF-TOKEN:",
+        token.substring(0, 20) + "..."
+      );
       return token;
     }
 
@@ -2557,7 +2906,10 @@ export class ContactApi {
     );
     if (xsrfCookieLower) {
       const token = decodeURIComponent(xsrfCookieLower.split("=")[1].trim());
-      console.log("✅ [CONTACT] Found xsrf-token (lowercase):", token.substring(0, 20) + "...");
+      console.log(
+        "✅ [CONTACT] Found xsrf-token (lowercase):",
+        token.substring(0, 20) + "..."
+      );
       return token;
     }
 
@@ -2575,7 +2927,6 @@ export class ContactApi {
         return token;
       }
 
-
       try {
         const response = await fetch(endpoints.csrfCookie, {
           method: "GET",
@@ -2586,7 +2937,6 @@ export class ContactApi {
           },
         });
 
-   
         if (response.ok) {
           // Check cookies immediately (browser sets cookies synchronously)
           token = this.extractCsrfTokenFromCookies();
@@ -2595,10 +2945,16 @@ export class ContactApi {
             console.log("✅ [CONTACT] CSRF token obtained from server");
             return token;
           } else {
-            console.warn("⚠ [CONTACT] CSRF endpoint responded OK but no cookie found");
+            console.warn(
+              "⚠ [CONTACT] CSRF endpoint responded OK but no cookie found"
+            );
           }
         } else {
-          console.error("❌ [CONTACT] CSRF endpoint failed:", response.status, response.statusText);
+          console.error(
+            "❌ [CONTACT] CSRF endpoint failed:",
+            response.status,
+            response.statusText
+          );
         }
       } catch (csrfError) {
         console.error("❌ [CONTACT] Error fetching CSRF token:", csrfError);
@@ -2613,15 +2969,15 @@ export class ContactApi {
   }
 
   static async submit(payload: Record<string, unknown>) {
-    logger.info('Submitting contact form', { payload });
-    
+    logger.info("Submitting contact form", { payload });
+
     try {
       // Validate the payload
       if (!payload.name || !payload.email || !payload.message) {
         return {
           success: false,
           data: null,
-          error: 'Please fill in all required fields.',
+          error: "Please fill in all required fields.",
         };
       }
 
@@ -2646,14 +3002,18 @@ export class ContactApi {
       });
 
       if (!csrfResponse.ok) {
-        console.warn("⚠️ [CONTACT API] CSRF cookie fetch failed, continuing anyway...");
+        console.warn(
+          "⚠️ [CONTACT API] CSRF cookie fetch failed, continuing anyway..."
+        );
       }
 
       // Wait for cookie to be set
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       // ✅ STEP 2: Get the CSRF token from cookies
-      console.log("🔑 [CONTACT API] Step 2: Extracting CSRF token from cookies...");
+      console.log(
+        "🔑 [CONTACT API] Step 2: Extracting CSRF token from cookies..."
+      );
       const csrfToken = await this.getCsrfToken();
 
       // ✅ STEP 3: Prepare headers
@@ -2665,11 +3025,18 @@ export class ContactApi {
 
       // Add CSRF token if available
       if (csrfToken) {
-        console.log("✅ [CONTACT API] CSRF token obtained:", csrfToken.substring(0, 30) + "...");
+        console.log(
+          "✅ [CONTACT API] CSRF token obtained:",
+          csrfToken.substring(0, 30) + "..."
+        );
         headers["X-XSRF-TOKEN"] = csrfToken; // Laravel Sanctum expects this header name
       } else {
-        console.warn("⚠️ [CONTACT API] No CSRF token available (may be due to CORS restrictions)");
-        console.warn("⚠️ [CONTACT API] Proceeding without CSRF token - API route may not require it");
+        console.warn(
+          "⚠️ [CONTACT API] No CSRF token available (may be due to CORS restrictions)"
+        );
+        console.warn(
+          "⚠️ [CONTACT API] Proceeding without CSRF token - API route may not require it"
+        );
       }
 
       // Prepare request body
@@ -2677,7 +3044,10 @@ export class ContactApi {
 
       console.log("📤 [CONTACT API] Request URL:", apiUrl);
       console.log("📤 [CONTACT API] Request headers:", headers);
-      console.log("📤 [CONTACT API] Request body:", JSON.stringify(requestBody, null, 2));
+      console.log(
+        "📤 [CONTACT API] Request body:",
+        JSON.stringify(requestBody, null, 2)
+      );
 
       // ✅ STEP 4: Send POST request with credentials
       const response = await fetch(apiUrl, {
@@ -2690,7 +3060,10 @@ export class ContactApi {
       });
 
       console.log("📥 [CONTACT API] Response status:", response.status);
-      console.log("📥 [CONTACT API] Response status text:", response.statusText);
+      console.log(
+        "📥 [CONTACT API] Response status text:",
+        response.statusText
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -2699,12 +3072,12 @@ export class ContactApi {
         console.error("❌ [CONTACT API] Error response:", errorText);
 
         let errorMessage = `API request failed with status ${response.status}`;
-        
+
         try {
           const errorJson = JSON.parse(errorText);
           console.error("❌ [CONTACT API] Error JSON:", errorJson);
           errorMessage = errorJson.message || errorJson.error || errorMessage;
-          
+
           if (errorMessage.includes("CSRF")) {
             throw new Error(
               `CSRF token mismatch (${response.status}). The CSRF token may not have been set correctly. Check browser console for cookie information.`
@@ -2719,41 +3092,50 @@ export class ContactApi {
 
       const result = await response.json();
       console.log("✅ [CONTACT API] SUCCESS: Data sent to Laravel dashboard!");
-      console.log("✅ [CONTACT API] Response data:", JSON.stringify(result, null, 2));
+      console.log(
+        "✅ [CONTACT API] Response data:",
+        JSON.stringify(result, null, 2)
+      );
 
       return {
         success: true,
         data: result.data || result,
-        message: result.message || 'Your message has been received! We will get back to you soon.',
+        message:
+          result.message ||
+          "Your message has been received! We will get back to you soon.",
       };
-
     } catch (error: any) {
       console.error("❌ [CONTACT API] Exception occurred:", error);
       console.error("❌ [CONTACT API] Error message:", error.message);
-      logger.error('Contact form submission failed', { error, payload });
-      
+      logger.error("Contact form submission failed", { error, payload });
+
       // Try to store in localStorage as fallback (for manual processing)
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         try {
           const contactData = {
             id: Date.now(),
             timestamp: new Date().toISOString(),
             ...payload,
-            status: 'pending',
-            source: 'website',
-            error: error?.message || 'API submission failed'
+            status: "pending",
+            source: "website",
+            error: error?.message || "API submission failed",
           };
-          
-          const existingContacts = JSON.parse(localStorage.getItem('contactSubmissions') || '[]');
+
+          const existingContacts = JSON.parse(
+            localStorage.getItem("contactSubmissions") || "[]"
+          );
           existingContacts.push(contactData);
-          localStorage.setItem('contactSubmissions', JSON.stringify(existingContacts));
-          
-          console.log('📝 [CONTACT] Data stored in localStorage as fallback');
+          localStorage.setItem(
+            "contactSubmissions",
+            JSON.stringify(existingContacts)
+          );
+
+          console.log("📝 [CONTACT] Data stored in localStorage as fallback");
         } catch (storageError) {
-          console.error('Failed to store in localStorage:', storageError);
+          console.error("Failed to store in localStorage:", storageError);
         }
       }
-      
+
       // Re-throw the error so the UI can handle it
       throw error;
     }
@@ -2761,34 +3143,38 @@ export class ContactApi {
 
   // Helper method to get stored contact submissions (for admin dashboard)
   static getStoredSubmissions() {
-    if (typeof window === 'undefined') return [];
-    
+    if (typeof window === "undefined") return [];
+
     try {
-      const submissions = JSON.parse(localStorage.getItem('contactSubmissions') || '[]');
+      const submissions = JSON.parse(
+        localStorage.getItem("contactSubmissions") || "[]"
+      );
       return submissions;
     } catch (error) {
-      console.error('Error retrieving stored submissions:', error);
+      console.error("Error retrieving stored submissions:", error);
       return [];
     }
   }
 
   // Helper method to clear stored submissions (for admin dashboard)
   static clearStoredSubmissions() {
-    if (typeof window === 'undefined') return;
-    
-    localStorage.removeItem('contactSubmissions');
-    console.log('📝 Contact submissions cleared');
+    if (typeof window === "undefined") return;
+
+    localStorage.removeItem("contactSubmissions");
+    console.log("📝 Contact submissions cleared");
   }
 }
 
 export class AwlyaaChartsApi {
   static async getAll(params: ListParams = {}) {
-    const result = await apiClient.get<any[]>(endpoints.awlyaaCharts, { params });
+    const result = await apiClient.get<any[]>(endpoints.awlyaaCharts, {
+      params,
+    });
     if (!result.success) {
       return {
         data: [],
         success: false,
-        error: result.error || result.message || 'Failed to load Awlyaa charts',
+        error: result.error || result.message || "Failed to load Awlyaa charts",
         pagination: null,
       };
     }
@@ -2813,10 +3199,10 @@ export class ShajaraApi {
           id: 1,
           name: "شجرهٔ حضرات کابل  شجرهٔ عاليهٔ حضرات عالي درجات نقشبنديه مجدديه عمريه (قدسنا الله باسرارهم العاليه)  خانقاه عاليه مجدديه عمريه ارغندی، پغمان، كابل",
           created_at: "2025-10-13T05:17:47.000000Z",
-          updated_at: "2025-10-13T05:17:47.000000Z"
-        }
+          updated_at: "2025-10-13T05:17:47.000000Z",
+        },
       ];
-      
+
       return {
         data: fallbackData,
         success: true,
@@ -2851,47 +3237,47 @@ export class SanadApi {
     const limit = rawLimit ?? DEFAULT_PAGE_SIZE;
 
     try {
-      logger.info('Fetching sanads from API', { page, limit });
+      logger.info("Fetching sanads from API", { page, limit });
       const result = await apiClient.get(endpoints.sanad, {
         params: { page, limit, ...rest },
       });
 
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
 
-      logger.info('Successfully fetched sanads', { count: Array.isArray(result.data) ? result.data.length : 0 });
+      logger.info("Successfully fetched sanads", {
+        count: Array.isArray(result.data) ? result.data.length : 0,
+      });
 
       if (result.pagination) {
         return result;
       }
 
-      const total = Array.isArray(result.data)
-        ? result.data.length
-        : limit;
+      const total = Array.isArray(result.data) ? result.data.length : limit;
 
       return {
         ...result,
         pagination: createPaginationMeta({ page, limit, total }),
       };
     } catch (error) {
-      logger.warn('Sanads API failed, using fallback data', { error });
-      
+      logger.warn("Sanads API failed, using fallback data", { error });
+
       // Return fallback data if API fails
       const fallbackData = [
         {
           id: 1,
           name: "شجرهٔ حضرات کابل  شجرهٔ عاليهٔ حضرتات عالي درجات نقشبنديه مجدديه عمريه (قدسنا الله باسرارهم العاليه)  خانقاه عاليه مجدديه عمريه ارغندی، پغمان، كابل",
           created_at: "2025-10-13T05:17:47.000000Z",
-          updated_at: "2025-10-13T05:17:47.000000Z"
-        }
+          updated_at: "2025-10-13T05:17:47.000000Z",
+        },
       ];
-      
+
       return {
         data: fallbackData,
         success: true,
-        message: apiConfig.fallback.showFallbackMessage 
-          ? "Using cached data due to API unavailability" 
+        message: apiConfig.fallback.showFallbackMessage
+          ? "Using cached data due to API unavailability"
           : undefined,
         pagination: createPaginationMeta({
           page,
@@ -2906,11 +3292,11 @@ export class SanadApi {
     try {
       const result = await apiClient.get(`${endpoints.sanad}/${id}`);
       if (!result.success) {
-        throw new Error(result.error || 'API request failed');
+        throw new Error(result.error || "API request failed");
       }
       return result;
     } catch (error) {
-      logger.warn('Sanad getById failed', { id, error });
+      logger.warn("Sanad getById failed", { id, error });
       if (!apiConfig.fallback.useForDetailEndpoints) {
         throw error;
       }
