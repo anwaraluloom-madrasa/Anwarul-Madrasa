@@ -117,19 +117,20 @@ const About = () => {
       {t('about.biography.education')}
     </p>
 
-    {t('about.biography.educationJourneyDesc', { defaultValue: '' }) && (
-      <p className="m-0">
-        {t('about.biography.educationJourneyDesc')}
-      </p>
-    )}
+    {t('about.biography.educationJourneyDesc') && (
+  <p className="m-0">
+    {t('about.biography.educationJourneyDesc')}
+  </p>
+)}
 
-    {t('about.biography.spiritualJourneyDesc', { defaultValue: '' }) && (
+
+    {t('about.biography.spiritualJourneyDesc') && (
       <p className="m-0">
         {t('about.biography.spiritualJourneyDesc')}
       </p>
     )}
 
-    {t('about.biography.firstMadrasaDesc', { defaultValue: '' }) && (
+    {t('about.biography.firstMadrasaDesc') && (
       <p className="m-0">
         {t('about.biography.firstMadrasaDesc')}
       </p>
@@ -161,7 +162,7 @@ const About = () => {
       {t('about.biography.firstMadrasaTeaching')}
     </p>
 
-    {t('about.biography.migrationDesc', { defaultValue: '' }) && (
+    {t('about.biography.migrationDesc') && (
       <p className="m-0">
         {t('about.biography.migrationDesc')}{' '}
         {t('about.biography.migrationDate')} |{' '}
@@ -171,13 +172,13 @@ const About = () => {
       </p>
     )}
 
-    {t('about.biography.deathDesc', { defaultValue: '' }) && (
+    {t('about.biography.deathDesc') && (
       <p className="m-0">
         {t('about.biography.deathDesc')}
       </p>
     )}
 
-    {t('about.biography.reestablishmentDesc', { defaultValue: '' }) && (
+    {t('about.biography.reestablishmentDesc') && (
       <p className="m-0">
         {t('about.biography.reestablishmentDesc')}{' '}
         {t('about.biography.reestablishmentDate')} |{' '}
