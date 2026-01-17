@@ -91,67 +91,103 @@ const About = () => {
   className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-center mb-20 text-justify"
 >
   {/* Text Section */}
-  <div className="space-y-8">
-    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-snug text-center">
-      <span className="text-amber-600">{t('about.founderTitle')}</span>
-    </h3>
-    <h4 className="text-xl font-semibold text-amber-700 text-center">
-      {t('about.founderName')}
-    </h4>
+ <div className="space-y-6">
 
-    {/* Biography Section */}
-    <div className="space-y-6 text-gray-600 text-base sm:text-lg leading-relaxed text-justify">
-      <p>
-        <strong>{t('about.biography.introduction')}</strong>
+  {/* Titles */}
+  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center leading-tight">
+    <span className="text-amber-600">{t('about.founderTitle')}</span>
+  </h3>
+
+  <h4 className="text-lg sm:text-xl font-semibold text-amber-700 text-center">
+    {t('about.founderName')}
+  </h4>
+
+  {/* Biography */}
+  <div className="text-gray-700 text-base sm:text-lg leading-7 text-justify space-y-3">
+
+    <p className="font-semibold m-0">
+      {t('about.biography.introduction')}
+    </p>
+
+    <p className="m-0">
+      {t('about.biography.father')}
+    </p>
+
+    <p className="m-0">
+      {t('about.biography.education')}
+    </p>
+
+    {t('about.biography.educationJourneyDesc', { defaultValue: '' }) && (
+      <p className="m-0">
+        {t('about.biography.educationJourneyDesc')}
       </p>
-      <p>{t('about.biography.father')}</p>
-      <p>{t('about.biography.education')}</p>
-      <p>{t('about.biography.educationJourneyDesc')}</p>
-      <p>{t('about.biography.spiritualJourneyDesc')}</p>
-      <p>{t('about.biography.firstMadrasaDesc')}</p>
+    )}
 
-      <div className="bg-amber-50 p-4 rounded-lg border border-amber-200 text-center">
-        <p className="text-lg font-bold text-amber-600">
-          {t('about.biography.firstMadrasaDate')} |{' '}
-          {t('about.biography.firstMadrasaDateShamsi')} |{' '}
-          {t('about.biography.firstMadrasaDateMiladi')}
-        </p>
+    {t('about.biography.spiritualJourneyDesc', { defaultValue: '' }) && (
+      <p className="m-0">
+        {t('about.biography.spiritualJourneyDesc')}
+      </p>
+    )}
+
+    {t('about.biography.firstMadrasaDesc', { defaultValue: '' }) && (
+      <p className="m-0">
+        {t('about.biography.firstMadrasaDesc')}
+      </p>
+    )}
+
+    {/* Date Box */}
+    <div className="my-4 bg-amber-50 p-3 rounded-lg border border-amber-200 text-center">
+      <p className="text-sm sm:text-base font-semibold text-amber-700 m-0">
+        {t('about.biography.firstMadrasaDate')} |{' '}
+        {t('about.biography.firstMadrasaDateShamsi')} |{' '}
+        {t('about.biography.firstMadrasaDateMiladi')}
+      </p>
+    </div>
+
+    {/* Mobile Image */}
+    <div className="my-4 lg:hidden">
+      <div className="relative h-[320px] rounded-xl overflow-hidden shadow-md">
+        <Image
+          src={img}
+          alt="شیخ خلیفه صاحب ارغندی (رح)"
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
+    </div>
 
-      {/* Mobile Image */}
-      <div className="relative w-full mb-8">
-        <div className="relative w-full flex lg:hidden h-[300px] sm:h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-xl group">
-          <Image
-            src={img}
-            alt="شیخ خلیفه صاحب ارغندی (رح) - د انوارالعلوم بنسټګر"
-            className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
-          <div className="absolute inset-0 rounded-2xl border border-amber-200/50"></div>
-        </div>
-      </div>
+    <p className="m-0">
+      {t('about.biography.firstMadrasaTeaching')}
+    </p>
 
-      <p>{t('about.biography.firstMadrasaTeaching')}</p>
-      <p>
-        {t('about.biography.migrationDesc')} {t('about.biography.migrationDate')} |{' '}
+    {t('about.biography.migrationDesc', { defaultValue: '' }) && (
+      <p className="m-0">
+        {t('about.biography.migrationDesc')}{' '}
+        {t('about.biography.migrationDate')} |{' '}
         {t('about.biography.migrationDateShamsi')} |{' '}
         {t('about.biography.migrationDateMiladi')}{' '}
         {t('about.biography.migrationTeaching')}
       </p>
-      <p>{t('about.biography.deathDesc')}</p>
-      <p>
+    )}
+
+    {t('about.biography.deathDesc', { defaultValue: '' }) && (
+      <p className="m-0">
+        {t('about.biography.deathDesc')}
+      </p>
+    )}
+
+    {t('about.biography.reestablishmentDesc', { defaultValue: '' }) && (
+      <p className="m-0">
         {t('about.biography.reestablishmentDesc')}{' '}
         {t('about.biography.reestablishmentDate')} |{' '}
         {t('about.biography.reestablishmentDateShamsi')} |{' '}
         {t('about.biography.reestablishmentDateMiladi')}{' '}
         {t('about.biography.reestablishmentPrayer')}
       </p>
-    </div>
-
-    {/* Buttons */}
+    )}
+  </div>
+   {/* Buttons */}
     <div className="flex flex-col sm:flex-row gap-4 justify-center">
       <Link
         href="/about"
@@ -180,7 +216,8 @@ const About = () => {
         {t('about.callToAction.contactUs')}
       </Link>
     </div>
-  </div>
+</div>
+
 
   {/* Media Section */}
   <div className="relative w-full">
