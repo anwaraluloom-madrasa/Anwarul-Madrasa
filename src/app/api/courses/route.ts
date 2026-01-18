@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const API_BASE_URL = 'https://website.anwarululoom.com/api';
+const API_BASE_URL = process.env.NODE_ENV === 'development' 
+  ? 'http://localhost:8000/api'
+  : 'https://website.anwarululoom.com/api';
 
 export async function GET(request: NextRequest) {
   try {

@@ -797,6 +797,82 @@ export class CoursesApi {
   }
 }
 
+interface CourseCategory {
+  id: number;
+  name: string;
+  slug: string;
+  created_at: string;
+  updated_at: string;
+  courses_count: number;
+}
+
+interface CourseCategoryResponse {
+  total: number;
+  categories: CourseCategory[];
+}
+
+export class CourseCategoryApi {
+  static async getCategories(): Promise<ApiResponse<CourseCategoryResponse>> {
+    try {
+      logger.info("Fetching course categories from API");
+      const result = await apiClient.get(endpoints.courseCategories);
+
+      if (!result.success) {
+        logger.warn("CourseCategory getCategories API failed", {
+          error: result.error,
+        });
+        return {
+          data: { total: 0, categories: [] },
+          success: false,
+          error: result.error || "API request failed",
+        };
+      }
+
+      // Handle different response formats
+      let categoriesData: CourseCategoryResponse = { total: 0, categories: [] };
+      
+      if (result.data && typeof result.data === "object") {
+        const data = result.data as Record<string, unknown>;
+        if (data.categories && Array.isArray(data.categories)) {
+          categoriesData = {
+            total: (data.total as number) || (data.categories as CourseCategory[]).length,
+            categories: data.categories as CourseCategory[]
+          };
+        } else if (data.data && typeof data.data === "object") {
+          const innerData = data.data as Record<string, unknown>;
+          if (innerData.categories && Array.isArray(innerData.categories)) {
+            categoriesData = {
+              total: (innerData.total as number) || (innerData.categories as CourseCategory[]).length,
+              categories: innerData.categories as CourseCategory[]
+            };
+          }
+        } else if (Array.isArray(result.data)) {
+          categoriesData = {
+            total: result.data.length,
+            categories: result.data as CourseCategory[]
+          };
+        }
+      }
+
+      logger.info("Successfully fetched course categories", {
+        count: categoriesData.categories.length,
+      });
+
+      return {
+        data: categoriesData,
+        success: true,
+      };
+    } catch (error) {
+      logger.error("CourseCategory API failed", { error });
+      return {
+        data: { total: 0, categories: [] },
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to fetch course categories",
+      };
+    }
+  }
+}
+
 // awlayaa api
 
 export interface AdmissionFormData {

@@ -14,7 +14,6 @@ import {
   Clock, 
   UserRound, 
   ExternalLink,
-  Users,
   Video,
   Heart,
   Share2,
@@ -26,7 +25,7 @@ import {
 import IslamicHeader from '../components/IslamicHeader';
 import Breadcrumb from '@/components/Breadcrumb';
 import { useDirection } from '@/hooks/useDirection';
-import { CoursesApi } from '@/lib/api';
+import { CoursesApi, CourseCategoryApi } from '@/lib/api';
 import type { Course } from '@/lib/types';
 import ErrorDisplay from '@/components/ErrorDisplay';
 import { getImageUrl } from '@/lib/utils';
@@ -58,29 +57,86 @@ export default function OnlineCoursesPage() {
   const [liked, setLiked] = React.useState(false);
   const [likesCount, setLikesCount] = React.useState(0);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [categories, setCategories] = useState<Array<{ id: number; name: string; slug: string; courses_count?: number }>>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch categories
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        setCategoriesLoading(true);
+        console.log('🔄 Fetching course categories...');
+        const result = await CourseCategoryApi.getCategories();
+        console.log('📊 Course categories result:', result);
+        
+        if (result.success && result.data) {
+          if (result.data.categories && Array.isArray(result.data.categories)) {
+            console.log('✅ Setting categories:', result.data.categories);
+            setCategories(result.data.categories);
+          } else {
+            console.warn('⚠️ Categories data is not in expected format:', result.data);
+            // Try alternative format
+            if (Array.isArray(result.data)) {
+              setCategories(result.data);
+            }
+          }
+        } else {
+          console.warn('⚠️ Failed to fetch categories:', result.error);
+        }
+      } catch (err) {
+        console.error('❌ Error fetching categories:', err);
+      } finally {
+        setCategoriesLoading(false);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  // Fetch courses
   useEffect(() => {
     async function fetchCourses() {
       try {
         setLoading(true);
         const result = await CoursesApi.getAll({ limit: 100 });
         if (result.success && Array.isArray(result.data)) {
-          setCourses(result.data.filter(c => Number(c.is_published) === 1));
+          const publishedCourses = result.data.filter(c => Number(c.is_published) === 1);
+          setAllCourses(publishedCourses);
+          setCourses(publishedCourses);
         } else {
           setCourses([]);
+          setAllCourses([]);
         }
       } catch (err) {
         console.error('Error fetching courses:', err);
         setError(err instanceof Error ? err.message : 'Failed to fetch courses');
         setCourses([]);
+        setAllCourses([]);
       } finally {
         setLoading(false);
       }
     }
     fetchCourses();
   }, []);
+
+  // Filter courses by category
+  useEffect(() => {
+    if (selectedCategoryId === null) {
+      setCourses(allCourses);
+    } else {
+      // Filter courses that have the selected category_id
+      // Check for category_id in course object (may not be in type definition but returned from API)
+      const filtered = allCourses.filter((course) => {
+        const courseWithCategory = course as Course & { category_id?: number; course_category_id?: number };
+        return courseWithCategory.category_id === selectedCategoryId || 
+               courseWithCategory.course_category_id === selectedCategoryId;
+      });
+      setCourses(filtered);
+    }
+  }, [selectedCategoryId, allCourses]);
 
   const handleLike = () => {
     setLiked(!liked);
@@ -134,6 +190,68 @@ export default function OnlineCoursesPage() {
               د علم او معرفت سفر پیل کړئ زموږ د آنلاین کورسونو سره
             </p>
           </motion.div>
+
+          {/* Category Filters */}
+          {categoriesLoading ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15, delay: 0.1 }}
+              className="mb-12"
+            >
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-32"></div>
+                <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-32"></div>
+                <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-32"></div>
+              </div>
+            </motion.div>
+          ) : categories.length > 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15, delay: 0.1 }}
+              className="mb-12"
+            >
+              <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+                <button
+                  onClick={() => setSelectedCategoryId(null)}
+                  className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
+                    selectedCategoryId === null
+                      ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                      : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 hover:bg-amber-50'
+                  }`}
+                >
+                  ټول کورسونه ({allCourses.length})
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategoryId(category.id)}
+                    className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
+                      selectedCategoryId === category.id
+                        ? 'bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
+                        : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 hover:bg-amber-50'
+                    }`}
+                  >
+                    {category.name} ({category.courses_count || 0})
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.15, delay: 0.1 }}
+              className="mb-12"
+            >
+              <div className="text-center">
+                <p className="text-gray-500 text-sm">
+                  دسته بندي نشته یا لود کېدل
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Loading State */}
           {loading && (
