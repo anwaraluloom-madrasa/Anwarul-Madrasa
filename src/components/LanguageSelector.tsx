@@ -1,29 +1,27 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Globe, ChevronDown } from "lucide-react";
-
-const languages = [
-  { code: "ps", name: "پښتو" },
-  { code: "en", name: "English" },
-  { code: "fa", name: "فارسی" },
-  { code: "ar", name: "العربية" },
-  { code: "ur", name: "اردو" },
-  { code: "tr", name: "Türkçe" },
-  { code: "uz", name: "O'zbek" },
-];
+import React, { useEffect, useRef } from "react";
 
 export default function LanguageSelector() {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState("ps");
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && wrapperRef.current) {
       // Set gtranslate settings
-      (window as any).gtranslateSettings = {
+      interface GTranslateSettings {
+        default_language: string;
+        native_language_names: boolean;
+        languages: string[];
+        wrapper_selector: string;
+      }
+
+      interface WindowWithGTranslate extends Window {
+        gtranslateSettings?: GTranslateSettings;
+        gt_init?: () => void;
+      }
+
+      const win = window as WindowWithGTranslate;
+      win.gtranslateSettings = {
         "default_language": "ps",
         "native_language_names": true,
         "languages": ["ps", "en", "fa", "ar", "ur", "tr", "uz"],
@@ -32,6 +30,7 @@ export default function LanguageSelector() {
 
       // Function to load gtranslate
       const loadGTranslate = () => {
+        // Check if script already exists
         const existingScript = document.querySelector('script[src*="gtranslate.net"]');
         
         if (!existingScript) {
@@ -39,172 +38,136 @@ export default function LanguageSelector() {
           script.src = 'https://cdn.gtranslate.net/widgets/latest/lc.js';
           script.defer = true;
           script.async = true;
-          script.onload = () => {
-            // After script loads, initialize
-            if ((window as any).gt_init) {
-              (window as any).gt_init();
-              setIsInitialized(true);
-              
-              // Wait a bit for gtranslate to render
-              setTimeout(() => {
-                const select = wrapperRef.current?.querySelector('select') as HTMLSelectElement;
-                if (select) {
-                  // Get current language from gtranslate cookie or default
-                  const cookieValue = document.cookie.match(/googtrans=([^;]+)/);
-                  const langCode = cookieValue ? cookieValue[1].split('/').pop() : "ps";
-                  setCurrentLang(langCode || "ps");
-                  
-                  // Listen for changes from gtranslate
-                  select.addEventListener('change', () => {
-                    const newLang = select.value || "ps";
-                    setCurrentLang(newLang);
-                    setIsOpen(false);
-                  });
-                }
-              }, 500);
-            }
-          };
           document.head.appendChild(script);
-        } else {
-          // Script already exists, check if initialized
-          setTimeout(() => {
-            const select = wrapperRef.current?.querySelector('select') as HTMLSelectElement;
-            if (select) {
-              const cookieValue = document.cookie.match(/googtrans=([^;]+)/);
-              const langCode = cookieValue ? cookieValue[1].split('/').pop() : "ps";
-              setCurrentLang(langCode || select.value || "ps");
-              setIsInitialized(true);
-            }
-          }, 500);
         }
       };
 
+      // Load script
       loadGTranslate();
 
-      // Periodic check for initialization
+      // Try to initialize after script loads
       const checkAndInit = setInterval(() => {
-        if ((window as any).gt_init && wrapperRef.current && !isInitialized) {
-          (window as any).gt_init();
-          setIsInitialized(true);
+        if (win.gt_init && wrapperRef.current) {
+          win.gt_init();
           clearInterval(checkAndInit);
+        }
+      }, 100);
+
+      // Clear interval after 5 seconds
+      setTimeout(() => clearInterval(checkAndInit), 5000);
+
+      // Style the gtranslate select when it's ready to make it look like a dropdown
+      let isStyled = false;
+      
+      const styleSelect = () => {
+        if (!wrapperRef.current) return;
+        
+        const select = wrapperRef.current.querySelector('select') as HTMLSelectElement;
+        if (select && !select.hasAttribute('data-custom-styled')) {
+          // Mark as styled to avoid re-styling
+          select.setAttribute('data-custom-styled', 'true');
+          isStyled = true;
           
-          setTimeout(() => {
-            const select = wrapperRef.current?.querySelector('select') as HTMLSelectElement;
-            if (select) {
-              const cookieValue = document.cookie.match(/googtrans=([^;]+)/);
-              const langCode = cookieValue ? cookieValue[1].split('/').pop() : "ps";
-              setCurrentLang(langCode || select.value || "ps");
-              
-              select.addEventListener('change', () => {
-                const newLang = select.value || "ps";
-                setCurrentLang(newLang);
-                setIsOpen(false);
-              });
-            }
-          }, 500);
+          // Apply custom styles to make it look like a modern dropdown
+          select.style.cssText = `
+            padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 0.5rem !important;
+            background-color: white !important;
+            color: #374151 !important;
+            cursor: pointer !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6L8 10L12 6' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 0.5rem center !important;
+            padding-right: 2.5rem !important;
+            min-width: 120px !important;
+            transition: all 0.2s ease !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            width: auto !important;
+            display: block !important;
+          `;
+          
+          // Store original styles for reset
+          const originalBorderColor = '#d1d5db';
+          const originalBoxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+          
+          // Add hover effect
+          select.addEventListener('mouseenter', () => {
+            select.style.setProperty('border-color', '#9ca3af', 'important');
+            select.style.setProperty('box-shadow', '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 'important');
+          });
+          
+          select.addEventListener('mouseleave', () => {
+            select.style.setProperty('border-color', originalBorderColor, 'important');
+            select.style.setProperty('box-shadow', originalBoxShadow, 'important');
+          });
+          
+          // Add focus effect
+          select.addEventListener('focus', () => {
+            select.style.setProperty('outline', 'none', 'important');
+            select.style.setProperty('border-color', '#10b981', 'important');
+            select.style.setProperty('box-shadow', '0 0 0 3px rgba(16, 185, 129, 0.1)', 'important');
+          });
+          
+          select.addEventListener('blur', () => {
+            select.style.setProperty('border-color', originalBorderColor, 'important');
+            select.style.setProperty('box-shadow', originalBoxShadow, 'important');
+          });
+        }
+      };
+
+      // Try to style immediately and then periodically
+      styleSelect();
+      const styleInterval = setInterval(() => {
+        if (!isStyled) {
+          styleSelect();
+        } else {
+          clearInterval(styleInterval);
         }
       }, 200);
 
-      setTimeout(() => clearInterval(checkAndInit), 10000);
+      // Also use MutationObserver to catch when gtranslate adds the select
+      const observer = new MutationObserver(() => {
+        if (!isStyled) {
+          styleSelect();
+        }
+      });
+
+      if (wrapperRef.current) {
+        observer.observe(wrapperRef.current, {
+          childList: true,
+          subtree: true
+        });
+      }
+
+      setTimeout(() => {
+        clearInterval(styleInterval);
+        observer.disconnect();
+      }, 10000);
 
       return () => {
         clearInterval(checkAndInit);
+        observer.disconnect();
       };
     }
-  }, [isInitialized]);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setIsOpen(false);
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const handleLanguageClick = (langCode: string) => {
-    const select = wrapperRef.current?.querySelector('select') as HTMLSelectElement;
-    if (select) {
-      // Change the select value
-      select.value = langCode;
-      
-      // Create and dispatch a proper change event
-      const changeEvent = new Event('change', { bubbles: true, cancelable: true });
-      select.dispatchEvent(changeEvent);
-      
-      // Also trigger input event for better compatibility
-      const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-      select.dispatchEvent(inputEvent);
-      
-      // Use gtranslate's API if available
-      if ((window as any).doGTranslate) {
-        (window as any).doGTranslate(langCode);
-      }
-      
-      setCurrentLang(langCode);
-      setIsOpen(false);
-    }
-  };
-
-  const currentLanguage = languages.find(lang => lang.code === currentLang) || languages[0];
+  }, []);
 
   return (
-    <div className="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 lg:bottom-7 lg:left-6 z-50" ref={dropdownRef}>
-      {/* Hidden gtranslate wrapper */}
+    <div className="fixed bottom-3 left-3 sm:bottom-4 sm:left-4 lg:bottom-7 lg:left-6 z-50">
       <div 
-        className="gtranslate_wrapper_footer absolute opacity-0 pointer-events-none" 
-        ref={wrapperRef} 
-        style={{ width: '1px', height: '1px', overflow: 'hidden' }}
+        className="gtranslate_wrapper_footer" 
+        ref={wrapperRef}
+        style={{
+          display: 'block',
+          visibility: 'visible',
+          opacity: 1,
+        }}
       ></div>
-      
-      {/* Custom Dropdown */}
-      <div className="relative">
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-xs sm:text-sm"
-          type="button"
-          aria-label="Select Language"
-          aria-expanded={isOpen}
-        >
-          <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-700 flex-shrink-0" />
-          <span className="font-medium text-gray-700 min-w-[45px] sm:min-w-[60px] text-left truncate">
-            {currentLanguage.name}
-          </span>
-          <ChevronDown className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-700 transition-transform duration-200 flex-shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
-
-        {isOpen && (
-          <div className="absolute bottom-full left-0 mb-2 w-36 sm:w-40 bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden z-50 max-h-[200px] sm:max-h-none overflow-y-auto">
-            <div className="py-1">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageClick(lang.code)}
-                  className={`w-full px-3 sm:px-4 py-2 text-xs sm:text-sm text-left hover:bg-green-50 transition-colors duration-150 ${
-                    currentLang === lang.code
-                      ? 'bg-green-100 text-green-700 font-semibold'
-                      : 'text-gray-700'
-                  }`}
-                  type="button"
-                >
-                  {lang.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
