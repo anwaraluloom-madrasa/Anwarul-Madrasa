@@ -106,29 +106,48 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
     }
   }, [belongsToMadrasaFilter, showAll]);
 
+  // Get filter-specific empty state message
+  const getEmptyStateMessage = () => {
+    if (belongsToMadrasaFilter === 1) {
+      return {
+        title: "د مدرسې کتابونه نشته",
+        description: "اوسمهال د مدرسې کتابونه موجود نه دي. مهرباني وکړئ وروسته بیا وګورئ.",
+      };
+    } else if (belongsToMadrasaFilter === 0) {
+      return {
+        title: "نور کتابونه نشته",
+        description: "اوسمهال نور کتابونه موجود نه دي. مهرباني وکړئ وروسته بیا وګورئ.",
+      };
+    }
+    return {
+      title: "کتابونه نشته",
+      description: "اوسمهال کتابونه موجود نه دي. مهرباني وکړئ وروسته بیا وګورئ.",
+    };
+  };
+
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <BookCardSkeleton key={index} />
-        ))}
+      <div className="w-full">
+        {/* Filter Buttons Skeleton */}
+        <div className="mb-8">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+            <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-32"></div>
+            <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-40"></div>
+            <div className="px-6 py-3 rounded-xl bg-gray-200 animate-pulse h-12 w-36"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <BookCardSkeleton key={index} />
+          ))}
+        </div>
       </div>
-    );
-  }
-
-  if (displayBooks.length === 0) {
-    return (
-      <ComingSoonEmptyState
-        title="No Books Available"
-        description="We're working on adding more books to our collection."
-        className="max-w-2xl mx-auto"
-      />
     );
   }
 
   return (
     <div className="w-full">
-      {/* Filter Buttons */}
+      {/* Filter Buttons - Always visible */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,9 +191,17 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
         </div>
       </motion.div>
 
-      {/* Books Grid with proper margins */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-        {displayBooks.map((book) => {
+      {/* Empty State or Books Grid */}
+      {displayBooks.length === 0 ? (
+        <ComingSoonEmptyState
+          title={getEmptyStateMessage().title}
+          description={getEmptyStateMessage().description}
+          className="max-w-2xl mx-auto"
+        />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          {displayBooks.map((book) => {
           const coverImage = getImageUrl(book.image) || "";
 
           return (
@@ -276,23 +303,25 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
             </Link>
           );
         })}
-      </div>
-      {/* Pagination */}
-      {!showAll &&
-        displayBooks.length > 0 &&
-        (hasNextPage ||
-          hasPrevPage ||
-          (typeof totalPages === "number" && totalPages > 1)) && (
-          <PaginationControls
-            className="mt-10"
-            page={page}
-            totalPages={typeof totalPages === "number" ? totalPages : null}
-            hasNextPage={hasNextPage}
-            hasPrevPage={hasPrevPage}
-            onPageChange={(p) => setPage(p)}
-            isBusy={loading}
-          />
-        )}
+          </div>
+          {/* Pagination */}
+          {!showAll &&
+            displayBooks.length > 0 &&
+            (hasNextPage ||
+              hasPrevPage ||
+              (typeof totalPages === "number" && totalPages > 1)) && (
+              <PaginationControls
+                className="mt-10"
+                page={page}
+                totalPages={typeof totalPages === "number" ? totalPages : null}
+                hasNextPage={hasNextPage}
+                hasPrevPage={hasPrevPage}
+                onPageChange={(p) => setPage(p)}
+                isBusy={loading}
+              />
+            )}
+        </>
+      )}
     </div>
   );
 }
