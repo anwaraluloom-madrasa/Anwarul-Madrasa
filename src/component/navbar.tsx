@@ -191,10 +191,9 @@ const Navbar = memo(function Navbar() {
   
   // Get courses links for dropdown
   const coursesLinks = useMemo(() => {
-    const courses = navigation.main.find(link => link.name === 'courses');
+    // Only include onlineCourses, exclude courses
     const onlineCourses = navigation.main.find(link => link.name === 'onlineCourses');
     return [
-      { ...courses!, name: NAV_LABELS['courses' as keyof typeof NAV_LABELS] || courses!.name },
       { ...onlineCourses!, name: NAV_LABELS['onlineCourses' as keyof typeof NAV_LABELS] || onlineCourses!.name }
     ].filter(Boolean);
   }, []);
