@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getImageUrl } from "../../../lib/utils";
 import { BooksApi } from "../../../lib/api";
 import { Book } from "../../../lib/types";
@@ -11,64 +11,100 @@ import { BookOpen, Calendar, ChevronLeft } from "lucide-react";
 import { cleanText } from "../../../lib/textUtils";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
 import BookCardSkeleton from "./BookCardSkeleton";
+import { motion } from "framer-motion";
 
 interface BooksSectionProps {
   showAll?: boolean; // Show all books or only limited
   showHero?: boolean; // Only display hero on specific page
 }
 
+type BelongsToMadrasaFilter = "all" | 0 | 1;
+
 export default function BooksSection({ showAll = false }: BooksSectionProps) {
-  const [books, setBooks] = useState<Book[]>([]);
+  const [books, setBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
+  const [allBooks, setAllBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState<number | null>(null);
+  const [belongsToMadrasaFilter, setBelongsToMadrasaFilter] = useState<BelongsToMadrasaFilter>("all");
   const PAGE_SIZE = 8;
 
-  // Fetch books from API
+  // Fetch books from API - always fetch all for accurate filtering and counts
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
-        const response = await BooksApi.getAll(
-          showAll ? {} : { page, limit: PAGE_SIZE }
-        );
+        // Fetch all books (up to 1000) for accurate filtering and counts
+        const response = await BooksApi.getAll({ limit: 1000 });
         const booksData =
           (response as any)?.data?.data || (response as any)?.data || [];
-        setBooks(Array.isArray(booksData) ? booksData : []);
-
-        const pagination = (response as any)?.pagination;
-        if (pagination && typeof pagination.totalPages === "number") {
-          setTotalPages(pagination.totalPages);
-        } else if (!showAll) {
-          // Fallback: infer if we likely have more pages
-          setTotalPages(
-            booksData.length < PAGE_SIZE && page === 1
-              ? 1
-              : booksData.length === PAGE_SIZE
-              ? page + 1
-              : page
-          );
-        } else {
-          setTotalPages(null);
-        }
+        const fetchedBooks = Array.isArray(booksData) ? booksData : [];
+        
+        setAllBooks(fetchedBooks);
       } catch (err) {
         console.error("Failed to fetch books:", err);
         setBooks([]);
+        setAllBooks([]);
       } finally {
         setLoading(false);
       }
     };
     fetchBooks();
-  }, [page, showAll]);
+  }, [showAll]);
 
-  const sortedBooks = books.filter((book) => book.is_published === 1);
-  const displayBooks = sortedBooks; // Books are already paginated from API
+  // Filter books by belongs_to_madrasa and update pagination
+  useEffect(() => {
+    const publishedBooks = allBooks.filter((book) => Number(book.is_published) === 1);
+    
+    let filtered: typeof allBooks;
+    if (belongsToMadrasaFilter === "all") {
+      filtered = publishedBooks;
+    } else {
+      filtered = publishedBooks.filter((book) => {
+        const belongsToMadrasa = (book as any).belongs_to_madrasa ?? 0;
+        return Number(belongsToMadrasa) === belongsToMadrasaFilter;
+      });
+    }
+    
+    setBooks(filtered);
+    
+    // Update total pages based on filtered results
+    if (showAll) {
+      setTotalPages(null);
+    } else {
+      setTotalPages(Math.ceil(filtered.length / PAGE_SIZE) || 1);
+    }
+  }, [belongsToMadrasaFilter, allBooks, showAll]);
+
+  // Count books for each filter - calculate from allBooks
+  const bookCounts = useMemo(() => {
+    const publishedBooks = allBooks.filter((book) => Number(book.is_published) === 1);
+    return {
+      all: publishedBooks.length,
+      madrasa: publishedBooks.filter((book) => Number((book as Book & { belongs_to_madrasa?: number }).belongs_to_madrasa ?? 0) === 1).length,
+      other: publishedBooks.filter((book) => Number((book as Book & { belongs_to_madrasa?: number }).belongs_to_madrasa ?? 0) === 0).length,
+    };
+  }, [allBooks]);
+
+  // Books are already filtered by belongs_to_madrasa and published status
+  // Slice for pagination (only if not showAll)
+  const displayBooks = showAll 
+    ? books 
+    : books.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  
   const hasNextPage =
     !showAll &&
     (typeof totalPages === "number"
       ? page < totalPages
-      : displayBooks.length === PAGE_SIZE);
+      : books.length > page * PAGE_SIZE);
   const hasPrevPage = !showAll && page > 1;
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    if (!showAll) {
+      setPage(1);
+    }
+  }, [belongsToMadrasaFilter, showAll]);
 
   if (loading) {
     return (
@@ -92,6 +128,50 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
 
   return (
     <div className="w-full">
+      {/* Filter Buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-8"
+      >
+        <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+          <button
+            onClick={() => setBelongsToMadrasaFilter("all")}
+            className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
+              belongsToMadrasaFilter === "all"
+                ? "bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
+                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 hover:bg-amber-50"
+            }`}
+            style={{ fontFamily: "Amiri, serif" }}
+          >
+            ټول کتابونه ({bookCounts.all})
+          </button>
+          <button
+            onClick={() => setBelongsToMadrasaFilter(1)}
+            className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
+              belongsToMadrasaFilter === 1
+                ? "bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
+                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 hover:bg-amber-50"
+            }`}
+            style={{ fontFamily: "Amiri, serif" }}
+          >
+            د مدرسې کتابونه ({bookCounts.madrasa})
+          </button>
+          <button
+            onClick={() => setBelongsToMadrasaFilter(0)}
+            className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
+              belongsToMadrasaFilter === 0
+                ? "bg-gradient-to-r from-amber-600 via-amber-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
+                : "bg-white text-gray-700 border-2 border-gray-200 hover:border-amber-300 hover:bg-amber-50"
+            }`}
+            style={{ fontFamily: "Amiri, serif" }}
+          >
+            نور کتابونه ({bookCounts.other})
+          </button>
+        </div>
+      </motion.div>
+
       {/* Books Grid with proper margins */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {displayBooks.map((book) => {
