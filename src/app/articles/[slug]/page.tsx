@@ -168,15 +168,19 @@ export default async function ArticleDetailsPage({ params }: PageProps) {
                 {/* Article Content */}
                 <div className="prose prose-lg max-w-none">
                   {article.description && (
-                    <p className="text-base md:text-lg text-gray-700 leading-relaxed mb-6" style={{ fontFamily: 'Amiri, serif' }}>
-                      {stripHtml(article.description)}
-                    </p>
+                    <div 
+                      className="text-base md:text-lg text-gray-700 leading-relaxed mb-6 [&_*]:text-gray-700 [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
+                      style={{ fontFamily: 'Amiri, serif' }}
+                      dir="rtl"
+                      dangerouslySetInnerHTML={{ __html: article.description }}
+                    />
                   )}
                   
                   {article.content && (
                     <div 
-                      className="text-gray-800 leading-relaxed"
+                      className="text-gray-800 leading-relaxed [&_*]:text-gray-800 [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                       style={{ fontFamily: 'Amiri, serif' }}
+                      dir="rtl"
                       dangerouslySetInnerHTML={{ __html: article.content }}
                     />
                   )}
@@ -210,9 +214,12 @@ export default async function ArticleDetailsPage({ params }: PageProps) {
                             {stripHtml(item.title)}
                           </h4>
                           
-                          <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
-                            {stripHtml(item.description) || "Continue reading..."}
-                          </p>
+                          <div 
+                            className="text-xs text-gray-500 leading-relaxed [&_*]:text-xs [&_*]:text-gray-500 [&_p]:mb-1 [&_*]:line-clamp-2"
+                            style={{ fontFamily: 'Amiri, serif' }}
+                            dir="rtl"
+                            dangerouslySetInnerHTML={{ __html: item.description || "Continue reading..." }}
+                          />
                         </Link>
                       ))}
                     </div>
@@ -242,9 +249,12 @@ export default async function ArticleDetailsPage({ params }: PageProps) {
                         {stripHtml(item.title)}
                       </h3>
                       
-                      <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
-                        {stripHtml(item.description) || "Continue reading..."}
-                      </p>
+                      <div 
+                        className="text-xs text-gray-500 leading-relaxed [&_*]:text-xs [&_*]:text-gray-500 [&_p]:mb-1 [&_*]:line-clamp-2"
+                        style={{ fontFamily: 'Amiri, serif' }}
+                        dir="rtl"
+                        dangerouslySetInnerHTML={{ __html: item.description || "Continue reading..." }}
+                      />
                     </Link>
                   ))}
                 </div>

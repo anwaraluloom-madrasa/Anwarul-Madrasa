@@ -238,9 +238,12 @@ export default function GraduationDetailPage({
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight" style={{ fontFamily: 'Amiri, serif' }}>
                 {stripHtml(graduation.title)}
               </h1>
-              <p className="text-base md:text-lg text-gray-600 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
-                {stripHtml(graduation.description)}
-              </p>
+              <div 
+                className="text-base md:text-lg text-gray-600 leading-relaxed [&_*]:text-base md:[&_*]:text-lg [&_*]:text-gray-600 [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
+                style={{ fontFamily: 'Amiri, serif' }}
+                dir="rtl"
+                dangerouslySetInnerHTML={{ __html: graduation.description }}
+              />
             </div>
 
             {/* Info Cards */}
@@ -500,9 +503,12 @@ export default function GraduationDetailPage({
                     <span>{t('graduationDetail.description')}</span>
                   </h3>
                   <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-                    <p className="text-sm md:text-base text-gray-700 leading-relaxed" style={{ fontFamily: 'Amiri, serif' }}>
-                      {stripHtml(selectedStudent.description)}
-                    </p>
+                    <div 
+                      className="text-sm md:text-base text-gray-700 leading-relaxed [&_*]:text-sm md:[&_*]:text-base [&_*]:text-gray-700 [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
+                      style={{ fontFamily: 'Amiri, serif' }}
+                      dir="rtl"
+                      dangerouslySetInnerHTML={{ __html: selectedStudent.description }}
+                    />
                   </div>
                 </div>
               )}

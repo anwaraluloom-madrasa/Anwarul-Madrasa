@@ -184,9 +184,12 @@ export default function GraduationsSection({ showAll = false }: GraduationsSecti
                   </h3>
 
                   {/* Description */}
-                  <p className="text-xs sm:text-sm text-[#4a8a8a] leading-relaxed line-clamp-2 sm:line-clamp-3" style={{ fontFamily: 'Amiri, serif' }}>
-                    {stripHtml(grad.description) || t('graduationDetail.noDescriptionAvailable')}
-                  </p>
+                  <div 
+                    className="text-xs sm:text-sm text-[#4a8a8a] leading-relaxed [&_*]:text-xs sm:[&_*]:text-sm [&_*]:text-[#4a8a8a] [&_p]:mb-1 [&_*]:line-clamp-2 sm:[&_*]:line-clamp-3"
+                    style={{ fontFamily: 'Amiri, serif' }}
+                    dir="rtl"
+                    dangerouslySetInnerHTML={{ __html: grad.description || t('graduationDetail.noDescriptionAvailable') }}
+                  />
 
                   {/* Metadata - Small Text */}
                   <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-xs text-[#4a8a8a] pt-1 sm:pt-2">

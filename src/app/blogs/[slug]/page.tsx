@@ -261,12 +261,12 @@ export default async function BlogDetailsPage({ params }: Params) {
                       </h3>
 
                       {/* Description */}
-                      <p
-                        className="text-xs sm:text-sm text-[#4a8a8a] leading-relaxed line-clamp-2 sm:line-clamp-3 break-words"
+                      <div
+                        className="text-xs sm:text-sm text-[#4a8a8a] leading-relaxed break-words [&_*]:text-xs sm:[&_*]:text-sm [&_*]:text-[#4a8a8a] [&_p]:mb-1 [&_*]:line-clamp-2 sm:[&_*]:line-clamp-3"
                         style={{ fontFamily: "Amiri, serif" }}
-                      >
-                        {stripHtml(rb.description)}
-                      </p>
+                        dir="rtl"
+                        dangerouslySetInnerHTML={{ __html: rb.description }}
+                      />
 
                       {/* Date - Small Text */}
                       <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-[#4a8a8a] pt-1 sm:pt-2">

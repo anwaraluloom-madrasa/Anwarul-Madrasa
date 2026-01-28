@@ -200,9 +200,12 @@ export default function CoursesSection({
                         {course.title}
                       </h3>
 
-                      <p className="text-gray-600 leading-relaxed line-clamp-2 text-sm" style={{ fontFamily: 'Amiri, serif' }}>
-                        {stripHtml(course.description) || t('courses.immersiveLearning')}
-                      </p>
+                      <div 
+                        className="text-gray-600 leading-relaxed text-sm [&_*]:text-sm [&_*]:text-gray-600 [&_p]:mb-1 [&_*]:line-clamp-2"
+                        style={{ fontFamily: 'Amiri, serif' }}
+                        dir="rtl"
+                        dangerouslySetInnerHTML={{ __html: course.description || t('courses.immersiveLearning') }}
+                      />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mb-4">

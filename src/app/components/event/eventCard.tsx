@@ -221,12 +221,12 @@ export default function EventsSection({
                       </h3>
 
                       {/* Description */}
-                      <p
-                        className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 line-clamp-3 sm:line-clamp-4 break-words"
+                      <div
+                        className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 break-words [&_*]:text-sm sm:[&_*]:text-base md:[&_*]:text-lg [&_*]:text-gray-600 [&_p]:mb-2 [&_*]:line-clamp-3 sm:[&_*]:line-clamp-4"
                         style={{ fontFamily: "Amiri, serif" }}
-                      >
-                        {stripHtml(event.description)}
-                      </p>
+                        dir="rtl"
+                        dangerouslySetInnerHTML={{ __html: event.description }}
+                      />
                     </div>
 
                     {/* Event Details Grid */}
