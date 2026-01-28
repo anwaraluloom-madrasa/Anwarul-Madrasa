@@ -6,8 +6,14 @@ import { useEffect, useState, useMemo } from "react";
 import { getImageUrl } from "../../../lib/utils";
 import { BooksApi } from "../../../lib/api";
 import { Book } from "../../../lib/types";
+
+interface BookCategory {
+  id: number;
+  name: string;
+  slug?: string;
+}
 import PaginationControls from "@/components/PaginationControls";
-import { BookOpen, Calendar, ChevronLeft } from "lucide-react";
+import { BookOpen, Calendar, ChevronLeft, ChevronDown } from "lucide-react";
 import { cleanText } from "../../../lib/textUtils";
 import { ComingSoonEmptyState } from "@/components/EmptyState";
 import BookCardSkeleton from "./BookCardSkeleton";
@@ -24,11 +30,29 @@ type BelongsToMadrasaFilter = "all" | 0 | 1;
 export default function BooksSection({ showAll = false, limit = 6 }: BooksSectionProps) {
   const [books, setBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [allBooks, setAllBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
+  const [categories, setCategories] = useState<BookCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState<number | null>(null);
   const [belongsToMadrasaFilter, setBelongsToMadrasaFilter] = useState<BelongsToMadrasaFilter>("all");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const PAGE_SIZE = 8;
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await BooksApi.getCategories();
+        if (result.success && Array.isArray(result.data)) {
+          setCategories(result.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch book categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Fetch books from API - always fetch all for accurate filtering and counts
   useEffect(() => {
@@ -37,8 +61,12 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
         setLoading(true);
         // Fetch all books (up to 1000) for accurate filtering and counts
         const response = await BooksApi.getAll({ limit: 1000 });
-        const booksData =
-          (response as any)?.data?.data || (response as any)?.data || [];
+        const responseData = response as { data?: Book[] | { data?: Book[] } };
+        const booksData = Array.isArray(responseData?.data) 
+          ? responseData.data 
+          : Array.isArray(responseData?.data?.data) 
+            ? responseData.data.data 
+            : [];
         const fetchedBooks = Array.isArray(booksData) ? booksData : [];
         
         setAllBooks(fetchedBooks);
@@ -53,17 +81,27 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
     fetchBooks();
   }, [showAll]);
 
-  // Filter books by belongs_to_madrasa and update pagination
+  // Filter books by belongs_to_madrasa, category, and update pagination
   useEffect(() => {
     const publishedBooks = allBooks.filter((book) => Number(book.is_published) === 1);
     
     let filtered: typeof allBooks;
+    
+    // First filter by belongs_to_madrasa
     if (belongsToMadrasaFilter === "all") {
       filtered = publishedBooks;
     } else {
       filtered = publishedBooks.filter((book) => {
-        const belongsToMadrasa = (book as any).belongs_to_madrasa ?? 0;
+        const bookWithMadrasa = book as Book & { belongs_to_madrasa?: number };
+        const belongsToMadrasa = bookWithMadrasa.belongs_to_madrasa ?? 0;
         return Number(belongsToMadrasa) === belongsToMadrasaFilter;
+      });
+    }
+    
+    // Then filter by category if selected
+    if (selectedCategoryId !== null) {
+      filtered = filtered.filter((book) => {
+        return book.book_category_id === selectedCategoryId;
       });
     }
     
@@ -75,17 +113,29 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
     } else {
       setTotalPages(Math.ceil(filtered.length / PAGE_SIZE) || 1);
     }
-  }, [belongsToMadrasaFilter, allBooks, showAll]);
+  }, [belongsToMadrasaFilter, selectedCategoryId, allBooks, showAll]);
 
   // Count books for each filter - calculate from allBooks
   const bookCounts = useMemo(() => {
     const publishedBooks = allBooks.filter((book) => Number(book.is_published) === 1);
-    return {
+    
+    // Base counts by belongs_to_madrasa
+    const baseCounts = {
       all: publishedBooks.length,
       madrasa: publishedBooks.filter((book) => Number((book as Book & { belongs_to_madrasa?: number }).belongs_to_madrasa ?? 0) === 1).length,
       other: publishedBooks.filter((book) => Number((book as Book & { belongs_to_madrasa?: number }).belongs_to_madrasa ?? 0) === 0).length,
     };
-  }, [allBooks]);
+    
+    // Category counts
+    const categoryCounts: Record<number, number> = {};
+    categories.forEach((category) => {
+      categoryCounts[category.id] = publishedBooks.filter(
+        (book) => book.book_category_id === category.id
+      ).length;
+    });
+    
+    return { ...baseCounts, categories: categoryCounts };
+  }, [allBooks, categories]);
 
   // Books are already filtered by belongs_to_madrasa and published status
   // Slice for pagination (only if not showAll) or limit
@@ -107,10 +157,36 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
     if (!showAll) {
       setPage(1);
     }
-  }, [belongsToMadrasaFilter, showAll]);
+  }, [belongsToMadrasaFilter, selectedCategoryId, showAll]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (isCategoryDropdownOpen && !target.closest('.category-dropdown-container')) {
+        setIsCategoryDropdownOpen(false);
+      }
+    };
+
+    if (isCategoryDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isCategoryDropdownOpen]);
 
   // Get filter-specific empty state message
   const getEmptyStateMessage = () => {
+    const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+    
+    if (selectedCategoryId !== null && selectedCategory) {
+      return {
+        title: `د ${selectedCategory.name} کټګورۍ کتابونه نشته`,
+        description: `اوسمهال د ${selectedCategory.name} کټګورۍ کتابونه موجود نه دي. مهرباني وکړئ وروسته بیا وګورئ.`,
+      };
+    }
+    
     if (belongsToMadrasaFilter === 1) {
       return {
         title: "د مدرسې کتابونه نشته",
@@ -157,7 +233,8 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
         transition={{ duration: 0.3 }}
         className="mb-8"
       >
-        <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+        {/* Belongs to Madrasa Filters and Category Dropdown */}
+        <div className="flex flex-wrap justify-center items-center gap-3 md:gap-4">
           <button
             onClick={() => setBelongsToMadrasaFilter("all")}
             className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 ${
@@ -191,6 +268,75 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
           >
             نور کتابونه ({bookCounts.other})
           </button>
+
+          {/* Category Dropdown */}
+          {categories.length > 0 && (
+            <div className="relative category-dropdown-container">
+              <button
+                onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm md:text-base transition-all duration-300 flex items-center gap-2 ${
+                  selectedCategoryId !== null
+                    ? "bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:scale-105"
+                    : "bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                }`}
+                style={{ fontFamily: "Amiri, serif" }}
+              >
+                <span>
+                  {selectedCategoryId !== null
+                    ? categories.find((c) => c.id === selectedCategoryId)?.name || "کټګورۍ"
+                    : "کټګورۍ"}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform duration-300 ${
+                    isCategoryDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Dropdown Menu */}
+              {isCategoryDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border-2 border-gray-200 z-50 max-h-80 overflow-y-auto">
+                  <button
+                    onClick={() => {
+                      setSelectedCategoryId(null);
+                      setIsCategoryDropdownOpen(false);
+                    }}
+                    className={`w-full text-right px-4 py-3 font-semibold text-sm transition-colors duration-200 ${
+                      selectedCategoryId === null
+                        ? "bg-blue-50 text-blue-700 border-r-4 border-blue-600"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                    style={{ fontFamily: "Amiri, serif" }}
+                  >
+                    ټولې کټګورۍ
+                  </button>
+                  {categories.map((category) => {
+                    const count = bookCounts.categories?.[category.id] || 0;
+                    return (
+                      <button
+                        key={category.id}
+                        onClick={() => {
+                          setSelectedCategoryId(category.id);
+                          setIsCategoryDropdownOpen(false);
+                        }}
+                        className={`w-full text-right px-4 py-3 font-semibold text-sm transition-colors duration-200 border-t border-gray-100 ${
+                          selectedCategoryId === category.id
+                            ? "bg-blue-50 text-blue-700 border-r-4 border-blue-600"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                        style={{ fontFamily: "Amiri, serif" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>{category.name}</span>
+                          <span className="text-xs text-gray-500">({count})</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </motion.div>
 

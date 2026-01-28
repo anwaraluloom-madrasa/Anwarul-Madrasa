@@ -96,6 +96,7 @@ export const endpoints = {
   commentAboutSheikComment: (slug: string) =>
     `/api/comment-about-sheik/comment/${slug}`,
   courseCategories: `/api/course-category`,
+  bookCategories: `/api/book/categories`,
 } as const;
 
 // Feature Flags

@@ -1291,6 +1291,47 @@ export class BooksApi {
       throw error;
     }
   }
+
+  static async getCategories(): Promise<ApiResponse<any[]>> {
+    try {
+      const response = await fetch(endpoints.bookCategories, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        logger.warn("Book categories API failed", {
+          status: response.status,
+        });
+        return { data: [], success: false, error: `HTTP error! status: ${response.status}` };
+      }
+
+      const data = await response.json();
+      logger.info("Book categories received", {
+        count: Array.isArray(data?.data) ? data.data.length : "unknown",
+      });
+
+      // Handle different response formats
+      if (data && typeof data === "object") {
+        if (Array.isArray(data.data)) {
+          return { data: data.data, success: true };
+        } else if (Array.isArray(data)) {
+          return { data, success: true };
+        } else if (data.categories && Array.isArray(data.categories)) {
+          return { data: data.categories, success: true };
+        }
+      }
+
+      logger.warn("Unexpected book categories data format");
+      return { data: [], success: true };
+    } catch (error) {
+      logger.error("Failed to fetch book categories", error);
+      return { data: [], success: false, error: error instanceof Error ? error.message : "Unknown error" };
+    }
+  }
 }
 
 export class EventsApi {
