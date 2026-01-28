@@ -34,8 +34,20 @@ export default function AwlyaaListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await AwlyaaApi.getAll();
-        setAwlyaa(res.data as Awlyaa[]);
+        const res = await AwlyaaApi.getAll({ 
+          sort: 'orders_number',
+          order: 'asc' 
+        });
+        let data = res.data as Awlyaa[];
+        
+        // Sort by orders_number (fallback if backend doesn't support sorting)
+        data = data.sort((a, b) => {
+          const orderA = a.orders_number ?? 999999; // Put items without order_number at the end
+          const orderB = b.orders_number ?? 999999;
+          return orderA - orderB;
+        });
+        
+        setAwlyaa(data);
       } catch (err: any) {
         setError(err.message || "Failed to fetch Awlyaa");
       } finally {
@@ -45,12 +57,19 @@ export default function AwlyaaListPage() {
     fetchData();
   }, []);
 
-  // Filter awlyaa based on search term
-  const filteredAwlyaa = awlyaa.filter(
-    (item) =>
-      (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter awlyaa based on search term, maintaining sort order
+  const filteredAwlyaa = awlyaa
+    .filter(
+      (item) =>
+        (item.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      // Maintain sort order even after filtering
+      const orderA = a.orders_number ?? 999999;
+      const orderB = b.orders_number ?? 999999;
+      return orderA - orderB;
+    });
 
   // Animation variants - optimized for instant rendering
   const containerVariants = {

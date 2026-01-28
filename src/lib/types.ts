@@ -242,6 +242,7 @@ export interface Awlyaa extends BaseEntity {
   famous_works: string | null;
   profile_image: string | null;
   extra_information: string | null;
+  orders_number: number | null;
   created_at: string;
   updated_at: string;
 }
