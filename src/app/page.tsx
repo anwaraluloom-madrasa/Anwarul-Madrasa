@@ -131,7 +131,7 @@ export default function HomePage() {
           {/* Simple Books Section */}
           <div className="mt-8">
             <div className="relative">
-              <BooksSection showAll={false} />
+              <BooksSection showAll={false} limit={6} />
 
               {/* Simple Call to Action */}
               <div className="mt-8 text-center">

@@ -16,11 +16,12 @@ import { motion } from "framer-motion";
 interface BooksSectionProps {
   showAll?: boolean; // Show all books or only limited
   showHero?: boolean; // Only display hero on specific page
+  limit?: number; // Limit number of books to show when showAll is false
 }
 
 type BelongsToMadrasaFilter = "all" | 0 | 1;
 
-export default function BooksSection({ showAll = false }: BooksSectionProps) {
+export default function BooksSection({ showAll = false, limit = 6 }: BooksSectionProps) {
   const [books, setBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [allBooks, setAllBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -87,10 +88,12 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
   }, [allBooks]);
 
   // Books are already filtered by belongs_to_madrasa and published status
-  // Slice for pagination (only if not showAll)
+  // Slice for pagination (only if not showAll) or limit
   const displayBooks = showAll 
     ? books 
-    : books.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    : limit 
+      ? books.slice(0, limit) // Use limit prop when provided
+      : books.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE); // Otherwise use pagination
   
   const hasNextPage =
     !showAll &&
@@ -304,8 +307,9 @@ export default function BooksSection({ showAll = false }: BooksSectionProps) {
           );
         })}
           </div>
-          {/* Pagination */}
+          {/* Pagination - Only show if not using limit prop */}
           {!showAll &&
+            !limit &&
             displayBooks.length > 0 &&
             (hasNextPage ||
               hasPrevPage ||
