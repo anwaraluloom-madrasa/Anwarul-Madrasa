@@ -157,7 +157,7 @@ export default function SanadSection({
                     {/* Content - takes full width, text aligned right */}
                     <div className="flex-1 text-right min-w-0">
                       <div
-                        className="text-gray-800 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed font-semibold break-words"
+                        className="text-gray-800 text-xs sm:text-sm md:text-base lg:text-xl leading-relaxed font-semibold break-words"
                         style={{ fontFamily: "Amiri, serif" }}
                         lang="ar"
                         dir="rtl"
