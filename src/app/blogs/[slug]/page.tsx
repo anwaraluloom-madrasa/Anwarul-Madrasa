@@ -158,7 +158,7 @@ export default async function BlogDetailsPage({ params }: Params) {
                 <div
                   className="text-sm sm:text-base md:text-lg text-gray-700 leading-relaxed break-words overflow-wrap-anywhere"
                   style={{ fontFamily: "Amiri, serif" }}
-                  dangerouslySetInnerHTML={{ __html: blog.description }}
+                  dangerouslySetInnerHTML={{ __html: blog.description || '' }}
                 />
               </div>
             )}
@@ -265,7 +265,7 @@ export default async function BlogDetailsPage({ params }: Params) {
                         className="text-xs sm:text-sm text-[#4a8a8a] leading-relaxed break-words [&_*]:text-xs sm:[&_*]:text-sm [&_*]:text-[#4a8a8a] [&_p]:mb-1 [&_*]:line-clamp-2 sm:[&_*]:line-clamp-3"
                         style={{ fontFamily: "Amiri, serif" }}
                         dir="rtl"
-                        dangerouslySetInnerHTML={{ __html: rb.description }}
+                        dangerouslySetInnerHTML={{ __html: rb.description || '' }}
                       />
 
                       {/* Date - Small Text */}

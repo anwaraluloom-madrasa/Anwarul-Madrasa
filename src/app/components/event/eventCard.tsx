@@ -225,7 +225,7 @@ export default function EventsSection({
                         className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 break-words [&_*]:text-sm sm:[&_*]:text-base md:[&_*]:text-lg [&_*]:text-gray-600 [&_p]:mb-2 [&_*]:line-clamp-3 sm:[&_*]:line-clamp-4"
                         style={{ fontFamily: "Amiri, serif" }}
                         dir="rtl"
-                        dangerouslySetInnerHTML={{ __html: event.description }}
+                        dangerouslySetInnerHTML={{ __html: event.description || '' }}
                       />
                     </div>
 

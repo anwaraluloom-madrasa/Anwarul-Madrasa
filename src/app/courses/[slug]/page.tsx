@@ -234,7 +234,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
                 <div 
                   className="prose prose-sm sm:prose-base md:prose-lg prose-amber max-w-none text-gray-800 leading-relaxed animate-fade-in [&_*]:text-gray-800 [&_*]:text-sm sm:[&_*]:text-base md:[&_*]:text-lg [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                   dir="rtl"
-                  dangerouslySetInnerHTML={{ __html: course.description }}
+                  dangerouslySetInnerHTML={{ __html: course.description || '' }}
                 />
               ) : (
                 <div className="bg-amber-50 border-l-4 border-amber-500 px-3 sm:px-4 md:px-6 py-2 sm:py-3 md:py-4 rounded-md animate-fade-in shadow-inner">
@@ -271,11 +271,13 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
                   <span className="hidden sm:inline">|</span>
                   <span>{t('courses.year')}: <span className="font-semibold">{book.written_year || "N/A"}</span></span>
                 </div>
-                <div 
-                  className="text-gray-700 text-sm sm:text-base leading-relaxed mb-3 break-words [&_*]:text-gray-700 [&_*]:text-sm sm:[&_*]:text-base [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
-                  dir="rtl"
-                  dangerouslySetInnerHTML={{ __html: book.description }}
-                />
+                {book.description && (
+                  <div 
+                    className="text-gray-700 text-sm sm:text-base leading-relaxed mb-3 break-words [&_*]:text-gray-700 [&_*]:text-sm sm:[&_*]:text-base [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
+                    dir="rtl"
+                    dangerouslySetInnerHTML={{ __html: book.description || '' }}
+                  />
+                )}
                 {book.pdf_file && (
                   <a
                     href={getImageUrl(book.pdf_file)}
@@ -318,7 +320,7 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
                     <div 
                       className="text-gray-700 text-sm sm:text-base break-words [&_*]:text-gray-700 [&_*]:text-sm sm:[&_*]:text-base [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                       dir="rtl"
-                      dangerouslySetInnerHTML={{ __html: recordedBy.description }}
+                      dangerouslySetInnerHTML={{ __html: recordedBy.description || '' }}
                     />
                   )}
                 </div>

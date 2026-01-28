@@ -145,7 +145,7 @@ export default async function AuthorDetailPage({ params }: AuthorPageProps) {
                 <div
                   className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-white/60 rounded-2xl p-6 md:p-8 border border-emerald-100/50 [&_p]:mb-4 [&_p]:text-lg [&_strong]:font-semibold [&_strong]:text-gray-900 [&_em]:italic [&_ul]:list-disc [&_ul]:ml-6 [&_ol]:list-decimal [&_ol]:ml-6 [&_li]:mb-2"
                   style={{ fontFamily: 'Amiri, serif' }}
-                  dangerouslySetInnerHTML={{ __html: author.bio }}
+                  dangerouslySetInnerHTML={{ __html: author.bio || '' }}
                 />
               </div>
             )}
