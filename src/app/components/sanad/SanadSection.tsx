@@ -156,16 +156,15 @@ export default function SanadSection({
 
                     {/* Content - takes full width, text aligned right */}
                     <div className="flex-1 text-right min-w-0">
-                      <p
+                      <div
                         className="text-gray-800 text-xs sm:text-sm md:text-base lg:text-lg leading-relaxed font-semibold break-words"
                         style={{ fontFamily: "Amiri, serif" }}
                         lang="ar"
                         dir="rtl"
                         data-no-translate="true"
                         translate="no"
-                      >
-                        {sanad.name}
-                      </p>
+                        dangerouslySetInnerHTML={{ __html: sanad.name }}
+                      />
                     </div>
 
                     {/* Spacer for visual balance */}
