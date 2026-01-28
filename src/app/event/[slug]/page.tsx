@@ -264,13 +264,11 @@ export default async function EventDetailsPage({ params }: Params) {
                         {t("eventsPage.aboutThisEvent")}
                       </h2>
                       <div
-                        className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 border-2 border-emerald-100/50 shadow-lg [&_p]:mb-6 [&_p]:text-base sm:[&_p]:text-lg [&_p]:font-medium"
+                        className="prose prose-lg max-w-none text-gray-700 leading-relaxed bg-gradient-to-br from-emerald-50/50 via-white to-emerald-50/30 rounded-3xl p-4 sm:p-6 md:p-8 lg:p-10 xl:p-12 border-2 border-emerald-100/50 shadow-lg [&_*]:text-gray-700 [&_p]:mb-6 [&_p]:text-base sm:[&_p]:text-lg [&_p]:font-medium [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic break-words"
                         style={{ fontFamily: "Amiri, serif" }}
-                      >
-                        <p className="whitespace-pre-line break-words">
-                          {cleanText(event.description)}
-                        </p>
-                      </div>
+                        dir="rtl"
+                        dangerouslySetInnerHTML={{ __html: event.description || '' }}
+                      />
                     </div>
                   </div>
                 )}
