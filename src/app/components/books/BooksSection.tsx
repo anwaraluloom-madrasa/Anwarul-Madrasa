@@ -23,11 +23,12 @@ interface BooksSectionProps {
   showAll?: boolean; // Show all books or only limited
   showHero?: boolean; // Only display hero on specific page
   limit?: number; // Limit number of books to show when showAll is false
+  hideCategoryFilter?: boolean; // Hide category filter dropdown
 }
 
 type BelongsToMadrasaFilter = "all" | 0 | 1;
 
-export default function BooksSection({ showAll = false, limit = 6 }: BooksSectionProps) {
+export default function BooksSection({ showAll = false, limit = 6, hideCategoryFilter = false }: BooksSectionProps) {
   const [books, setBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [allBooks, setAllBooks] = useState<(Book & { belongs_to_madrasa?: number })[]>([]);
   const [categories, setCategories] = useState<BookCategory[]>([]);
@@ -270,7 +271,7 @@ export default function BooksSection({ showAll = false, limit = 6 }: BooksSectio
           </button>
 
           {/* Category Dropdown */}
-          {categories.length > 0 && (
+          {!hideCategoryFilter && categories.length > 0 && (
             <div className="relative category-dropdown-container">
               <button
                 onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
