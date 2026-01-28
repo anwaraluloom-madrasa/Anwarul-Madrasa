@@ -359,9 +359,12 @@ export default function AwlyaaContent({ awlyaa }: AwlyaaContentProps) {
                 </h2>
 
                 <div className="relative z-10">
-                  <p className="text-gray-700 leading-relaxed text-base" style={{ fontFamily: 'Amiri, serif' }}>
-                    {cleanText(awlyaa.extra_information)}
-                  </p>
+                  <div 
+                    className="text-gray-700 leading-relaxed text-base [&_*]:text-gray-700 [&_*]:text-base [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
+                    style={{ fontFamily: 'Amiri, serif' }}
+                    dir="rtl"
+                    dangerouslySetInnerHTML={{ __html: awlyaa.extra_information }}
+                  />
                 </div>
               </div>
             )}

@@ -106,12 +106,12 @@ export default async function IftahDetailsPage({ params }: PageProps) {
             <div className="mb-8">
               <h2 className="text-lg font-bold text-gray-900 mb-3">سوال</h2>
               <div className="bg-gray-50 p-5 rounded-lg border-r-4 border-gray-300">
-                <p
-                  className="text-gray-800 leading-relaxed text-base sm:text-lg"
+                <div
+                  className="text-gray-800 leading-relaxed text-base sm:text-lg [&_*]:text-gray-800 [&_*]:text-base sm:[&_*]:text-lg [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                   style={{ fontFamily: "Amiri, serif" }}
-                >
-                  {cleanText(iftah.question)}
-                </p>
+                  dir="rtl"
+                  dangerouslySetInnerHTML={{ __html: iftah.question }}
+                />
               </div>
             </div>
 
@@ -138,12 +138,12 @@ export default async function IftahDetailsPage({ params }: PageProps) {
                 )}
               </div>
               <div className="bg-gray-50 p-5 rounded-lg border-r-4 border-gray-300">
-                <p
-                  className="text-gray-800 leading-relaxed text-base sm:text-lg"
+                <div
+                  className="text-gray-800 leading-relaxed text-base sm:text-lg [&_*]:text-gray-800 [&_*]:text-base sm:[&_*]:text-lg [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                   style={{ fontFamily: "Amiri, serif" }}
-                >
-                  {cleanText(iftah.answer)}
-                </p>
+                  dir="rtl"
+                  dangerouslySetInnerHTML={{ __html: iftah.answer }}
+                />
               </div>
             </div>
 
@@ -151,12 +151,12 @@ export default async function IftahDetailsPage({ params }: PageProps) {
             {iftah.note && (
               <div className="mb-8 mt-6">
                 <h2 className="text-sm font-bold text-gray-900 mb-3">نوټ</h2>
-                <p
-                  className="text-gray-800 leading-relaxed text-base sm:text-lg"
+                <div
+                  className="text-gray-800 leading-relaxed text-base sm:text-lg [&_*]:text-gray-800 [&_*]:text-base sm:[&_*]:text-lg [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                   style={{ fontFamily: "Amiri, serif" }}
-                >
-                  {cleanText(iftah.note)}
-                </p>
+                  dir="rtl"
+                  dangerouslySetInnerHTML={{ __html: iftah.note }}
+                />
               </div>
             )}
 

@@ -78,11 +78,10 @@ export default async function BookDetailsPage({ params }: Params) {
                     <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900">تفصیلات</h2>
                   </div>
                   <div
-                    className="text-gray-700 text-sm sm:text-base leading-relaxed [&_p]:mb-3 [&_*]:text-sm [&_*]:sm:text-base"
+                    className="text-gray-700 text-sm sm:text-base leading-relaxed [&_*]:text-gray-700 [&_*]:text-sm sm:[&_*]:text-base [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                     dir="rtl"
-                  >
-                    {cleanText(book.description)}
-                  </div>
+                    dangerouslySetInnerHTML={{ __html: book.description }}
+                  />
                 </div>
               )}
 
@@ -119,11 +118,10 @@ export default async function BookDetailsPage({ params }: Params) {
                       </Link>
                       {book.author.bio && (
                         <div
-                          className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-100"
+                          className="text-gray-700 text-sm leading-relaxed bg-gray-50 rounded-lg p-4 border border-gray-100 [&_*]:text-gray-700 [&_*]:text-sm [&_p]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-4 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mb-3 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:mr-6 [&_ol]:list-decimal [&_ol]:mr-6 [&_li]:mb-2 [&_strong]:font-bold [&_em]:italic [&_a]:text-blue-600 [&_a]:underline [&_img]:rounded-lg [&_img]:my-4 [&_blockquote]:border-r-4 [&_blockquote]:border-gray-300 [&_blockquote]:pr-4 [&_blockquote]:italic"
                           dir="rtl"
-                        >
-                          {cleanText(book.author.bio)}
-                        </div>
+                          dangerouslySetInnerHTML={{ __html: book.author.bio }}
+                        />
                       )}
                       <div className="flex flex-wrap gap-2.5 pt-1">
                         {book.author.contact_no && (
